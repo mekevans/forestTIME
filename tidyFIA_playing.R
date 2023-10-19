@@ -45,7 +45,7 @@ daisy_chain <- function(CN, PREV_TRE_CN, dat, ...) {
   
   CNS <- c(CN)
   
-  for(i in 1:length(unique(dat$INVYR))) {
+  for(i in 1:length(unique(dat$INVYR))) { # this could be made faster if set to a hard upper limit of the max nb of times we imagine a tree has ever been visited
     
     CNS <- c(CNS, dat[which(dat$PREV_TRE_CN == tail(CNS, n = 1)), "CN"])
     
