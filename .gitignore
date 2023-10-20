@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 fia_dat_downloads/*
+processed_dat/*
