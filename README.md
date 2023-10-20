@@ -1,3 +1,3 @@
 # in-the-trees
 
-Toy repo for RMD to workshop scripts related to the FIA project.
+Workshopping scripts related to the FIA timeseries project.
