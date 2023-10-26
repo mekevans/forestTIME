@@ -17,7 +17,7 @@ daisy_chain <- function(CN, PREV_TRE_CN, dat, ...) {
   
   CNS <- c(CN)
   
-  for(i in 1:length(unique(dat$INVYR))) {
+  for(i in 1:5) {
     
     CNS <- c(CNS, dat[which(dat$PREV_TRE_CN == tail(CNS, n = 1)), "CN"])
     

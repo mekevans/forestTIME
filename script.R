@@ -1,105 +1,43 @@
 library(arrow)
 library(tidyverse)
+library(furrr)
 source(here::here("R", "daisy_chain.R"))
 source(here::here("R", "download_state_data.R"))
+source(here::here("R", "store_as_hive.R"))
+source(here::here("R", "cns_on_hive.R"))
+source(here::here("R", "create_trees_info_table.R"))
+source(here::here("R", "create_tree_change_table.R"))
 
-state_to_use = "CT"
+
+state_to_use = "FL"
+state_number = 9 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
+raw_dir <- "data/rawdat/state"
+arrow_dir <- "data/arrow"
 
 #### Download data ####
 
-download_state_data(state_to_use, "data/rawdat/state")
+# Note that this fxn fails if the download takes more than 60 seconds.
+
+# download_state_data(state_to_use, "data/rawdat/state")
+
 
 #### Store TREE data in a hive ####
 
-trees <- read_csv(here::here("data", "rawdat", "state", paste0(state_to_use, "_TREE.csv"))) |>
-  filter(INVYR >= 2000) |>
-  select(CN, PREV_TRE_CN, INVYR, STATECD, COUNTYCD, PLOT, STATUSCD, DIA, HT, ACTUALHT, SPCD) |>
-  mutate(CN = as.character(CN),
-         PREV_TRE_CN = as.character(PREV_TRE_CN))
-write_dataset(ct_trees, here::here("ct_demo", "arrow_dat", "TREE_RAW"), format = "csv",
-              partitioning = c("STATECD", "COUNTYCD"))
+# raw_trees_hive(state_to_use = state_to_use,
+#               rawdat_dir = raw_dir,
+#               arrow_dir = arrow_dir)
 
 #### Create CN tables and store in a hive of the same structure ####
-# 
-# sliced_pipeline <- function(ds_path) {
-# 
-#   dir.create(str_replace(ds_path, "TREE_RAW", "TREE_CNS") |> str_remove("/part-0.csv"), recursive = T)
-# 
-#   read_csv(ds_path, col_select = c("CN", "PREV_TRE_CN", "INVYR")) |>
-#     add_persistent_cns() |>
-#     write.csv(str_replace(ds_path, "TREE_RAW", "TREE_CNS"), row.names = F)
-# 
-# }
-# 
-# ds_paths <- list.files(here::here("ct_demo", "arrow_dat", "TREE_RAW"), full.names = T, recursive = T)
-# 
-# system.time(map(ds_paths, sliced_pipeline))
-# the above takes 50-90 seconds
 
+#system.time(create_cn_tables(state_number = 12, arrow_dir = arrow_dir))
 
 #### Create TREE INFO table ####
 
-cns <-
-  open_dataset(
-    here::here("ct_demo", "arrow_dat", "TREE_CNS"),
-    partitioning = c("STATECD", "COUNTYCD"),
-    format = "csv",
-    hive_style = T,
-    col_types = schema(
-      CN = utf8(),
-      PREV_TRE_CN = utf8(),
-      INVYR = int64(),
-      TREE_FIRST_CN = utf8(),
-      STATECD = utf8(),
-      COUNTYCD = utf8()
-    )
-  ) |>
-  mutate(across(where(is.character), ~ ifelse(. == "NA", "NA", .)))
+system.time(create_tree_info(arrow_dir = arrow_dir))
+# less than a second
 
-trees <- open_dataset(
-  here::here("ct_demo", "arrow_dat", "TREE_RAW"),
-  partitioning = c("STATECD", "COUNTYCD"),
-  format = "csv",
-  hive_style = T,
-  col_types = schema(
-    CN = utf8(),
-    PREV_TRE_CN = utf8(),
-    INVYR = int64(),
-    PLOT = utf8(),
-    SPCD = utf8(),
-    STATECD = utf8(),
-    COUNTYCD = utf8(),
-    STATUSCD = utf8(),
-    DIA = float64(),
-    HT = float64(),
-    ACTUALHT = float64()
-  )) |>
-  mutate(across(where(is.character), ~ ifelse(. == "", "NA", .)))
-
-
-trees_info <- cns |>
-  left_join(trees) |>
-  group_by(TREE_FIRST_CN, PLOT, STATECD, COUNTYCD, SPCD) |>
-  summarize(NYEARS = dplyr::n(),
-            NYEARS_MEASURED = sum(STATUSCD != 0),
-            FIRSTYR = min(INVYR),
-            LASTYR = max(INVYR)) |>
-  ungroup() 
-
-dup_cns <- trees_info |> 
-  select(TREE_FIRST_CN, SPCD) |> 
-  group_by(TREE_FIRST_CN) |> 
-  count() |> 
-  filter(n > 1) |>
-  select(TREE_FIRST_CN) |>
-  mutate(SUSPECT_SPECIES = 1)
-
-trees_info <- trees_info |>
-  left_join(dup_cns) 
-
-write_dataset(trees_info, here::here("ct_demo", "arrow_dat", "TREE_INFO"), format = "csv", partitioning = c("STATECD", "COUNTYCD"))
-
-#### Create TREE CHANGES table ####
-
+#### Create TREE CHANGE table ####
+system.time(create_tree_change( arrow_dir = arrow_dir))
+# 1.25 seconds
 
 #### Set up as DuckDB? ####
