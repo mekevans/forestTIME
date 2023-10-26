@@ -1,27 +1,23 @@
-
-
 library(arrow)
 library(tidyverse)
-source(here::here("daisy_chain.R"))
+source(here::here("R", "daisy_chain.R"))
+source(here::here("R", "download_state_data.R"))
 
+state_to_use = "CT"
 
 #### Download data ####
 
-# tidyFIA::download_by_state("CT", file_dir = here::here("ct_demo", "raw_dat", "CT")) #this is very fast
-#
-# download.file("https://apps.fs.usda.gov/fia/datamart/CSV/FIADB_REFERENCE.zip", here::here("ct_demo", "raw_dat", "species", "DB_REFERENCE.zip"))
-#
-# unzip(here::here("ct_demo", "raw_dat", "species", "DB_REFERENCE.zip"), files = "REF_SPECIES.csv", exdir = here::here("ct_demo", "raw_dat", "species"))
+download_state_data(state_to_use, "data/rawdat/state")
 
 #### Store TREE data in a hive ####
-# 
-# ct_trees <- read_csv(here::here("ct_demo", "raw_dat", "CT", "CT_TREE.csv")) |>
-#   filter(INVYR >= 2000) |>
-#   select(CN, PREV_TRE_CN, INVYR, STATECD, COUNTYCD, PLOT, STATUSCD, DIA, HT, ACTUALHT, SPCD) |>
-#   mutate(CN = as.character(CN),
-#          PREV_TRE_CN = as.character(PREV_TRE_CN))
-# write_dataset(ct_trees, here::here("ct_demo", "arrow_dat", "TREE_RAW"), format = "csv",
-#               partitioning = c("STATECD", "COUNTYCD"))
+
+trees <- read_csv(here::here("data", "rawdat", "state", paste0(state_to_use, "_TREE.csv"))) |>
+  filter(INVYR >= 2000) |>
+  select(CN, PREV_TRE_CN, INVYR, STATECD, COUNTYCD, PLOT, STATUSCD, DIA, HT, ACTUALHT, SPCD) |>
+  mutate(CN = as.character(CN),
+         PREV_TRE_CN = as.character(PREV_TRE_CN))
+write_dataset(ct_trees, here::here("ct_demo", "arrow_dat", "TREE_RAW"), format = "csv",
+              partitioning = c("STATECD", "COUNTYCD"))
 
 #### Create CN tables and store in a hive of the same structure ####
 # 
