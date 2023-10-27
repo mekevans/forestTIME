@@ -1,0 +1,130 @@
+---
+title: "ForestTIME"
+format: gfm
+---
+
+```{r}
+
+library(arrow)
+library(dplyr)
+library(ggplot2)
+
+states_to_include = "9"
+raw_dir <- "data/rawdat/state"
+arrow_dir <- "data/arrow"
+
+trees <-
+  open_dataset(
+    here::here(arrow_dir, "TREE_RAW"),
+    partitioning = c("STATECD", "COUNTYCD"),
+    format = "csv",
+    hive_style = T,
+    col_types = schema(
+      CN = float64(),
+      TREE_FIRST_CN = float64()
+    )) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+cns <-
+  open_dataset(
+    here::here(arrow_dir, "TREE_CNS"),
+    partitioning = c("STATECD", "COUNTYCD"),
+    format = "csv",
+    hive_style = T,
+    col_types = schema(
+      CN = float64(),
+      TREE_FIRST_CN = float64()
+    )) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+tree_info <-  open_dataset(
+  here::here(arrow_dir, "TREE_INFO"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(TREE_FIRST_CN = float64())) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+tree_change <-  open_dataset(
+  here::here(arrow_dir, "TREE_CHANGE"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(TREE_FIRST_CN = float64())) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+
+```
+
+# Tables
+
+## TREE
+
+```{r}
+
+head(trees)
+
+```
+
+
+## CNS
+
+```{r}
+
+head(cns)
+
+```
+
+
+## TREE_INFO
+
+```{r}
+
+head(tree_info)
+
+```
+
+
+## TREE_CHANGE
+
+```{r}
+
+head(tree_change)
+
+```
+
+
+# Using TREE_FIRST_CN to track individuals
+
+```{r}
+
+individuals <- trees |> 
+  left_join(cns) |>
+  filter(PLOT %in% unique(PLOT)[1:15],
+         STATUSCD %in% c(1:2))
+
+ggplot(individuals, aes(INVYR, as.character(TREE_FIRST_CN))) + 
+  geom_point() +
+  facet_wrap(vars(PLOT), scales = "free_y") +
+  theme_minimal() +
+  theme(axis.text.y = element_blank()) +
+  ggtitle("Individuals sampled each year")
+```
+
+
+```{r}
+
+
+ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN), color = as.factor(SPCD))) + 
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+
+
+```
