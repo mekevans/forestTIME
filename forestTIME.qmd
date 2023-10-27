@@ -128,3 +128,27 @@ ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TRE
 
 
 ```
+
+
+```{r}
+
+ggplot(tree_info, aes(NYEARS_MEASURED)) + 
+  geom_histogram() +
+  theme_bw() +
+  ggtitle("Number of survey visits per tree")
+
+```
+
+# Species with the most trees
+
+```{r}
+
+tree_info |>
+  group_by(SPCD) |>
+  summarize(ntrees = dplyr::n()) |>
+  ungroup() |>
+  arrange(desc(ntrees)) |>
+  head(10)
+
+```
+

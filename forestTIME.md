@@ -106,12 +106,12 @@ head(cns)
     # A tibble: 6 × 4
            CN TREE_FIRST_CN STATECD COUNTYCD
         <dbl>         <dbl>   <int>    <int>
-    1 5.59e13       5.59e13       9       11
-    2 2.08e14       5.59e13       9       11
-    3 2.55e14       5.59e13       9       11
-    4 1.23e15       5.59e13       9       11
-    5 5.59e13       5.59e13       9       11
-    6 2.08e14       5.59e13       9       11
+    1 5.59e13       5.59e13       9        1
+    2 2.08e14       5.59e13       9        1
+    3 2.55e14       5.59e13       9        1
+    4 5.59e13       5.59e13       9        1
+    5 2.08e14       5.59e13       9        1
+    6 2.55e14       5.59e13       9        1
 
 ## TREE_INFO
 
@@ -139,12 +139,12 @@ head(tree_change)
     # A tibble: 6 × 17
       CN_CURRENT TREE_FIRST_CN CN_PREV INVYR_CURRENT  PLOT STATUSCD_CURRENT
            <dbl>         <dbl>   <dbl>         <int> <int>            <int>
-    1    2.08e14       5.59e13 5.59e13          2008   112                1
-    2    2.55e14       5.59e13 2.08e14          2013   112                2
-    3    2.08e14       5.59e13 5.59e13          2008   112                1
-    4    2.55e14       5.59e13 2.08e14          2013   112                1
-    5    7.29e14       5.59e13 2.55e14          2019   112                1
-    6    2.08e14       5.59e13 5.59e13          2008   112                1
+    1    2.08e14       5.59e13 5.59e13          2008   323                1
+    2    2.55e14       5.59e13 2.08e14          2013   323                1
+    3    1.23e15       5.59e13 2.55e14          2020   323                1
+    4    2.08e14       5.59e13 5.59e13          2008   323                1
+    5    2.55e14       5.59e13 2.08e14          2013   323                1
+    6    1.23e15       5.59e13 2.55e14          2020   323                2
     # ℹ 11 more variables: DIA_CURRENT <dbl>, HT_CURRENT <int>,
     #   ACTUALHT_CURRENT <int>, SPCD <int>, INVYR_PREV <int>, STATUSCD_PREV <int>,
     #   DIA_PREV <dbl>, HT_PREV <int>, ACTUALHT_PREV <int>, STATECD <int>,
@@ -185,3 +185,39 @@ ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TRE
     Warning: Removed 5 rows containing missing values (`geom_line()`).
 
 ![](forestTIME_files/figure-commonmark/unnamed-chunk-7-1.png)
+
+``` r
+ggplot(tree_info, aes(NYEARS_MEASURED)) + 
+  geom_histogram() +
+  theme_bw() +
+  ggtitle("Number of survey visits per tree")
+```
+
+    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](forestTIME_files/figure-commonmark/unnamed-chunk-8-1.png)
+
+# Species with the most trees
+
+``` r
+tree_info |>
+  group_by(SPCD) |>
+  summarize(ntrees = dplyr::n()) |>
+  ungroup() |>
+  arrange(desc(ntrees)) |>
+  head(10)
+```
+
+    # A tibble: 10 × 2
+        SPCD ntrees
+       <int>  <int>
+     1   316   2936
+     2   372   1155
+     3   833    814
+     4   261    761
+     5   129    712
+     6   802    527
+     7   318    503
+     8   837    466
+     9   531    416
+    10   541    415
