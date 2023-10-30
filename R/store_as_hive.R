@@ -15,7 +15,8 @@ raw_trees_hive <- function(state_to_use = "CT", rawdat_dir = "data/rawdat/state"
                             DIA,
                             HT,
                             ACTUALHT,
-                            SPCD)) |>
+                            SPCD,
+                            CYCLE)) |>
     filter(INVYR >= 2000) 
   
   write_dataset(
