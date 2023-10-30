@@ -1,7 +1,5 @@
 chain_by_joins <- function(tree_table) {
   
-  
-  
   cycles <- tree_table |> select(CYCLE) |> distinct() |> arrange(CYCLE) |> compute()
   
   cycle_trees <- tree_table |>
@@ -32,7 +30,7 @@ chain_by_joins <- function(tree_table) {
   }
   
   known_trees <- known_trees |>
-    left_join(tree_table |> select(CN, STATECD, COUNTYCD))
+    left_join(tree_table)
   
   known_trees
 }

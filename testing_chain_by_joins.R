@@ -1,15 +1,11 @@
-source(here::here("chain_by_joins.R"))
 library(arrow)
 library(tidyverse)
 library(furrr)
 
 
 
-state_to_use = "FL"
-state_number = 9 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
 raw_dir <- "data/rawdat/state"
 arrow_dir <- "data/arrow"
-states_to_include = 9
 
 raw_trees <-
   open_dataset(
@@ -17,21 +13,10 @@ raw_trees <-
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
     hive_style = T,
-    col_types = schema(
-      CN = float64(),
-      TREE_FIRST_CN = float64()
-    )) |>
-  filter(STATECD %in% states_to_include) 
-
-ct_chained <- chain_by_joins(raw_trees)
-
-
-write_dataset(ct_chained, path = here::here(arrow_dir, "TREE_CN_CHAIN"), 
-              format = "csv",
-              partitioning = c("STATECD", "COUNTYCD"))
-
-
-ctc <- collect(ct_chained)
+    col_types = schema(CN = float64(),
+                       TREE_FIRST_CN = float64())
+  ) |>
+  compute()
 
 
 daisy <-
@@ -40,18 +25,42 @@ daisy <-
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
     hive_style = T,
-    col_types = schema(
-      CN = float64(),
-      TREE_FIRST_CN = float64()
-    )) |>
-  filter(STATECD %in% states_to_include) |>
-  collect()
-
-str(daisy)
-str(ctc)
+    col_types = schema(CN = float64(),
+                       TREE_FIRST_CN = float64())
+  ) |>
+  compute()
 
 
-ctc <- ctc |> rename(chain_first_cn = TREE_FIRST_CN)
+joins <-   open_dataset(
+  here::here(arrow_dir, "TREE_CN_JOIN"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(CN = float64(),
+                     TREE_FIRST_CN = float64())
+) |>
+  rename(TREE_FIRST_CN_JOINS = TREE_FIRST_CN) |>
+  compute()
 
-daisy_check <- left_join(daisy, ctc) |>
-  mutate(diff = TREE_FIRST_CN == chain_first_cn)
+compare <- left_join(daisy, joins) |> collect() |>
+  mutate(across(contains("CN"), as.character))
+
+any(compare$TREE_FIRST_CN != compare$TREE_FIRST_CN_JOINS)
+
+compare_errors <-
+  filter(compare, TREE_FIRST_CN != TREE_FIRST_CN_JOINS)
+
+weird <- filter(compare, TREE_FIRST_CN == "429552394489998")
+
+weird2 <- filter(raw_trees, CN == 429552394489998) |> collect()
+
+## Daisy and joins give different output...in all instances where this occurs, a tree has been recorded in multiple counties. This results in breaking the chain in daisy-style (daisy runs parallelized broken out by county) but not join-style (join is currently running at the state level).
+
+
+multi_county <- joins |> collect() |>
+  group_by(TREE_FIRST_CN_JOINS) |>
+  summarize(nrecords = dplyr::n(),
+            ncounties = length(unique(COUNTYCD))) |>
+  filter(ncounties > 1)
+
+all(sort(unique(multi_county$TREE_FIRST_CN_JOINS)) == sort(unique(compare_errors$TREE_FIRST_CN_JOINS)))
