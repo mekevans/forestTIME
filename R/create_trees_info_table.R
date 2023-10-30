@@ -6,7 +6,7 @@ create_tree_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
   
   cns <-
     open_dataset(
-      here::here(arrow_dir, "TREE_CNS"),
+      here::here(arrow_dir, "TREE_CN_JOIN"),
       partitioning = c("STATECD", "COUNTYCD"),
       format = "csv",
       hive_style = T,

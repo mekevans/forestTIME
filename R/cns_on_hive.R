@@ -49,7 +49,7 @@ create_cn_tables_join <- function(state_number = 9,
     )) |>
     filter(STATECD %in% state_number)  
 
-  trees_cns <- chain_by_joins(raw_trees)
+  trees_cns <- chain_by_joins(raw_trees) 
   
   write_dataset(trees_cns,
                 here::here(arrow_dir, "TREE_CN_JOIN"),

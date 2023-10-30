@@ -28,7 +28,7 @@ trees <-
 
 cns <-
   open_dataset(
-    here::here(arrow_dir, "TREE_CNS"),
+    here::here(arrow_dir, "TREE_CN_JOIN"),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
     hive_style = T,

@@ -30,7 +30,8 @@ chain_by_joins <- function(tree_table) {
   }
   
   known_trees <- known_trees |>
-    left_join(tree_table)
+    left_join(tree_table) |>
+    select(CN, TREE_FIRST_CN, STATECD, COUNTYCD)
   
   known_trees
 }
