@@ -38,3 +38,10 @@ dbListTables(con)
 dbDisconnect(con)
 
 
+join_cns_df <- collect(join_cns)
+tree_info_df <- collect(tree_info)
+
+# For curiousity's sake, also saving as .csvs
+
+write.csv(join_cns_df, here::here("data", "processed_tables", "join_cns.csv"), row.names = F) # 53 MB
+write.csv(tree_info_df, here::here("data", "processed_tables", "tree_info.csv"), row.names = F) # 26 MB
