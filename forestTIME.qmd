@@ -123,7 +123,8 @@ ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TRE
   geom_point() +
   geom_line() +
   theme_bw() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  ggtitle("CT Plot 112")
 
 
 
