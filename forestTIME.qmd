@@ -153,3 +153,56 @@ tree_info |>
 
 ```
 
+
+# Querying data stored remotely
+
+
+Create a local duckdb and set it up to connect over https:
+
+```{r}
+
+library(DBI)
+library(duckdb)
+library(dplyr)
+
+con <- dbConnect(duckdb())
+
+dbExecute(con, "INSTALL httpfs;")
+dbExecute(con, "LOAD httpfs;")
+
+```
+
+Create `cns` view in this database by connecting to remote data:
+
+```{r}
+dbExecute(con,
+          "CREATE view cns AS
+          SELECT * FROM read_csv_auto('https://raw.githubusercontent.com/diazrenata/in-the-trees/main/static_data/processed_tables/join_cns.csv')
+          ")
+
+dbListTables(con)
+
+```
+
+Query the remote data using dplyr:
+
+```{r}
+ct_cns_1 <- tbl(con, "cns") |>
+  filter(STATECD == 9)
+
+head(ct_cns_1)
+
+
+```
+
+
+Query the remote data using dbGetQuery:
+
+```{r}
+ct_cns_2 <- dbGetQuery(con, "SELECT * FROM cns WHERE STATECD == 9")
+
+head(ct_cns_2)
+
+dbDisconnect(con)
+
+```

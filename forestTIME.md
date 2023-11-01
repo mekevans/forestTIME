@@ -48,7 +48,7 @@ trees <-
 
 cns <-
   open_dataset(
-    here::here(arrow_dir, "TREE_CNS"),
+    here::here(arrow_dir, "TREE_CN_JOIN"),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
     hive_style = T,
@@ -86,16 +86,16 @@ tree_change <-  open_dataset(
 head(trees)
 ```
 
-    # A tibble: 6 × 11
-           CN PREV_TRE_CN INVYR  PLOT STATUSCD   DIA    HT ACTUALHT  SPCD STATECD
-        <dbl>       <dbl> <int> <int>    <int> <dbl> <int>    <int> <int>   <int>
-    1 5.59e13          NA  2003   112        1   2.3    24       NA   316       9
-    2 5.59e13          NA  2003   112        1   4.6    38       NA   316       9
-    3 5.59e13          NA  2003   112        1   1      14       NA   531       9
-    4 5.59e13          NA  2003   112        1   5.6    62       62   531       9
-    5 5.59e13          NA  2003   112        1   5.6    64       64   316       9
-    6 5.59e13          NA  2003   112        1   2.2    24       NA   837       9
-    # ℹ 1 more variable: COUNTYCD <int>
+    # A tibble: 6 × 12
+           CN PREV_TRE_CN INVYR  PLOT STATUSCD   DIA    HT ACTUALHT  SPCD CYCLE
+        <dbl>       <dbl> <int> <int>    <int> <dbl> <int>    <int> <int> <int>
+    1 5.59e13          NA  2003   112        1   2.3    24       NA   316     5
+    2 5.59e13          NA  2003   112        1   4.6    38       NA   316     5
+    3 5.59e13          NA  2003   112        1   1      14       NA   531     5
+    4 5.59e13          NA  2003   112        1   5.6    62       62   531     5
+    5 5.59e13          NA  2003   112        1   5.6    64       64   316     5
+    6 5.59e13          NA  2003   112        1   2.2    24       NA   837     5
+    # ℹ 2 more variables: STATECD <int>, COUNTYCD <int>
 
 ## CNS
 
@@ -106,12 +106,12 @@ head(cns)
     # A tibble: 6 × 4
            CN TREE_FIRST_CN STATECD COUNTYCD
         <dbl>         <dbl>   <int>    <int>
-    1 5.59e13       5.59e13       9        1
-    2 2.08e14       5.59e13       9        1
-    3 2.55e14       5.59e13       9        1
-    4 5.59e13       5.59e13       9        1
-    5 2.08e14       5.59e13       9        1
-    6 2.55e14       5.59e13       9        1
+    1 5.59e13       5.59e13       9       11
+    2 5.59e13       5.59e13       9       11
+    3 5.59e13       5.59e13       9       11
+    4 5.59e13       5.59e13       9       11
+    5 5.59e13       5.59e13       9       11
+    6 5.59e13       5.59e13       9       11
 
 ## TREE_INFO
 
@@ -177,7 +177,8 @@ ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TRE
   geom_point() +
   geom_line() +
   theme_bw() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  ggtitle("CT Plot 112")
 ```
 
     Warning: Removed 5 rows containing missing values (`geom_point()`).
@@ -221,3 +222,82 @@ tree_info |>
      8   837    466
      9   531    416
     10   541    415
+
+# Querying data stored remotely
+
+Create a local duckdb and set it up to connect over https:
+
+``` r
+library(DBI)
+library(duckdb)
+library(dplyr)
+
+con <- dbConnect(duckdb())
+
+dbExecute(con, "INSTALL httpfs;")
+```
+
+    [1] 0
+
+``` r
+dbExecute(con, "LOAD httpfs;")
+```
+
+    [1] 0
+
+Create `cns` view in this database by connecting to remote data:
+
+``` r
+dbExecute(con,
+          "CREATE view cns AS
+          SELECT * FROM read_csv_auto('https://raw.githubusercontent.com/diazrenata/in-the-trees/main/static_data/processed_tables/join_cns.csv')
+          ")
+```
+
+    [1] 0
+
+``` r
+dbListTables(con)
+```
+
+    [1] "cns"
+
+Query the remote data using dplyr:
+
+``` r
+ct_cns_1 <- tbl(con, "cns") |>
+  filter(STATECD == 9)
+
+head(ct_cns_1)
+```
+
+    # Source:   SQL [6 x 4]
+    # Database: DuckDB v0.9.1 [renatadiaz@Windows 10 x64:R 4.3.1/:memory:]
+           CN TREE_FIRST_CN STATECD COUNTYCD
+        <dbl>         <dbl>   <dbl>    <dbl>
+    1 2.08e14       5.59e13       9        1
+    2 2.08e14       5.59e13       9        1
+    3 2.08e14       5.59e13       9        1
+    4 2.08e14       5.59e13       9        1
+    5 2.08e14       5.59e13       9        1
+    6 2.08e14       5.59e13       9        1
+
+Query the remote data using dbGetQuery:
+
+``` r
+ct_cns_2 <- dbGetQuery(con, "SELECT * FROM cns WHERE STATECD == 9")
+
+head(ct_cns_2)
+```
+
+                CN TREE_FIRST_CN STATECD COUNTYCD
+    1 2.075007e+14  5.591506e+13       9        1
+    2 2.075007e+14  5.591506e+13       9        1
+    3 2.075007e+14  5.591507e+13       9        1
+    4 2.075007e+14  5.591507e+13       9        1
+    5 2.075007e+14  5.591507e+13       9        1
+    6 2.075007e+14  5.591507e+13       9        1
+
+``` r
+dbDisconnect(con)
+```
