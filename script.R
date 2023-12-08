@@ -10,8 +10,8 @@ source(here::here("R", "create_tree_change_table.R"))
 source(here::here("R", "chain_by_joins.R"))
 
 
-state_to_use = "CT"
-state_number = 9 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
+state_to_use = "MN"
+state_number = 27 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
 raw_dir <- "data/rawdat/state"
 arrow_dir <- "data/arrow"
 
@@ -19,7 +19,7 @@ arrow_dir <- "data/arrow"
 
 # Note that this fxn fails if the download takes more than 60 seconds.
 
-# download_state_data(state_to_use, "data/rawdat/state")
+ download_state_data(state_to_use, "data/rawdat/state", )
 
 
 # #### Store TREE data in a hive ####
