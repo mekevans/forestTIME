@@ -20,13 +20,14 @@ download_from_datamart <- function(state, file_dir, max_time = 300) {
   options(timeout = max_time)
   
   system.time(downloaded <- try(utils::download.file(url, destfile = zip_file)))
+
   
   if ("try-error" %in% class(downloaded)) {
     stop("Download failed")
   }
   
   utils::unzip(zipfile = zip_file, exdir = file_dir)
- 
+
   on.exit(options(timeout = 60))
    
 }

@@ -22,6 +22,7 @@ arrow_dir <- "data/arrow"
 download_state_data(state_to_use, "data/rawdat/state")
 
 
+
 # #### Store TREE data in a hive ####
 # 
 raw_trees_hive(state_to_use = "MN",
