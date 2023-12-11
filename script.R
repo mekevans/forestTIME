@@ -19,7 +19,7 @@ arrow_dir <- "data/arrow"
 
 # Note that this fxn fails if the download takes more than 60 seconds.
 
-download_state_data(state_to_use, "data/rawdat/state")
+#download_state_data(state_to_use, "data/rawdat/state")
 
 
 

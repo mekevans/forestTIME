@@ -9,7 +9,7 @@ library(arrow)
 library(dplyr)
 library(ggplot2)
 
-states_to_include = "9"
+states_to_include = "27"
 raw_dir <- "data/rawdat/state"
 arrow_dir <- "data/arrow"
 
@@ -104,12 +104,12 @@ head(tree_change)
 
 individuals <- trees |> 
   left_join(cns) |>
-  filter(PLOT %in% unique(PLOT)[1:15],
+  filter(PLOT %in% unique(PLOT)[1:12],
          STATUSCD %in% c(1:2))
 
 ggplot(individuals, aes(INVYR, as.character(TREE_FIRST_CN))) + 
   geom_point() +
-  facet_wrap(vars(PLOT), scales = "free_y") +
+  facet_wrap(vars(PLOT), scales = "free_y", nrow = 3) +
   theme_minimal() +
   theme(axis.text.y = element_blank()) +
   ggtitle("Individuals sampled each year")
@@ -119,7 +119,7 @@ ggplot(individuals, aes(INVYR, as.character(TREE_FIRST_CN))) +
 ```{r}
 
 
-ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN), color = as.factor(SPCD))) + 
+ggplot(individuals |> filter(PLOT == 20012), aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN), color = as.factor(SPCD))) + 
   geom_point() +
   geom_line() +
   theme_bw() +
@@ -134,9 +134,11 @@ ggplot(individuals |> filter(PLOT == 112), aes(INVYR, DIA, group = as.factor(TRE
 ```{r}
 
 ggplot(tree_info, aes(NYEARS_MEASURED)) + 
-  geom_histogram() +
+  geom_histogram(bins = max(tree_info$NYEARS_MEASURED) + 1, center = 0) +
   theme_bw() +
   ggtitle("Number of survey visits per tree")
+
+# why are some 0?
 
 ```
 
