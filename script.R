@@ -40,8 +40,5 @@ system.time(create_cn_tables_join(state_number = 27, arrow_dir = arrow_dir))
 system.time(create_tree_info(arrow_dir = arrow_dir))
 # less than a second
 
-#### Create TREE CHANGE table ####
-system.time(create_tree_change( arrow_dir = arrow_dir))
-# 1.25 seconds
 
 #### Set up as DuckDB? ####
