@@ -1,0 +1,123 @@
+---
+title: "Comparison of daisy chain and tree number"
+format: 
+  gfm: 
+    df-print: kable
+editor: source
+---
+
+## Context
+
+The "daisy chain" method is to link backwards in time using `PREV_TRE_CN` and `CN`. The "tree number" method is to concatenate columns `STATECD`, `UNITCD`, `COUNTYCD`, `PLOT`, `SUBP`, and `TREE` to get a unique tree number for each tree. In principle these _should_ give equivalent outcomes, but we don't know if they really always do!
+
+## Code 
+
+```{r}
+#| label: setup
+
+library(arrow)
+library(dplyr)
+
+state_number <- c(9, 27)
+arrow_dir <- "data/arrow"
+
+```
+
+
+```{r}
+#| label: create unique number table
+
+tree_unique_number <- open_dataset(
+  here::here(arrow_dir, "TREE_RAW"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(
+    CN = float64(),
+    TREE_FIRST_CN = float64()
+  )) |>
+  filter(STATECD %in% state_number) |>
+  mutate(TREE_UNIQUE_NUM = paste(STATECD,
+                                 UNITCD,
+                                 COUNTYCD,
+                                 PLOT,
+                                 SUBP,
+                                 TREE, 
+                                 sep = "_")) |>
+  compute()
+```
+
+
+```{r}
+#| label: open daisy chain table
+
+join_cns <-  open_dataset(
+  here::here(arrow_dir, "TREE_CN_JOIN"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(
+    CN = float64(),
+    TREE_FIRST_CN = float64()
+  )) |>
+  filter(STATECD %in% state_number) |>
+  compute()
+
+```
+
+
+```{r}
+#| label: create unmatched_cns table
+
+unmatched_cns <- join_cns |>
+  left_join(tree_unique_number) |>
+  select(TREE_FIRST_CN, TREE_UNIQUE_NUM) |> 
+  distinct() |>
+  collect() |> 
+  group_by(TREE_FIRST_CN) |>
+  mutate(n_NUM = n()) |>
+  group_by(TREE_UNIQUE_NUM) |>
+  mutate(n_FIRST_CN = n()) |>
+  ungroup() |>
+  filter(n_NUM > 1 |
+           n_FIRST_CN > 1)
+
+
+```
+
+There are `r nrow(unmatched_cns)` instances where there isn't a perfect 1-1 matching of one TREE_UNIQUE_NUM to TREE_FIRST_CN. 
+For these, it's always that 1 TREE_UNIQUE_NUM has matched to multiple TREE_FIRST_CNs. 
+
+
+In these data, each of these instances occurred when a tree had a `STATUSCD = 0` in one cycle and then received a new `CN` and a `PREV_TRE_CN = NA` in the following cycle. 
+That is, in the following cycle, the previous tree CN was forgotten and the chain was broken. 
+
+`STATUSCD = 0` means a tree is not part of the current sample, e.g. due to being incorrectly tallied or on a dangerous or inaccessible condition. 
+
+In this sample (MN and CT), _all_ of the breaks occurred on plot 21085, subplots 1 and 2, in 2012. Perhaps something was the matter with those plots in 2012?
+
+Below is tables showing this.
+
+```{r}
+
+unmatched_deeper_dives <- join_cns |>
+  left_join(tree_unique_number) |>
+  filter(TREE_UNIQUE_NUM %in% unmatched_cns$TREE_UNIQUE_NUM) |>
+  arrange(TREE_UNIQUE_NUM, CYCLE) |>
+  collect() |>
+  mutate(TREE_FIRST_CN = as.character(TREE_FIRST_CN),
+         CN = as.character(CN),
+         PREV_TRE_CN = as.character(PREV_TRE_CN)) |>
+  group_by(TREE_UNIQUE_NUM) |>
+  mutate(CN_break = TREE_FIRST_CN != CN[1]) |>
+  mutate(prev_break = lag(CN_break),
+         prev_status = lag(STATUSCD)) |>
+  mutate(is_break_point = ifelse(CN_break, ifelse(prev_break, FALSE, TRUE), FALSE)) 
+
+knitr::kable(unmatched_deeper_dives)
+
+knitr::kable(unmatched_deeper_dives |>
+  filter(is_break_point)
+)
+
+```
