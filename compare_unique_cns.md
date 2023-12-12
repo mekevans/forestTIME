@@ -39,7 +39,9 @@ library(dplyr)
         intersect, setdiff, setequal, union
 
 ``` r
-state_number <- c(9, 27)
+library(ggplot2)
+
+state_number <- c(4, 9, 27)
 arrow_dir <- "data/arrow"
 ```
 
@@ -91,28 +93,7 @@ unmatched_cns <- join_cns |>
   ungroup() |>
   filter(n_NUM > 1 |
            n_FIRST_CN > 1)
-```
 
-There are 36 instances where there isn’t a perfect 1-1 matching of one
-TREE_UNIQUE_NUM to TREE_FIRST_CN. For these, it’s always that 1
-TREE_UNIQUE_NUM has matched to multiple TREE_FIRST_CNs.
-
-In these data, each of these instances occurred when a tree had a
-`STATUSCD = 0` in one cycle and then received a new `CN` and a
-`PREV_TRE_CN = NA` in the following cycle. That is, in the following
-cycle, the previous tree CN was forgotten and the chain was broken.
-
-`STATUSCD = 0` means a tree is not part of the current sample, e.g. due
-to being incorrectly tallied or on a dangerous or inaccessible
-condition.
-
-In this sample (MN and CT), *all* of the breaks occurred on plot 21085,
-subplots 1 and 2, in 2012. Perhaps something was the matter with those
-plots in 2012?
-
-Below is tables showing this.
-
-``` r
 unmatched_deeper_dives <- join_cns |>
   left_join(tree_unique_number) |>
   filter(TREE_UNIQUE_NUM %in% unmatched_cns$TREE_UNIQUE_NUM) |>
@@ -126,8 +107,39 @@ unmatched_deeper_dives <- join_cns |>
   mutate(prev_break = lag(CN_break),
          prev_status = lag(STATUSCD)) |>
   mutate(is_break_point = ifelse(CN_break, ifelse(prev_break, FALSE, TRUE), FALSE)) 
+```
 
-knitr::kable(unmatched_deeper_dives)
+There are 3288 instances where there isn’t a perfect 1-1 matching of one
+TREE_UNIQUE_NUM to TREE_FIRST_CN. For these, it’s always that 1
+TREE_UNIQUE_NUM has matched to multiple TREE_FIRST_CNs.
+
+## Mismatches
+
+### CT
+
+CT has no mismatches.
+
+### MN
+
+In MN, each of these instances occurred when a tree had a `STATUSCD = 0`
+in one cycle and then received a new `CN` and a `PREV_TRE_CN = NA` in
+the following cycle. That is, in the following cycle, the previous tree
+CN was forgotten and the chain was broken.
+
+`STATUSCD = 0` means a tree is not part of the current sample, e.g. due
+to being incorrectly tallied or on a dangerous or inaccessible
+condition.
+
+In MN, *all* of the breaks occurred on plot 21085, subplots 1 and 2, in
+2012. Perhaps something was the matter with those plots in 2012?
+
+Below is tables showing this.
+
+``` r
+mn_deeper_dives <- unmatched_deeper_dives |>
+  filter(STATECD == 27)
+
+knitr::kable(mn_deeper_dives)
 ```
 
 | CN              | TREE_FIRST_CN   | STATECD | COUNTYCD | PREV_TRE_CN     | INVYR | UNITCD | SUBP | TREE |  PLOT | STATUSCD |  DIA |  HT | ACTUALHT | SPCD | CYCLE | TREE_UNIQUE_NUM   | CN_break | prev_break | prev_status | is_break_point |
@@ -206,7 +218,7 @@ knitr::kable(unmatched_deeper_dives)
 | 499615940126144 | 167064504020004 |      27 |        7 | 167064504020004 |  2017 |      2 |    2 |    8 | 21085 |        1 |  3.0 |  35 |       35 |  746 |    15 | 27_2_7_21085_2_8  | TRUE     | TRUE       |           1 | FALSE          |
 
 ``` r
-knitr::kable(unmatched_deeper_dives |>
+knitr::kable(mn_deeper_dives |>
   filter(is_break_point)
 )
 ```
@@ -231,3 +243,66 @@ knitr::kable(unmatched_deeper_dives |>
 | 167064502020004 | 167064502020004 |      27 |        7 | NA          |  2012 |      2 |    2 |    6 | 21085 |        1 |  3.8 |  34 |       NA |  746 |    14 | 27_2_7_21085_2_6  | TRUE     | FALSE      |           0 | TRUE           |
 | 167064503020004 | 167064503020004 |      27 |        7 | NA          |  2012 |      2 |    2 |    7 | 21085 |        1 |  2.5 |  26 |       NA |  746 |    14 | 27_2_7_21085_2_7  | TRUE     | FALSE      |           0 | TRUE           |
 | 167064504020004 | 167064504020004 |      27 |        7 | NA          |  2012 |      2 |    2 |    8 | 21085 |        1 |  2.1 |  23 |       NA |  746 |    14 | 27_2_7_21085_2_8  | TRUE     | FALSE      |           0 | TRUE           |
+
+### AZ
+
+The Arizona mismatches (approx. 1600 trees, of 71000 total) do not
+follow the same pattern as MN. All but 5 of these instances occur in
+CYCLE 3 between 2001-2005 when there are 2 visits to a tree within the
+same cycle. For those trees, the second visit to the tree has
+`PREV_TRE_CN = NA`, so there is no link to the first visit. To my
+understanding, the sampling methodology only calls for one visit per
+tree per cycle.
+
+Of the remaining 5 instances, I have no explanation. But, I’ll note that
+in 4 of those 5, the second record for a tree is of a different species
+than the first, suggesting some error somewhere.
+
+``` r
+#| arizona
+
+az_deeper_dives <- unmatched_deeper_dives |>
+  filter(STATECD == 4)
+
+az_repeat_visits <- tree_unique_number |>
+  filter(STATECD == 4) |>
+  group_by(CYCLE, TREE_UNIQUE_NUM) |>
+  arrange(INVYR) |>
+  mutate(NVISITS = n(),
+         VISIT_NUMBER = row_number(),
+         CN = as.character(CN)) |>
+  filter(NVISITS > 1,
+         VISIT_NUMBER == 1) |>
+  collect()
+```
+
+    Warning: window functions not currently supported in Arrow; pulling data into R
+
+``` r
+all(az_repeat_visits$CN %in% az_deeper_dives$CN)
+```
+
+    [1] TRUE
+
+``` r
+no_repeats <- az_deeper_dives |> 
+  anti_join(az_repeat_visits, by = "CN") |>
+  group_by(TREE_UNIQUE_NUM) |>
+  mutate(N_CNS = length(unique(TREE_FIRST_CN))) |>
+  filter(N_CNS > 1)
+
+knitr::kable(no_repeats)
+```
+
+| CN              | TREE_FIRST_CN   | STATECD | COUNTYCD | PREV_TRE_CN | INVYR | UNITCD | SUBP | TREE |  PLOT | STATUSCD |  DIA |  HT | ACTUALHT | SPCD | CYCLE | TREE_UNIQUE_NUM   | CN_break | prev_break | prev_status | is_break_point | N_CNS |
+|:----------------|:----------------|--------:|---------:|:------------|------:|-------:|-----:|-----:|------:|---------:|-----:|----:|---------:|-----:|------:|:------------------|:---------|:-----------|------------:|:---------------|------:|
+| 31611900010690  | 31611900010690  |       4 |       19 | NA          |  2002 |      1 |    1 |   12 | 85432 |        1 |  1.1 |   6 |        6 |  847 |     3 | 4_1_19_85432_1_12 | FALSE    | NA         |          NA | FALSE          |     2 |
+| 550230872126144 | 550230872126144 |       4 |       19 | NA          |  2017 |      1 |    1 |   12 | 85432 |        1 |  9.6 |  16 |       16 |  843 |     4 | 4_1_19_85432_1_12 | TRUE     | FALSE      |           1 | TRUE           |     2 |
+| 31611933010690  | 31611933010690  |       4 |       19 | NA          |  2002 |      1 |    3 |   24 | 85432 |        1 |  3.1 |  16 |       16 |  134 |     3 | 4_1_19_85432_3_24 | FALSE    | NA         |          NA | FALSE          |     2 |
+| 550230904126144 | 550230904126144 |       4 |       19 | NA          |  2017 |      1 |    3 |   24 | 85432 |        1 |  5.6 |  11 |       11 |  843 |     4 | 4_1_19_85432_3_24 | TRUE     | FALSE      |           1 | TRUE           |     2 |
+| 31611441010690  | 31611441010690  |       4 |       17 | NA          |  2004 |      2 |    2 |   11 | 82938 |        1 |  3.5 |  12 |       12 |  106 |     3 | 4_2_17_82938_2_11 | FALSE    | NA         |          NA | FALSE          |     2 |
+| 742145365290487 | 742145365290487 |       4 |       17 | NA          |  2019 |      2 |    2 |   11 | 82938 |        1 |  5.4 |   7 |        7 |   69 |     4 | 4_2_17_82938_2_11 | TRUE     | FALSE      |           1 | TRUE           |     2 |
+| 31610116010690  | 31610116010690  |       4 |        5 | NA          |  2001 |      2 |    4 |    3 | 82983 |        1 |  5.8 |  22 |       22 |  122 |     3 | 4_2_5_82983_4_3   | FALSE    | NA         |          NA | FALSE          |     2 |
+| 469481960489998 | 469481960489998 |       4 |        5 | NA          |  2016 |      2 |    4 |    3 | 82983 |        1 |  5.6 |  21 |       21 |  122 |     4 | 4_2_5_82983_4_3   | TRUE     | FALSE      |           1 | TRUE           |     2 |
+| 31610690010690  | 31610690010690  |       4 |        7 | NA          |  2003 |      2 |    3 |   10 | 83683 |        1 |  2.7 |   6 |        6 |  810 |     3 | 4_2_7_83683_3_10  | FALSE    | NA         |          NA | FALSE          |     2 |
+| 687317132126144 | 687317132126144 |       4 |        7 | NA          |  2018 |      2 |    3 |   10 | 83683 |        2 | 17.6 |  18 |        7 |  803 |     4 | 4_2_7_83683_3_10  | TRUE     | FALSE      |           1 | TRUE           |     2 |

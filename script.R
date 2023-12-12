@@ -10,8 +10,8 @@ source(here::here("R", "create_tree_change_table.R"))
 source(here::here("R", "chain_by_joins.R"))
 
 
-state_to_use = "MN"
-state_number = 27 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
+state_to_use = "AZ"
+state_number = 4 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
 raw_dir <- "data/rawdat/state"
 arrow_dir <- "data/arrow"
 
@@ -25,7 +25,7 @@ arrow_dir <- "data/arrow"
 
 # #### Store TREE data in a hive ####
 # 
-raw_trees_hive(state_to_use = "MN",
+raw_trees_hive(state_to_use = state_to_use,
               rawdat_dir = raw_dir,
               arrow_dir = arrow_dir)
 
@@ -33,7 +33,7 @@ raw_trees_hive(state_to_use = "MN",
 
 #system.time(create_cn_tables(state_number = 12, arrow_dir = arrow_dir))
 
-system.time(create_cn_tables_join(state_number = 27, arrow_dir = arrow_dir))
+system.time(create_cn_tables_join(state_number = state_number, arrow_dir = arrow_dir))
 
 #### Create TREE INFO table ####
 
