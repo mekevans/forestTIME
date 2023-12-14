@@ -1,0 +1,83 @@
+---
+title: "Demo script"
+format: html
+editor: source
+---
+
+This demo assumes we have already run and generated the TREE_PERSISTENT_CN and TREE_INFO tables. 
+
+```{r}
+#| echo = F
+
+library(arrow)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("demo", "R", "demo_functions.R"))
+# 
+# states_to_include = "27"
+# raw_dir <- "data/rawdat/state"
+# arrow_dir <- "data/arrow"
+# 
+# trees <-
+#   open_dataset(
+#     here::here(arrow_dir, "TREE_RAW"),
+#     partitioning = c("STATECD", "COUNTYCD"),
+#     format = "csv",
+#     hive_style = T,
+#     col_types = schema(
+#       CN = float64(),
+#       TREE_FIRST_CN = float64()
+#     )) |>
+#   filter(STATECD %in% states_to_include) |>
+#   collect()
+# 
+# cns <-
+#   open_dataset(
+#     here::here(arrow_dir, "TREE_CN_JOIN"),
+#     partitioning = c("STATECD", "COUNTYCD"),
+#     format = "csv",
+#     hive_style = T,
+#     col_types = schema(
+#       CN = float64(),
+#       TREE_FIRST_CN = float64()
+#     )) |>
+#   filter(STATECD %in% states_to_include) |>
+#   collect()
+# 
+# tree_info <-  open_dataset(
+#   here::here(arrow_dir, "TREE_INFO"),
+#   partitioning = c("STATECD", "COUNTYCD"),
+#   format = "csv",
+#   hive_style = T,
+#   col_types = schema(TREE_FIRST_CN = float64())) |>
+#   filter(STATECD %in% states_to_include) |>
+#   collect()
+
+```
+
+## select_trees and get_timeseries
+
+By default, these functions will return all trees in all years measured. 
+
+```{r}
+
+my_trees <- select_trees()
+
+knitr::kable(head(my_trees))
+
+my_timeseries <- get_timeseries(my_trees)
+
+knitr::kable(head(my_timeseries))
+```
+
+
+Select trees based on criteria such as plot and species by modifying the arguments to `my_trees`. 
+You can look up species codes in the table rendered [here]().
+
+```{r}
+
+my_
+
+
+```
