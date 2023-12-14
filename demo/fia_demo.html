@@ -123,9 +123,9 @@ Attaching package: 'dplyr'</code></pre>
     intersect, setdiff, setequal, union</code></pre>
 </div>
 </div>
-<section id="select-trees" class="level2">
-<h2 class="anchored" data-anchor-id="select-trees">Select trees</h2>
-<p>You can look up species codes by manually searching the table <a href="">here</a></p>
+<section id="select_trees-and-get_timeseries" class="level2">
+<h2 class="anchored" data-anchor-id="select_trees-and-get_timeseries">select_trees and get_timeseries</h2>
+<p>By default, these functions will return all trees in all years measured.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>my_trees <span class="ot">&lt;-</span> <span class="fu">select_trees</span>()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -158,70 +158,70 @@ Attaching package: 'dplyr'</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">6.519439e+13</td>
+<td style="text-align: right;">6.531664e+13</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2015</td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">20025</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">101</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.531664e+13</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2000</td>
 <td style="text-align: right;">2020</td>
-<td style="text-align: right;">375</td>
-<td style="text-align: right;">20058</td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">20025</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">6.519441e+13</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">2000</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">746</td>
-<td style="text-align: right;">20058</td>
-<td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">101</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">6.519442e+13</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">6.531664e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">2010</td>
-<td style="text-align: right;">746</td>
-<td style="text-align: right;">20058</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">462</td>
+<td style="text-align: right;">20025</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">101</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6.519442e+13</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.531665e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">746</td>
-<td style="text-align: right;">20058</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">544</td>
+<td style="text-align: right;">20025</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">101</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">6.519442e+13</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.531665e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">746</td>
-<td style="text-align: right;">20058</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">823</td>
+<td style="text-align: right;">20025</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">101</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6.519443e+13</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.531665e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">746</td>
-<td style="text-align: right;">20058</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">462</td>
+<td style="text-align: right;">20025</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">101</td>
 </tr>
 </tbody>
 </table>
@@ -232,12 +232,338 @@ Attaching package: 'dplyr'</code></pre>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
-<col style="width: 16%">
 <col style="width: 15%">
+<col style="width: 14%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 10%">
 <col style="width: 7%">
-<col style="width: 9%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">TREE_FIRST_CN</th>
+<th style="text-align: right;">CN</th>
+<th style="text-align: right;">INVYR</th>
+<th style="text-align: right;">STATECD</th>
+<th style="text-align: right;">COUNTYCD</th>
+<th style="text-align: right;">UNITCD</th>
+<th style="text-align: right;">PLOT</th>
+<th style="text-align: right;">SUBP</th>
+<th style="text-align: right;">TREE</th>
+<th style="text-align: right;">DIA</th>
+<th style="text-align: right;">HT</th>
+<th style="text-align: right;">STATUSCD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6.3</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">6.524787e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7.2</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5.2</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">6.1</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">6.524788e+13</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20191</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Select trees based on criteria such as plot and species by modifying the arguments to <code>select_trees</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>my_red_maples <span class="ot">&lt;-</span> <span class="fu">select_trees</span>(<span class="at">spcd =</span> <span class="dv">316</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>my_red_maples_plot <span class="ot">&lt;-</span> <span class="fu">select_trees</span>(<span class="at">spcd =</span> <span class="dv">316</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">plot =</span> <span class="dv">20010</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(my_red_maples))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 8%">
+<col style="width: 20%">
 <col style="width: 10%">
 <col style="width: 8%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">TREE_FIRST_CN</th>
+<th style="text-align: right;">NYEARS</th>
+<th style="text-align: right;">NYEARS_MEASURED</th>
+<th style="text-align: right;">FIRSTYR</th>
+<th style="text-align: right;">LASTYR</th>
+<th style="text-align: right;">SPCD</th>
+<th style="text-align: right;">PLOT</th>
+<th style="text-align: right;">STATECD</th>
+<th style="text-align: right;">COUNTYCD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">6.519121e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20138</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.519301e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20151</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.519303e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20151</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.519588e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20174</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.519588e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20174</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.519588e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20174</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(my_red_maples_plot))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 8%">
+<col style="width: 20%">
+<col style="width: 10%">
+<col style="width: 8%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">TREE_FIRST_CN</th>
+<th style="text-align: right;">NYEARS</th>
+<th style="text-align: right;">NYEARS_MEASURED</th>
+<th style="text-align: right;">FIRSTYR</th>
+<th style="text-align: right;">LASTYR</th>
+<th style="text-align: right;">SPCD</th>
+<th style="text-align: right;">PLOT</th>
+<th style="text-align: right;">STATECD</th>
+<th style="text-align: right;">COUNTYCD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2006</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>my_maple_timeseries <span class="ot">&lt;-</span> <span class="fu">get_timeseries</span>(my_red_maples_plot)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(my_maple_timeseries))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 14%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 6%">
 <col style="width: 5%">
 <col style="width: 5%">
 <col style="width: 5%">
@@ -252,6 +578,7 @@ Attaching package: 'dplyr'</code></pre>
 <th style="text-align: right;">STATECD</th>
 <th style="text-align: right;">COUNTYCD</th>
 <th style="text-align: right;">UNITCD</th>
+<th style="text-align: right;">PLOT</th>
 <th style="text-align: right;">SUBP</th>
 <th style="text-align: right;">TREE</th>
 <th style="text-align: right;">DIA</th>
@@ -261,82 +588,215 @@ Attaching package: 'dplyr'</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">15.1</td>
-<td style="text-align: right;">70</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">18.8</td>
-<td style="text-align: right;">70</td>
+<td style="text-align: right;">6.7</td>
+<td style="text-align: right;">32</td>
 <td style="text-align: right;">1</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">6.531693e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">12.9</td>
-<td style="text-align: right;">52</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">44</td>
 <td style="text-align: right;">1</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">2.9</td>
-<td style="text-align: right;">29</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: right;">47</td>
 <td style="text-align: right;">1</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
 <td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">8.8</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">6.2</td>
 <td style="text-align: right;">42</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">6.531694e+13</td>
-<td style="text-align: right;">2000</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">2001</td>
 <td style="text-align: right;">27</td>
-<td style="text-align: right;">103</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">21</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">14.3</td>
-<td style="text-align: right;">56</td>
+<td style="text-align: right;">20010</td>
 <td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Select the variables to return by modifying the arguments to <code>get_timeseries</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>my_maple_timeseries_extra <span class="ot">&lt;-</span> <span class="fu">get_timeseries</span>(my_red_maples_plot,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                                            <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"DIA"</span>, <span class="st">"HT"</span>, <span class="st">"ACTUALHT"</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(my_maple_timeseries_extra))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 14%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 3%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">TREE_FIRST_CN</th>
+<th style="text-align: right;">CN</th>
+<th style="text-align: right;">INVYR</th>
+<th style="text-align: right;">STATECD</th>
+<th style="text-align: right;">COUNTYCD</th>
+<th style="text-align: right;">UNITCD</th>
+<th style="text-align: right;">PLOT</th>
+<th style="text-align: right;">SUBP</th>
+<th style="text-align: right;">TREE</th>
+<th style="text-align: right;">DIA</th>
+<th style="text-align: right;">HT</th>
+<th style="text-align: right;">ACTUALHT</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">15.1</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">58</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6.7</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">6.585573e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">6.2</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">6.585574e+13</td>
+<td style="text-align: right;">2001</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20010</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">44</td>
 </tr>
 </tbody>
 </table>

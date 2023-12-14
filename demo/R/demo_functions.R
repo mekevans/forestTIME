@@ -45,6 +45,7 @@ get_timeseries <- function(selected_trees,
         "STATECD",
         "COUNTYCD",
         "UNITCD",
+        "PLOT",
         "SUBP",
         "TREE"
       ),
