@@ -1,0 +1,163 @@
+---
+title: "Extracting FIA timeseries"
+format: gfm
+editor: source
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+library(duckdbfs)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("demo", "R", "demo_functions_as_fs.R"))
+
+```
+
+## 1. `select_trees`
+
+`select_trees()` extracts persistent IDs for all trees that meet user-supplied criteria.
+
+In this example, the criteria include:
+
+- `STATECD`
+- `COUNTYD`
+- `PLOT`
+- `SPCD`
+- `min_years`, the minimum number of years between the first and last measurement
+- `min_measurements`, the minimum number of survey visits to that tree 
+
+::: {.callout-note}
+
+What additional filtering criteria should there be?
+
+:::
+
+By default, `select_trees` returns all trees:
+
+```{r}
+
+my_trees <- select_trees()
+
+nrow(my_trees)
+
+knitr::kable(head(my_trees))
+
+```
+
+Passing additional options filters the trees:
+
+```{r}
+
+# Extract all red maples (SPCD = 316)
+
+my_red_maples <- select_trees(spcd = 316)
+
+nrow(my_red_maples)
+
+knitr::kable(head(my_red_maples))
+
+```
+
+```{r}
+
+# Extract red maples on plot 20010
+
+my_red_maples_one_plot <- select_trees(spcd = 316,
+                                   plot = 20010)
+
+nrow(my_red_maples_one_plot)
+
+knitr::kable(head(my_red_maples_one_plot))
+
+```
+
+
+## 2. `get_timeseries`
+
+`get_timeseries` extracts measurements for a selection of trees. 
+By default, it will return all measurements of `DIA`, `HT`, and `STATUSCD` for the given trees.
+The time window included can be modified using the `min_year` and `max_year` arguments. 
+The measurements returned can be modified to add additional variables using the `variables` argument.
+Currently, any of the columns of the `TREE` table can be added as additional variables.
+
+::: {.callout-note}
+
+What should be the default measurements provided?
+
+What additional options should there be, including options from other tables?
+
+:::
+
+
+For example, extracting the default measurements for all years for red maples on plot 20010:
+
+```{r}
+
+my_maple_timeseries <- get_timeseries(my_red_maples_one_plot)
+
+nrow(my_maple_timeseries)
+
+knitr::kable(head(my_maple_timeseries))
+```
+
+
+
+Modifying the time window and variables to return:
+
+
+```{r}
+
+my_maple_timeseries2 <- get_timeseries(my_red_maples_one_plot,
+                                            min_year = 2010,
+                                            max_year = 2023,
+                                            variables = c("DIA", "HT", "ACTUALHT"))
+
+nrow(my_maple_timeseries2)
+
+knitr::kable(head(my_maple_timeseries2))
+```
+
+Here is a plot of how individual maple trees' diameters have changed over time:
+
+```{r}
+#| label: fig-mapledia
+#| fig-cap: Diameters of red maple trees on plot 20010 over time. Individual lines represent individual trees.
+#| echo: false
+
+ggplot(my_maple_timeseries, aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN))) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  ggtitle("Maple tree diameters over time", subtitle = "Plot 20010") +
+  xlab("INVYR") +
+  ylab("DIA")
+
+```
+
+
+## Remote access
+
+Using the `connection = "remote"` option pulls the data from remote sources rather than downloading it. 
+
+```{r}
+
+
+my_red_maples_one_plot_remote <- select_trees(spcd = 316,
+                                         plot = 20010,
+                                         connection = "remote")
+
+my_red_maples_timeseries_remote <-
+  get_timeseries(
+    my_red_maples_one_plot_remote,
+    min_year = 2010,
+    max_year = 2023,
+    variables = c("DIA", "HT", "ACTUALHT"),
+    connection = "remote"
+  )
+
+
+```

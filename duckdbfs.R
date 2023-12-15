@@ -39,5 +39,38 @@ mn_maple_cn_measurements <- mn_maple_cns |>
 
 system.time(maple_measurements <- collect(mn_maple_cn_measurements)) # 23.39 seconds
 
+## LOCAL ## 
+
+
+mn_cns <- duckdbfs::open_dataset(sources = list.files(here::here("data", "arrow", "TREE_CN_JOIN"), recursive = T, full.names = T),
+                                 hive_style = TRUE,
+                                 format = "csv") |>
+  filter(STATECD == 27)
+
+mn_info <- duckdbfs::open_dataset(sources = list.files(here::here("data", "arrow", "TREE_INFO"), recursive = T, full.names = T),
+                                  hive_style = TRUE,
+                                  format = "csv") |>
+  filter(STATECD == 27)
+
+mn_trees <- duckdbfs::open_dataset(sources = list.files(here::here("data", "arrow", "TREE_RAW"), recursive = T, full.names = T),
+                                    hive_style = TRUE,
+                                    format = "csv") |>
+  filter(STATECD == 27)# 4.3 seconds
+
+
+library(dplyr)
+
+mn_maples <- mn_info |>
+  filter(SPCD == 316,
+         PLOT == 20010)
+
+mn_maple_cns <- mn_maples |>
+  left_join(mn_cns) 
+
+mn_maple_cn_measurements <- mn_maple_cns |>
+  inner_join(mn_trees) |>
+  select(CN, INVYR, TREE_FIRST_CN, DIA, HT, STATUSCD)
+
+system.time(maple_measurements <- collect(mn_maple_cn_measurements)) # .97 seconds local
 
 
