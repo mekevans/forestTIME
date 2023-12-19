@@ -1,0 +1,28 @@
+# To run remote
+
+1.  Install `duckdbfs`:
+
+``` r
+install.packages("duckdbfs")
+```
+
+2.  Download and source this script:
+    <https://github.com/diazrenata/in-the-trees/blob/demo/demo/R/demo_functions_as_fs.R>
+
+3.  Run the `select_trees` and `get_timeseries` functions with the
+    `connection` argument set to `"remote"`:
+
+``` r
+my_red_maples_one_plot_remote <- select_trees(spcd = 316,
+                                         plot = 20010,
+                                         connection = "remote")
+
+my_red_maples_timeseries_remote <-
+  get_timeseries(
+    my_red_maples_one_plot_remote,
+    min_year = 2010,
+    max_year = 2023,
+    variables = c("DIA", "HT", "ACTUALHT"),
+    connection = "remote"
+  )
+```
