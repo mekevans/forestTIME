@@ -9,11 +9,11 @@ editor: source
 #| message: FALSE
 #| warning: FALSE
 
-library(duckdbfs)
+library(arrow)
 library(dplyr)
 library(ggplot2)
 
-source(here::here("demo", "R", "demo_functions_as_fs.R"))
+source(here::here("R", "demo_functions.R"))
 
 ```
 
@@ -76,7 +76,7 @@ knitr::kable(head(my_red_maples_one_plot))
 ```
 
 
-## 2. `get_timeseries`
+## `get_timeseries`
 
 `get_timeseries` extracts measurements for a selection of trees. 
 By default, it will return all measurements of `DIA`, `HT`, and `STATUSCD` for the given trees.
@@ -135,29 +135,5 @@ ggplot(my_maple_timeseries, aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN))) +
   ggtitle("Maple tree diameters over time", subtitle = "Plot 20010") +
   xlab("INVYR") +
   ylab("DIA")
-
-```
-
-
-## Remote access
-
-Using the `connection = "remote"` option pulls the data from remote sources rather than downloading it. 
-
-```{r}
-
-
-my_red_maples_one_plot_remote <- select_trees(spcd = 316,
-                                         plot = 20010,
-                                         connection = "remote")
-
-my_red_maples_timeseries_remote <-
-  get_timeseries(
-    my_red_maples_one_plot_remote,
-    min_year = 2010,
-    max_year = 2023,
-    variables = c("DIA", "HT", "ACTUALHT"),
-    connection = "remote"
-  )
-
 
 ```

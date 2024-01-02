@@ -13,6 +13,8 @@ arrow_dir <- "data/arrow"
 
 #### Download data ####
 
+# Note that this fxn fails if the download takes more than 60 seconds.
+
 download_state_data(state_to_use, "data/rawdat/state")
 
 #### Store TREE data in a hive ####
