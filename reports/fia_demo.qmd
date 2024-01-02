@@ -13,7 +13,7 @@ library(arrow)
 library(dplyr)
 library(ggplot2)
 
-source(here::here("demo", "R", "demo_functions.R"))
+source(here::here("R", "demo_functions.R"))
 
 ```
 
