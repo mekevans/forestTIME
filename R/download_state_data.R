@@ -6,14 +6,16 @@ download_state_data <- function(state = "CT", rawdat_dir = "rawdat/state", max_t
     
   }
   
-  download_from_datamart(state, file_dir = here::here(rawdat_dir), max_time = max_time) #this is very fast
+  download_from_datamart(state, table = "TREE", file_dir = here::here(rawdat_dir), max_time = max_time) #this is very fast
+  download_from_datamart(state, table = "PLOT", file_dir = here::here(rawdat_dir), max_time = max_time) #this is very fast
+  download_from_datamart(state, table = "COND", file_dir = here::here(rawdat_dir), max_time = max_time) #this is very fast
   
 }
 
 
-download_from_datamart <- function(state, file_dir, max_time = 300) {
+download_from_datamart <- function(state, table = "TREE", file_dir, max_time = 300) {
   
-  url <- paste0("https://apps.fs.usda.gov/fia/datamart/CSV/", state, "_TREE.zip")
+  url <- paste0("https://apps.fs.usda.gov/fia/datamart/CSV/", state, "_", table, ".zip")
   
   zip_file <- file.path(file_dir, basename(url))
   
