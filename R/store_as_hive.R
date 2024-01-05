@@ -80,4 +80,33 @@ raw_hive <-
         partitioning = c("STATECD", "COUNTYCD")
       )
     }
+    
+    if("COND" %in% tables) {
+      
+      cond <-
+        read_csv(
+          here::here(rawdat_dir, paste0(state_to_use, "_COND.csv")),
+          col_select = c(
+            CN,
+            PLT_CN,
+            INVYR,
+            STATECD,
+            UNITCD,
+            COUNTYCD,
+            PLOT,
+           CONDID,
+           COND_STATUS_CD,
+           COND_NONSAMPLE_REASN_CD
+          )
+        ) |>
+        filter(INVYR >= 2000) |>
+        mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
+      
+      write_dataset(
+        plots,
+        here::here(arrow_dir, "COND_RAW"),
+        format = "csv",
+        partitioning = c("STATECD", "COUNTYCD")
+      )
+    }
   }
