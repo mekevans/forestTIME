@@ -12,7 +12,7 @@ These will be filtering operations on relatively small datasets, and they will g
 
 ```
 
-plots_to_use <- filter(PLOT_INFO, STATECD = ..., COUNTYCD = ..., NYEARS_PLOT = ...)
+plots_to_use <- filter(PLOT_INFO, STATECD = ..., COUNTYCD = ..., NYEARS_PLOT = ...) # However, at this stage I don't see the value-add of filtering based on static characteristics of plots.
 
 trees_to_use <- tree_info |>
     filter(PLOT_UNIQUE_ID %in% plots_to_use$PLOT_UNIQUE_ID) |>
