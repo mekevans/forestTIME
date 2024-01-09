@@ -15,6 +15,7 @@ create_plot_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
   
   plot_info <- plots |>
     group_by(PLOT_UNIQUE_ID,
+             PLOT,
              STATECD,
              COUNTYCD,
              UNITCD) |>

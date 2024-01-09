@@ -23,16 +23,7 @@ create_tree_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
     hive_style = T) |>
     filter(STATECD %in% states_to_include)
   
-  
-  plot_info <- open_dataset(
-    here::here(arrow_dir, "PLOT_INFO"),
-    partitioning = c("STATECD", "COUNTYCD"),
-    format = "csv",
-    hive_style = T) |>
-    filter(STATECD %in% states_to_include)
-  
   trees_info <- trees |>
-    left_join(plot_info) |>
     group_by(TREE_UNIQUE_ID,
              PLOT_UNIQUE_ID) |>
     summarize(NYEARS = dplyr::n(),
@@ -44,9 +35,6 @@ create_tree_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
               SUBPLOT = min(SUBP),
               STATECD = min(STATECD),
               COUNTYCD = min(COUNTYCD),
-              LAT = min(LAT),
-              LON = min(LON),
-              ELEV = min(ELEV),
               SPCDS = n_distinct(SPCD)) |>
     ungroup() |>
     # Removes trees with multiple species codes recorded.
