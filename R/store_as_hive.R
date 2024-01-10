@@ -103,7 +103,7 @@ raw_hive <-
         mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
       
       write_dataset(
-        plots,
+        cond,
         here::here(arrow_dir, "COND_RAW"),
         format = "csv",
         partitioning = c("STATECD", "COUNTYCD")

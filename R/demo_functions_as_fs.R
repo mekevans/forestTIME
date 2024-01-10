@@ -129,8 +129,11 @@ filter_on_passed_vars <- function(selected_trees,
                                   local_dir = here::here("data", "arrow")) {
   if(connection == "local") {
     #  cn_sources = list.files(here::here(local_dir, "TREE_CN_JOIN"), recursive = T, full.names = T)
-    raw_sources = list.files(here::here(local_dir, "TREE_RAW"), recursive = T, full.names = T)
-    #  cn_hive = T
+    raw_tree_sources = list.files(here::here(local_dir, "TREE_RAW"), recursive = T, full.names = T)
+    raw_plot_sources = list.files(here::here(local_dir, "PLOT_RAW"), recursive = T, full.names = T)
+    raw_cond_sources = list.files(here::here(local_dir, "COND_RAW"), recursive = T, full.names = T)
+    
+     #  cn_hive = T
   } else {
     # cn_sources = "https://github.com/diazrenata/in-the-trees/raw/demo/static_data/processed_tables/mn_cns.csv"
     
@@ -172,17 +175,35 @@ filter_on_passed_vars <- function(selected_trees,
   #   dplyr::filter(TREE_FIRST_CN %in% selected_cns) |>
   #   compute()
   
-  tree_timeseries <-
+  plot_raw <- 
     duckdbfs::open_dataset(
-      sources = raw_sources,
+      sources = raw_plot_sources,
       hive_style = T,
       format = "csv"
     ) |>
+    rename(PLT_CN = CN)
+  cond_raw <- 
+    duckdbfs::open_dataset(
+      sources = raw_cond_sources,
+      hive_style = T,
+      format = "csv"
+    ) 
+  
+    
+  tree_timeseries <-
+    duckdbfs::open_dataset(
+      sources = raw_tree_sources,
+      hive_style = T,
+      format = "csv"
+    ) |>
+    rename(TREE_CN = CN) |>
+    left_join(plot_raw) |>
+    left_join(cond_raw) |>
     dplyr::mutate(STATECD = as.numeric(STATECD),
                   COUNTYCD = as.numeric(COUNTYCD)) |> 
     filter(TREE_UNIQUE_ID %in% selected_tree_ids) |>
     filter(!!!calls) |>
-    select(all_of(report_cols)) |>
+   # select(all_of(report_cols)) |>
     collect() 
   
   tree_timeseries

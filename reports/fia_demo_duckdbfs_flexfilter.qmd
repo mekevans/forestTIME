@@ -13,7 +13,7 @@ library(duckdbfs)
 library(dplyr)
 library(ggplot2)
 
-source(here::here("R", "demo_functions_as_fs.R"))
+source(here::here("R", "flexible_filtering_functions.R"))
 
 ```
 
@@ -21,20 +21,11 @@ source(here::here("R", "demo_functions_as_fs.R"))
 
 `select_trees()` extracts persistent IDs for all trees that meet user-supplied criteria.
 
-In this example, the criteria include:
-
-- `STATECD`
-- `COUNTYD`
-- `PLOT`
-- `SPCD`
-- `min_years`, the minimum number of years between the first and last measurement
-- `min_measurements`, the minimum number of survey visits to that tree 
-
 By default, `select_trees` returns all trees:
 
 ```{r}
 
-my_trees <- select_trees(connection = "local")
+my_trees <- select_trees_list(connection = "local")
 
 nrow(my_trees)
 
@@ -48,7 +39,9 @@ Passing additional options filters the trees:
 
 # Extract all red maples (SPCD = 316)
 
-my_red_maples <- select_trees(spcd = 316, connection = "local")
+my_red_maples <- select_trees_list(condition_list = list(
+  SPCD = list("==", 316)
+))
 
 nrow(my_red_maples)
 
@@ -60,8 +53,9 @@ knitr::kable(head(my_red_maples))
 
 # Extract red maples on plot 27_3_65_20067
 
-my_red_maples_one_plot <- select_trees(spcd = 316,
-                                   plot_unique_id = "27_3_65_20067")
+my_red_maples_one_plot <- select_trees_list(condition_list = list(
+  SPCD = list("==", 316),
+  PLOT_UNIQUE_ID = list("==", "27_3_65_20067")))
 
 nrow(my_red_maples_one_plot)
 
@@ -71,9 +65,11 @@ knitr::kable(head(my_red_maples_one_plot))
 
 ```{r}
 
-my_red_maples_one_county <- select_trees(spcd = 316,
-                                         state = 27,
-                                         county = 65)
+my_red_maples_one_county <- select_trees_list(list(
+  SPCD = list("==", 316),
+  STATECD = list("==", 27),
+  COUNTYCD = list("==", 65)
+))
 
 nrow(my_red_maples_one_county)
 
@@ -102,8 +98,9 @@ Modifying the time window and variables to return:
 
 my_maple_timeseries2 <- filter_on_passed_vars(my_red_maples_one_plot, 
                                        conditions = list(STATUSCD = list("==", 1),
-                                                         INVYR = list("%in%", 2005:2024)),
-                                       variables = c("DIA", "HT", "ACTUALHT", "STATUSCD"),
+                                                         INVYR = list("%in%", 2005:2024),
+                                                         CONDID = list("==", 2)),
+                                       variables = c("DIA", "HT", "ACTUALHT", "CONDID"),
                                        connection = "local")
 
 nrow(my_maple_timeseries2)
