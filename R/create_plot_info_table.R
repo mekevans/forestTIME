@@ -9,7 +9,8 @@ create_plot_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
     here::here(arrow_dir, "PLOT_RAW"),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
-    hive_style = T) |>
+    hive_style = T,
+    col_types = schema(PLOT_NONSAMPLE_REASN_CD = float64())) |>
     filter(STATECD %in% states_to_include) |>
     compute()
   
@@ -33,7 +34,7 @@ create_plot_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
            LONS == 1,
            ELEVS == 1) |>
     compute()
-    
+  
   
   write_dataset(plot_info, path = here::here(arrow_dir, "PLOT_INFO"), 
                 format = "csv",
