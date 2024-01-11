@@ -1,0 +1,32 @@
+---
+title: "Extracting FIA timeseries"
+format: gfm
+editor: source
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+library(duckdbfs)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("R", "query_tables.R"))
+
+```
+
+
+```{r}
+
+ts <- get_timeseries(
+  conditions = list(SPCD = list("==", 316),
+                    COUNTYCD = list("==", 65),
+                    CONDID = list("==", 2))
+)
+
+knitr::kable(head(ts))
+
+```
+
