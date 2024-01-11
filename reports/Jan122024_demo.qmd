@@ -18,15 +18,70 @@ source(here::here("R", "query_tables.R"))
 ```
 
 
+# `get_timeseries`
+
+The `get_timeseries` function takes a *list of conditions* and a *list of variables* and returns a timeseries of the requested variables for the trees/surveys that meet the supplied conditions.
+
+"Conditions" can include location (PLOT, COUNTYCD, STATECD), tree attributes (SPCD, number of years measured), or survey attributes (STATUSCD, DIA, CONDID). These conditions can come from any of the TREE, PLOT, or CONDITION tables in the FIA database.
+
+"Variables" can include any of the columns from the TREE, PLOT, or CONDITION tables. 
+
+The resulting timeseries identify individual trees using the TREE_UNIQUE_ID field, which is a composite of STATE, COUNTY, UNIT, PLOT, SUBPLOT, and TREE. (There is also the option of daisy-chaining, but in my tests with MN and AZ, the two methods are either identical, or the daisy-chain method is more prone to breaks/apparent errors.)
+
+## Examples
+
+Extract all variables red maples in county 65:
+
 ```{r}
 
 ts <- get_timeseries(
   conditions = list(SPCD = list("==", 316),
-                    COUNTYCD = list("==", 65),
-                    CONDID = list("==", 2))
+                    COUNTYCD = list("==", 65))
 )
 
 knitr::kable(head(ts))
 
 ```
 
+Extract DIA, HT, CONDID and MEASYEAR for red maples in county 65:
+
+
+```{r}
+
+ts2 <- get_timeseries(
+  conditions = list(SPCD = list("==", 316),
+                    COUNTYCD = list("==", 65)),
+  variables = c("MEASYEAR", "DIA", "HT", "CONDID")
+)
+
+knitr::kable(head(ts2))
+
+```
+
+Extract those same measurements for plot 27_3_65_20042, for a few species:
+
+
+```{r}
+
+ts3 <- get_timeseries(
+  conditions = list(COUNTYCD = list("==", 65),
+                    PLOT_UNIQUE_ID = list("==", "27_3_65_20042"),
+                    SPCD = list("%in%", c(316, 701, 833, 375))),
+  variables = c("MEASYEAR", "DIA", "HT", "CONDID")
+)
+
+knitr::kable(head(ts3))
+
+```
+
+Plotting the results:
+
+```{r}
+
+ggplot(ts3, aes(MEASYEAR, DIA, group = TREE_UNIQUE_ID, color = as.factor(SPCD))) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  scale_color_viridis_d("SPCD", end = .8) +
+  facet_wrap(vars(SPCD), scales = "free")
+```

@@ -12,14 +12,18 @@ select_trees <-
         full.names = T
       )
       tree_hive = T
-    } 
+    }
     else {
       stop("Sorry, I haven't set up remote yet!")
       # tree_sources = "https://github.com/diazrenata/in-the-trees/raw/demo/static_data/processed_tables/mn_info.csv"
       # tree_hive = F
     }
     
+    if(length(conditions) < 1) {
+      calls <- NULL
+    } else {
     calls <- construct_list_condition(conditions)
+    }
     
     tree_info <-  duckdbfs::open_dataset(
       sources = tree_sources,
@@ -35,10 +39,10 @@ select_trees <-
   }
 
 get_temporal_data <- function(selected_trees,
-                                  conditions = list(STATUSCD = list("==", "1")),
-                                  variables = "all",
-                                  connection = "local",
-                                  local_dir = here::here("data", "arrow")) {
+                              conditions = list(STATUSCD = list("==", "1")),
+                              variables = "all",
+                              connection = "local",
+                              local_dir = here::here("data", "arrow")) {
   if (connection == "local") {
     #  cn_sources = list.files(here::here(local_dir, "TREE_CN_JOIN"), recursive = T, full.names = T)
     raw_tree_sources = list.files(
@@ -160,8 +164,12 @@ get_temporal_data <- function(selected_trees,
   
   selected_tree_ids <- selected_trees$TREE_UNIQUE_ID
   
-  calls <- construct_list_condition(condition_list = conditions)
-  
+  if(length(conditions) < 1) {
+    calls <- NULL
+  } else {
+    calls <- construct_list_condition(conditions)
+  }
+
   # selected_cns <- selected_trees$TREE_FIRST_CN
   #
   # cns <-
@@ -195,6 +203,7 @@ get_temporal_data <- function(selected_trees,
                   COUNTYCD = as.numeric(COUNTYCD)) |>
     filter(TREE_UNIQUE_ID %in% selected_tree_ids) |>
     filter(!!!calls) |>
+    arrange(PLOT_UNIQUE_ID, TREE_UNIQUE_ID, INVYR) |>
     compute()
   
   if (any(variables != "all")) {
@@ -209,15 +218,23 @@ get_temporal_data <- function(selected_trees,
         "UNITCD",
         "PLOT",
         "SUBP",
-        "TREE"
+        "TREE",
+        "SPCD"
       ),
       variables
     )
-    
-    tree_timeseries <- tree_timeseries |>
-      select(all_of(report_cols)) |>
-      compute()
+  } else {
+    report_cols <-
+      c("TREE_UNIQUE_ID",
+        "PLOT_UNIQUE_ID",
+        colnames(tree_timeseries)[which(!(
+          colnames(tree_timeseries) %in% c("PLOT_UNIQUE_ID", "TREE_UNIQUE_ID")
+        ))])
   }
+  
+  tree_timeseries <- tree_timeseries |>
+    select(all_of(report_cols)) |>
+    compute()
   
   tree_timeseries |>
     collect()
@@ -238,7 +255,7 @@ construct_list_condition = function(condition_list = list(kitten_age = list("%in
 
 get_timeseries <-
   function(conditions = list(STATECD = list("==", 27),
-                                 STATUSCD = list("==", 1)),
+                             STATUSCD = list("==", 1)),
            variables = "all",
            connection = "local",
            local_dir = here::here("data", "arrow")) {
@@ -262,14 +279,13 @@ get_timeseries <-
     changing_conditions = conditions[which(!(names(conditions) %in% static_names))]
     
     selected_trees <-
-      select_trees(
-        conditions = static_conditions,
-        connection = connection,
-        local_dir = local_dir
-      )
+      select_trees(conditions = static_conditions,
+                   connection = connection,
+                   local_dir = local_dir)
     
     timeseries <-
-      get_temporal_data(selected_trees,
+      get_temporal_data(
+        selected_trees,
         conditions = changing_conditions,
         variables = variables,
         connection = connection,
