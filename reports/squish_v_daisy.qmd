@@ -1,0 +1,557 @@
+---
+title: "Comparison of daisy chain and tree number"
+format: 
+  gfm: 
+    df-print: kable
+editor: source
+execute:
+  echo: false
+  output: false
+---
+
+## Context
+
+The "daisy chain" method is to link backwards in time using `PREV_TRE_CN` and `CN`. The "tree number" method is to concatenate columns `STATECD`, `UNITCD`, `COUNTYCD`, `PLOT`, `SUBP`, and `TREE` to get a unique tree number for each tree. In principle these _should_ give equivalent outcomes, but we don't know if they really always do!
+
+## Code 
+
+```{r}
+#| label: setup
+
+library(arrow)
+library(dplyr)
+library(ggplot2)
+
+state_number <- c(1:60)
+arrow_dir <- "data/arrow"
+
+```
+
+
+```{r}
+#| label: create unique number table
+
+tree <- open_dataset(
+  here::here(arrow_dir, "TREE_RAW"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(
+    CN = float64(),
+    TREE_FIRST_CN = float64()
+  )) |>
+  filter(STATECD %in% state_number) |>
+  compute()
+```
+
+
+```{r}
+#| label: open daisy chain table
+
+join_cns <-  open_dataset(
+  here::here(arrow_dir, "TREE_CN_JOIN"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(
+    CN = float64(),
+    TREE_FIRST_CN = float64()
+  )) |>
+  filter(STATECD %in% state_number) |>
+  compute()
+
+```
+
+
+```{r}
+#| label: create unmatched_cns table
+
+unmatched_cns <- join_cns |>
+  left_join(tree) |>
+  select(STATECD, TREE_FIRST_CN, TREE_UNIQUE_ID) |> 
+  distinct() |>
+  collect() |> 
+  group_by(STATECD, TREE_FIRST_CN) |>
+  mutate(n_NUM = n()) |>
+  group_by(STATECD, TREE_UNIQUE_ID) |>
+  mutate(n_FIRST_CN = n()) |>
+  ungroup() |>
+  filter(n_NUM > 1 |
+           n_FIRST_CN > 1)
+
+```
+
+```{r}
+
+state_nmismatches <- unmatched_cns |>
+  group_by(STATECD) |>
+  tally()
+
+state_situations <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  mutate(multiple_trees_or_cns = NA,
+         description = NA,
+         n_mismatches = NA) |>
+  left_join(state_nmismatches, by = c('STATEFP' = 'STATECD'))
+  
+
+```
+
+### Alabama
+
+```{r}
+
+al <- filter(unmatched_cns, STATECD == 1)
+
+
+```
+
+All 152 mismatches in Alabama take the form of 2 "TREE_UNIQUE_IDS" per 1 "TREE_FIRST_CN".
+
+```{r}
+
+al_mismatches <- tree |>
+  filter(STATECD == 1,
+         TREE_UNIQUE_ID %in% al$TREE_UNIQUE_ID) |>
+  collect() |>
+  left_join(al) |>
+  arrange(TREE_FIRST_CN, CYCLE) |>
+  mutate(across(contains("CN"), as.character))
+
+al_nplots <- al_mismatches |>
+  group_by(TREE_FIRST_CN) |>
+  summarize(nplots = length(unique(PLOT)))
+
+
+state_situations[ which(state_situations$STATEFP == 1), "multiple_trees_or_cns"] <- "trees"
+
+state_situations[ which(state_situations$STATEFP == 1), "description"] <- "tree changes plot/county/unit"
+
+
+```
+
+In all of these instances, a PREV_TRE_CN links to a tree previously found on a different plot. For example, this tree is on plot 93 for 2001 and 2009, and then on plot 133 for 2016. This gives it a new UNIQUE_ID in 2016.
+
+:::callout-note
+
+Are these accurate, and the plot spatial arrangement changed, or in error?
+
+:::
+
+```{r}
+
+head(al_mismatches |> select(TREE_FIRST_CN, TREE_UNIQUE_ID, INVYR, PLOT), 3)
+
+```
+
+
+### Alaska
+
+```{r}
+
+ak <- filter(unmatched_cns, STATECD == 2)
+
+```
+
+All 17800 (!!) mismatches in Alaska have 2 TREE_FIRST_CNs per TREE_UNIQUE_ID. 
+
+```{r}
+
+ak_mismatches <- tree |>
+  filter(STATECD == 2,
+         TREE_UNIQUE_ID %in% ak$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+ak_cycle2 <- ak_mismatches |>
+  filter(CYCLE == 2) 
+
+unique(ak_cycle2$PREV_TRE_CN)
+
+ak_cycle2_all <- tree |> filter(STATECD == 2, CYCLE ==2) |> collect() 
+
+unique(ak_cycle2_all$PREV_TRE_CN)
+
+
+ak_remaining_mismatches <- ak_mismatches |>
+  filter(!(TREE_UNIQUE_ID %in% ak_cycle2_all$TREE_UNIQUE_ID))
+
+nrow(ak_mismatches |>
+  group_by(TREE_UNIQUE_ID) |>
+  summarize(nspp = length(unique(SPCD))) |>
+  filter(nspp > 1))
+
+
+
+state_situations[ which(state_situations$STATEFP == 2), "multiple_trees_or_cns"] <- "cns"
+
+state_situations[ which(state_situations$STATEFP == 2), "description"] <- "cycle with missing PREV_TRE_CNs"
+
+
+```
+
+There is a deeper dive to be done, but there are no non-NA PREV_TRE_CNs recorded for CYCLE=2 in Alaska. There are 8873 trees where that would cause a break in the chain, of 8899 unique trees with a mismatch. The remaining 52 skip from CYCLE=1 to CYCLE=3 and have an NA for PREV_TRE_CN in CYCLE=3. 
+
+Overall, 225 trees (of the mismatch pool) show inconsistent species. For what it's worth, `r nrow(tree |> filter(STATECD == 2) |> select(TREE_UNIQUE_ID, SPCD) |> distinct() |> group_by(TREE_UNIQUE_ID) |> tally() |> filter(n > 1) |> collect())` trees of the whole dataset have at least 2 SPCDs associated.
+
+### Arizona
+
+```{r}
+
+az <- filter(unmatched_cns, STATECD == 4)
+
+az_mismatches <- tree |>
+  filter(STATECD == 4,
+         TREE_UNIQUE_ID %in% az$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+az_two_cycle3s <- tree |>
+  filter(STATECD == 4) |>
+  select(TREE_UNIQUE_ID, CYCLE) |>
+  group_by_all() |>
+  tally() |>
+  filter(n > 1) |>
+  collect()
+
+az_two_cycle3s |> filter(!(TREE_UNIQUE_ID) %in% az_mismatches$TREE_UNIQUE_ID)
+
+
+state_situations[ which(state_situations$STATEFP == 4), "multiple_trees_or_cns"] <- "cns"
+
+state_situations[ which(state_situations$STATEFP == 4), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+
+
+
+```
+
+The mismatched records in Arizona have 2 surveys for CYCLE=3. There is a set of early surveys (2001-2002), and a set of later surveys (2007-2008) that don't link via the PREV_TRE_CNs to the 2001-2 surveys. 
+
+### Arkansas
+
+```{r}
+
+ar <- filter(unmatched_cns, STATECD == 5) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_FIRST_CN)
+
+ar_changes <- ar |>
+  mutate(state_county_plot_unit = substr(TREE_UNIQUE_ID, 1, 9))
+
+unique(ar_changes$state_county_plot_unit)
+
+ar_trees <- tree |>
+  filter(STATECD == 5) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% ar$TREE_FIRST_CN) |>
+  collect() |>
+    mutate(across(contains("CN"), as.character)) |>
+  left_join(ar) |>
+  arrange(TREE_FIRST_CN, INVYR)
+
+
+
+state_situations[ which(state_situations$STATEFP == 5), "multiple_trees_or_cns"] <- "trees"
+
+state_situations[ which(state_situations$STATEFP == 5), "description"] <- "tree changes plot/county/unit"
+
+
+
+```
+
+All the inconsistencies in Arkansas have a single CN recorded on two separate plots in different counties and units. Most (perhaps all) of the breaks occur between cycles 9 and 10 (2009-2014). 
+
+### California
+
+```{r}
+
+ca <- filter(unmatched_cns, STATECD == 8) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_FIRST_CN)
+
+
+
+state_situations[ which(state_situations$STATEFP == 6), "multiple_trees_or_cns"] <- "neither"
+
+state_situations[ which(state_situations$STATEFP == 6), "description"] <- NA
+
+
+
+```
+
+There are no unmatched CNs in California (?!).
+
+### Colorado
+
+```{r}
+
+co <- filter(unmatched_cns, STATECD == 8) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 8), "multiple_trees_or_cns"] <- "cns"
+
+
+co_mismatches <- tree |>
+  filter(STATECD == 8,
+         TREE_UNIQUE_ID %in% co$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 8), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+
+```
+
+CO has the same syndrome as AZ.
+
+### Connecticut
+
+None
+
+### Delaware
+
+None
+
+### Florida
+
+```{r}
+
+
+fl <- filter(unmatched_cns, STATECD == 12) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 12), "multiple_trees_or_cns"] <- "trees"
+
+
+fl_trees <- tree |>
+  filter(STATECD == 12) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% fl$TREE_FIRST_CN) |>
+  collect() |>
+    mutate(across(contains("CN"), as.character)) |>
+  left_join(fl) |>
+  arrange(TREE_FIRST_CN, INVYR)
+
+fl_trees |>
+  mutate(state_county_plot_unit = paste(STATECD, COUNTYCD, UNITCD, PLOT, sep = "_")) |>
+  group_by(TREE_FIRST_CN) |>
+  summarize(nlocs = length(unique(state_county_plot_unit))) |>
+  select(nlocs) |>
+  distinct()
+
+state_situations[ which(state_situations$STATEFP == 12), "description"] <- "tree changes plot/county/unit"
+
+
+```
+
+Florida has trees changing location, at the county/unit level.
+
+### Georgia
+
+```{r}
+
+
+ga <- filter(unmatched_cns, STATECD == 13) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 13), "multiple_trees_or_cns"] <- "both"
+
+
+ga_two_cns <- tree |>
+  filter(STATECD == 13,
+         TREE_UNIQUE_ID %in% ga$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  filter(TREE_UNIQUE_ID %in% filter(ga, n_FIRST_CN > 1)$TREE_UNIQUE_ID) |>
+  mutate(across(contains("CN"), as.character))
+
+
+ga_two_trees <- tree |>
+  filter(STATECD == 13) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% ga$TREE_FIRST_CN) |>
+  collect() |>
+    mutate(across(contains("CN"), as.character)) |>
+  filter(TREE_UNIQUE_ID %in% filter(ga, n_NUM > 1)$TREE_UNIQUE_ID) |>
+  left_join(ga) |>
+  arrange(TREE_FIRST_CN, INVYR)
+
+state_situations[ which(state_situations$STATEFP == 13), "description"] <- "cycle with missing PREV_TRE_CNs and tree changes plot/county/unit"
+```
+
+
+Georgia has *both* syndromes. Missing PREV_TRE_CN and changing location.
+
+### Hawaii
+
+None
+
+### Idaho
+
+```{r}
+
+
+id <- filter(unmatched_cns, STATECD == 16) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+id |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 16), "multiple_trees_or_cns"] <- "cns"
+
+id_mismatches <- tree |>
+  filter(STATECD == 16,
+         TREE_UNIQUE_ID %in% id$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 16), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+
+```
+
+### Illinois
+
+```{r}
+
+il <- filter(unmatched_cns, STATECD == 17) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 17), "multiple_trees_or_cns"] <- "cns"
+
+il_mismatches <- tree |>
+  filter(STATECD == 17,
+         TREE_UNIQUE_ID %in% il$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 17), "description"] <- "cycle with missing PREV_TRE_CNs"
+
+```
+
+### Indiana
+
+```{r}
+
+indy <- filter(unmatched_cns, STATECD == 18) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 18), "multiple_trees_or_cns"] <- "cns"
+
+indy_mismatches <- tree |>
+  filter(STATECD == 18,
+         TREE_UNIQUE_ID %in% indy$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 18), "description"] <- "cycle with missing PREV_TRE_CNs"
+
+```
+
+### Iowa
+
+None
+
+### Kansas
+
+None
+
+### Kentucky
+
+```{r}
+
+ky <- filter(unmatched_cns, STATECD == 21) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 21), "multiple_trees_or_cns"] <- "trees"
+
+ky_trees <- tree |>
+  filter(STATECD == 21) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% ky$TREE_FIRST_CN) |>
+  collect() |>
+    mutate(across(contains("CN"), as.character)) |>
+  left_join(fl) |>
+  arrange(TREE_FIRST_CN, INVYR) 
+
+ky_trees |>
+  mutate(state_county_plot_unit = paste(STATECD, COUNTYCD, UNITCD, PLOT, sep = "_")) |>
+  group_by(TREE_FIRST_CN) |>
+  summarize(nlocs = length(unique(state_county_plot_unit))) |>
+  select(nlocs) |>
+  distinct()
+
+state_situations[ which(state_situations$STATEFP == 21), "description"] <-  "tree changes plot/county/unit"
+
+```
+
+### Minnesota
+
+```{r}
+
+mn <- filter(unmatched_cns, STATECD == 27) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+state_situations[ which(state_situations$STATEFP == 27), "multiple_trees_or_cns"] <- "cns"
+
+mn_mismatches <- tree |>
+  filter(STATECD == 27,
+         TREE_UNIQUE_ID %in% mn$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 27), "description"] <- "cycle with missing PREV_TRE_CNs"
+```
+
+### Montana
+
+```{r}
+
+mt <- filter(unmatched_cns, STATECD == 30) |> 
+  mutate(across(contains("CN"), as.character)) |>
+  arrange(TREE_UNIQUE_ID)
+
+mt |>
+  select(n_NUM, n_FIRST_CN) |>
+  distinct()
+
+state_situations[ which(state_situations$STATEFP == 30), "multiple_trees_or_cns"] <- "cns"
+
+mt_mismatches <- tree |>
+  filter(STATECD == 30,
+         TREE_UNIQUE_ID %in% mt$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 30), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+```
+
+
+## All states
+
+```{r, output = T}
+
+knitr::kable(state_situations)
+
+```

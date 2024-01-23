@@ -7,8 +7,10 @@ source(here::here("R", "create_plot_info_table.R"))
 source(here::here("R", "chain_by_joins.R"))
 source(here::here("R", "cns_on_hive.R"))
 
-state_to_use = "CO"
-state_number = 8 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
+# start downloading at PA
+
+state_to_use = "WY"
+state_number = 56 # for now, lookup here: https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html. These are FIPS codes, not too hard to download eventually.
 raw_dir <- "data/rawdat/state"
 arrow_dir <- "data/arrow"
 
