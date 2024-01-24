@@ -799,6 +799,6 @@ state_situations <- state_situations |>
 
 knitr::kable(state_situations)
 
-write.csv(here::here("reports", "state_situations.csv"))
+write.csv(state_situations, here::here("reports", "state_situations.csv"))
 
 ```
