@@ -41,6 +41,7 @@ tree <- open_dataset(
     TREE_FIRST_CN = float64()
   )) |>
   filter(STATECD %in% state_number) |>
+      mutate(across(contains("CN"), as.character)) |>
   compute()
 ```
 
@@ -58,6 +59,7 @@ join_cns <-  open_dataset(
     TREE_FIRST_CN = float64()
   )) |>
   filter(STATECD %in% state_number) |>
+      mutate(across(contains("CN"), as.character)) |>
   compute()
 
 ```
@@ -65,19 +67,36 @@ join_cns <-  open_dataset(
 
 ```{r}
 #| label: create unmatched_cns table
+# 
+# unmatched_cns <- join_cns |>
+#   left_join(tree) |>
+#   select(STATECD, TREE_FIRST_CN, TREE_UNIQUE_ID) |> 
+#   distinct() |>
+#   collect() |> 
+#   group_by(STATECD, TREE_FIRST_CN) |>
+#   mutate(n_NUM = n()) |>
+#   group_by(STATECD, TREE_UNIQUE_ID) |>
+#   mutate(n_FIRST_CN = n()) |>
+#   ungroup() |>
+#   filter(n_NUM > 1 |
+#            n_FIRST_CN > 1)
+# 
+# arrow::write_dataset(unmatched_cns, path = here::here(arrow_dir, "UNMATCHED_CNS"),partitioning = c("STATECD"),
+#   format = "csv",
+#   hive_style = T)
+#                      
 
-unmatched_cns <- join_cns |>
-  left_join(tree) |>
-  select(STATECD, TREE_FIRST_CN, TREE_UNIQUE_ID) |> 
-  distinct() |>
-  collect() |> 
-  group_by(STATECD, TREE_FIRST_CN) |>
-  mutate(n_NUM = n()) |>
-  group_by(STATECD, TREE_UNIQUE_ID) |>
-  mutate(n_FIRST_CN = n()) |>
-  ungroup() |>
-  filter(n_NUM > 1 |
-           n_FIRST_CN > 1)
+unmatched_cns <- open_dataset(
+  here::here(arrow_dir, "UNMATCHED_CNS"),
+  partitioning = c("STATECD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(
+    CN = float64(),
+    TREE_FIRST_CN = float64()
+  )) |>
+      mutate(across(contains("CN"), as.character)) |>
+  collect()
 
 ```
 
@@ -85,13 +104,22 @@ unmatched_cns <- join_cns |>
 
 state_nmismatches <- unmatched_cns |>
   group_by(STATECD) |>
-  tally()
+  tally() |>
+  mutate(n = n/2)
+
+state_totals <- tree |>
+  select(STATECD, TREE_UNIQUE_ID) |>
+  distinct() |>
+  group_by(STATECD) |> 
+  tally() |>
+  rename(n_trees_overall = n) |>
+  collect()
 
 state_situations <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
   mutate(multiple_trees_or_cns = NA,
-         description = NA,
-         n_mismatches = NA) |>
-  left_join(state_nmismatches, by = c('STATEFP' = 'STATECD'))
+         description = NA) |>
+  left_join(state_nmismatches, by = c('STATEFP' = 'STATECD')) |>
+  left_join(state_totals, by = c('STATEFP' = 'STATECD'))
   
 
 ```
@@ -479,6 +507,8 @@ ky <- filter(unmatched_cns, STATECD == 21) |>
   mutate(across(contains("CN"), as.character)) |>
   arrange(TREE_UNIQUE_ID)
 
+ky |> select(n_NUM, n_FIRST_CN) |> distinct()
+
 state_situations[ which(state_situations$STATEFP == 21), "multiple_trees_or_cns"] <- "trees"
 
 ky_trees <- tree |>
@@ -487,7 +517,7 @@ ky_trees <- tree |>
   filter(TREE_FIRST_CN %in% ky$TREE_FIRST_CN) |>
   collect() |>
     mutate(across(contains("CN"), as.character)) |>
-  left_join(fl) |>
+  left_join(ky) |>
   arrange(TREE_FIRST_CN, INVYR) 
 
 ky_trees |>
@@ -547,11 +577,228 @@ mt_mismatches <- tree |>
 state_situations[ which(state_situations$STATEFP == 30), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
 ```
 
+### Nevada
+
+```{r}
+
+nv <- unmatched_cns |>
+  filter(STATECD == 32)
+
+nv |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 32), "multiple_trees_or_cns"] <- "cns"
+
+nv_mismatches <- tree |>
+  filter(STATECD == 32,
+         TREE_UNIQUE_ID %in% nv$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 32), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+
+```
+
+
+### North Carolina
+
+```{r}
+
+nc <- unmatched_cns |>
+  filter(STATECD == 37)
+
+nc |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 32), "multiple_trees_or_cns"] <- "both"
+
+
+nc_two_cns <- tree |>
+  filter(STATECD == 37,
+         TREE_UNIQUE_ID %in% nc$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  filter(TREE_UNIQUE_ID %in% filter(nc, n_FIRST_CN > 1)$TREE_UNIQUE_ID) |>
+  mutate(across(contains("CN"), as.character))
+
+
+nc_two_trees <- tree |>
+  filter(STATECD == 37) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% nc$TREE_FIRST_CN) |>
+  collect() |>
+  filter(TREE_UNIQUE_ID %in% filter(nc, n_NUM > 1)$TREE_UNIQUE_ID) |>
+  left_join(nc) |>
+  arrange(TREE_FIRST_CN, INVYR) |>
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 37), "description"] <- "tree changes plot/county/unit and INVYR = 9999"
+
+```
+
+NC has trees with INVYR == 9999 that are visited a second time in a cycle. It also has trees changing counties and plots. 
+
+### Oregon
+
+```{r}
+
+or <- unmatched_cns |>
+  filter(STATECD == 41)
+
+or |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 41), "multiple_trees_or_cns"] <- "trees"
+
+or_trees <- tree |>
+  filter(STATECD == 41) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% or$TREE_FIRST_CN) |>
+  collect() |>
+  left_join(or) |>
+  arrange(TREE_FIRST_CN, INVYR) |>
+      mutate(across(contains("CN"), as.character)) 
+
+state_situations[ which(state_situations$STATEFP == 41), "description"] <- "tree changes plot/county/unit"
+
+```
+
+### South Carolina
+
+```{r}
+
+sc <- unmatched_cns |>
+  filter(STATECD == 45)
+
+sc |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 41), "multiple_trees_or_cns"] <- "trees"
+
+sc_trees <- tree |>
+  filter(STATECD == 45) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% sc$TREE_FIRST_CN) |>
+  collect() |>
+  left_join(sc) |>
+  arrange(TREE_FIRST_CN, INVYR) |>
+      mutate(across(contains("CN"), as.character)) 
+
+
+state_situations[ which(state_situations$STATEFP == 45), "description"] <- "tree changes plot/county/unit"
+```
+
+### Tennessee 
+
+
+```{r}
+
+tn <- unmatched_cns |>
+  filter(STATECD == 47)
+
+tn |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 47), "multiple_trees_or_cns"] <- "cns"
+
+tn_mismatches <- tree |>
+  filter(STATECD == 47,
+         TREE_UNIQUE_ID %in% tn$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 47), "description"] <- "multiple visits in one cycle"
+
+```
+
+### Utah
+
+
+```{r}
+
+ut <- unmatched_cns |>
+  filter(STATECD == 49)
+
+ut |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 49), "multiple_trees_or_cns"] <- "cns"
+
+ut_mismatches <- tree |>
+  filter(STATECD == 49,
+         TREE_UNIQUE_ID %in% ut$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+state_situations[ which(state_situations$STATEFP == 49), "description"] <- "multiple visits in one cycle with no PREV_TRE_CN link"
+
+```
+
+### Virginia
+
+```{r}
+
+va <- unmatched_cns |>
+  filter(STATECD == 51)
+
+va |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 51), "multiple_trees_or_cns"] <- "trees"
+
+va_trees <- tree |>
+  filter(STATECD == 51) |>
+  left_join(join_cns) |>
+  filter(TREE_FIRST_CN %in% va$TREE_FIRST_CN) |>
+  collect() |>
+  left_join(va) |>
+  arrange(TREE_FIRST_CN, INVYR) |>
+      mutate(across(contains("CN"), as.character)) 
+
+
+state_situations[ which(state_situations$STATEFP == 51), "description"] <- "tree changes plot/county/unit"
+
+```
+
+### West Virginia
+
+
+```{r}
+
+wv <- unmatched_cns |>
+  filter(STATECD == 54)
+
+wv |> select(n_NUM, n_FIRST_CN) |> distinct()
+
+state_situations[ which(state_situations$STATEFP == 54), "multiple_trees_or_cns"] <- "cns"
+
+wv_mismatches <- tree |>
+  filter(STATECD == 54,
+         TREE_UNIQUE_ID %in% wv$TREE_UNIQUE_ID) |>
+  left_join(join_cns) |>
+  arrange(TREE_UNIQUE_ID, CYCLE) |>
+  collect() |> 
+  mutate(across(contains("CN"), as.character))
+
+
+state_situations[ which(state_situations$STATEFP == 54), "description"] <- "cycle with missing PREV_TRE_CNs"
+
+```
 
 ## All states
 
 ```{r, output = T}
 
+state_situations <- state_situations |>
+  mutate(multiple_trees_or_cns = ifelse(is.na(multiple_trees_or_cns), "neither", multiple_trees_or_cns),
+         description = ifelse(is.na(description), "OK", description),
+         n = ifelse(is.na(n), 0, n),
+         n_trees_overall = ifelse(is.na(n_trees_overall), 0, n_trees_overall)) |>
+  filter(STATEFP < 60,
+         STATEFP != 11)
+
 knitr::kable(state_situations)
+
+write.csv(here::here("reports", "state_situations.csv"))
 
 ```

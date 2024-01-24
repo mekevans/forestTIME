@@ -104,64 +104,79 @@ None
 
 ### Montana
 
+### Nevada
+
+### North Carolina
+
+NC has trees with INVYR == 9999 that are visited a second time in a
+cycle. It also has trees changing counties and plots.
+
+### Oregon
+
+### South Carolina
+
+### Tennessee
+
+### Utah
+
+### Virginia
+
+### West Virginia
+
 ## All states
 
-|   X | STATE | STATEFP | STATENS | STATE_NAME                                   | multiple_trees_or_cns | description                                                       | n_mismatches |     n |
-|----:|:------|--------:|--------:|:---------------------------------------------|:----------------------|:------------------------------------------------------------------|:-------------|------:|
-|   1 | AL    |       1 | 1779775 | Alabama                                      | trees                 | tree changes plot/county/unit                                     | NA           |   152 |
-|   2 | AK    |       2 | 1785533 | Alaska                                       | cns                   | cycle with missing PREV_TRE_CNs                                   | NA           | 17798 |
-|   3 | AZ    |       4 | 1779777 | Arizona                                      | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             | NA           |  3252 |
-|   4 | AR    |       5 |   68085 | Arkansas                                     | trees                 | tree changes plot/county/unit                                     | NA           |    52 |
-|   5 | CA    |       6 | 1779778 | California                                   | neither               | NA                                                                | NA           |    NA |
-|   6 | CO    |       8 | 1779779 | Colorado                                     | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             | NA           | 17072 |
-|   7 | CT    |       9 | 1779780 | Connecticut                                  | NA                    | NA                                                                | NA           |    NA |
-|   8 | DE    |      10 | 1779781 | Delaware                                     | NA                    | NA                                                                | NA           |    NA |
-|   9 | DC    |      11 | 1702382 | District of Columbia                         | NA                    | NA                                                                | NA           |    NA |
-|  10 | FL    |      12 |  294478 | Florida                                      | trees                 | tree changes plot/county/unit                                     | NA           |   220 |
-|  11 | GA    |      13 | 1705317 | Georgia                                      | both                  | cycle with missing PREV_TRE_CNs and tree changes plot/county/unit | NA           |   544 |
-|  12 | HI    |      15 | 1779782 | Hawaii                                       | NA                    | NA                                                                | NA           |    NA |
-|  13 | ID    |      16 | 1779783 | Idaho                                        | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             | NA           |  2216 |
-|  14 | IL    |      17 | 1779784 | Illinois                                     | cns                   | cycle with missing PREV_TRE_CNs                                   | NA           |    28 |
-|  15 | IN    |      18 |  448508 | Indiana                                      | cns                   | cycle with missing PREV_TRE_CNs                                   | NA           |    46 |
-|  16 | IA    |      19 | 1779785 | Iowa                                         | NA                    | NA                                                                | NA           |    NA |
-|  17 | KS    |      20 |  481813 | Kansas                                       | NA                    | NA                                                                | NA           |    NA |
-|  18 | KY    |      21 | 1779786 | Kentucky                                     | trees                 | tree changes plot/county/unit                                     | NA           |   220 |
-|  19 | LA    |      22 | 1629543 | Louisiana                                    | NA                    | NA                                                                | NA           |    NA |
-|  20 | ME    |      23 | 1779787 | Maine                                        | NA                    | NA                                                                | NA           |    NA |
-|  21 | MD    |      24 | 1714934 | Maryland                                     | NA                    | NA                                                                | NA           |    NA |
-|  22 | MA    |      25 |  606926 | Massachusetts                                | NA                    | NA                                                                | NA           |    NA |
-|  23 | MI    |      26 | 1779789 | Michigan                                     | NA                    | NA                                                                | NA           |    NA |
-|  24 | MN    |      27 |  662849 | Minnesota                                    | cns                   | cycle with missing PREV_TRE_CNs                                   | NA           |    36 |
-|  25 | MS    |      28 | 1779790 | Mississippi                                  | NA                    | NA                                                                | NA           |    NA |
-|  26 | MO    |      29 | 1779791 | Missouri                                     | NA                    | NA                                                                | NA           |    NA |
-|  27 | MT    |      30 |  767982 | Montana                                      | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             | NA           |  4288 |
-|  28 | NE    |      31 | 1779792 | Nebraska                                     | NA                    | NA                                                                | NA           |    NA |
-|  29 | NV    |      32 | 1779793 | Nevada                                       | NA                    | NA                                                                | NA           |   848 |
-|  30 | NH    |      33 | 1779794 | New Hampshire                                | NA                    | NA                                                                | NA           |    NA |
-|  31 | NJ    |      34 | 1779795 | New Jersey                                   | NA                    | NA                                                                | NA           |    NA |
-|  32 | NM    |      35 |  897535 | New Mexico                                   | NA                    | NA                                                                | NA           |    NA |
-|  33 | NY    |      36 | 1779796 | New York                                     | NA                    | NA                                                                | NA           |    NA |
-|  34 | NC    |      37 | 1027616 | North Carolina                               | NA                    | NA                                                                | NA           |  3066 |
-|  35 | ND    |      38 | 1779797 | North Dakota                                 | NA                    | NA                                                                | NA           |    NA |
-|  36 | OH    |      39 | 1085497 | Ohio                                         | NA                    | NA                                                                | NA           |    NA |
-|  37 | OK    |      40 | 1102857 | Oklahoma                                     | NA                    | NA                                                                | NA           |    NA |
-|  38 | OR    |      41 | 1155107 | Oregon                                       | NA                    | NA                                                                | NA           |    54 |
-|  39 | PA    |      42 | 1779798 | Pennsylvania                                 | NA                    | NA                                                                | NA           |    NA |
-|  40 | RI    |      44 | 1219835 | Rhode Island                                 | NA                    | NA                                                                | NA           |    NA |
-|  41 | SC    |      45 | 1779799 | South Carolina                               | NA                    | NA                                                                | NA           |    NA |
-|  42 | SD    |      46 | 1785534 | South Dakota                                 | NA                    | NA                                                                | NA           |    NA |
-|  43 | TN    |      47 | 1325873 | Tennessee                                    | NA                    | NA                                                                | NA           |    NA |
-|  44 | TX    |      48 | 1779801 | Texas                                        | NA                    | NA                                                                | NA           |    NA |
-|  45 | UT    |      49 | 1455989 | Utah                                         | NA                    | NA                                                                | NA           |    NA |
-|  46 | VT    |      50 | 1779802 | Vermont                                      | NA                    | NA                                                                | NA           |    NA |
-|  47 | VA    |      51 | 1779803 | Virginia                                     | NA                    | NA                                                                | NA           |    NA |
-|  48 | WA    |      53 | 1779804 | Washington                                   | NA                    | NA                                                                | NA           |    NA |
-|  49 | WV    |      54 | 1779805 | West Virginia                                | NA                    | NA                                                                | NA           |    NA |
-|  50 | WI    |      55 | 1779806 | Wisconsin                                    | NA                    | NA                                                                | NA           |    NA |
-|  51 | WY    |      56 | 1779807 | Wyoming                                      | NA                    | NA                                                                | NA           |    NA |
-|  52 | AS    |      60 | 1802701 | American Samoa                               | NA                    | NA                                                                | NA           |    NA |
-|  53 | GU    |      66 | 1802705 | Guam                                         | NA                    | NA                                                                | NA           |    NA |
-|  54 | MP    |      69 | 1779809 | Commonwealth of the Northern Mariana Islands | NA                    | NA                                                                | NA           |    NA |
-|  55 | PR    |      72 | 1779808 | Puerto Rico                                  | NA                    | NA                                                                | NA           |    NA |
-|  56 | UM    |      74 | 1878752 | U.S. Minor Outlying Islands                  | NA                    | NA                                                                | NA           |    NA |
-|  57 | VI    |      78 | 1802710 | United States Virgin Islands                 | NA                    | NA                                                                | NA           |    NA |
+|   X | STATE | STATEFP | STATENS | STATE_NAME     | multiple_trees_or_cns | description                                                       |     n | n_trees_overall |
+|----:|:------|--------:|--------:|:---------------|:----------------------|:------------------------------------------------------------------|------:|----------------:|
+|   1 | AL    |       1 | 1779775 | Alabama        | trees                 | tree changes plot/county/unit                                     |    76 |          341392 |
+|   2 | AK    |       2 | 1785533 | Alaska         | cns                   | cycle with missing PREV_TRE_CNs                                   |  8899 |          112462 |
+|   3 | AZ    |       4 | 1779777 | Arizona        | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             |  1626 |           71627 |
+|   4 | AR    |       5 |   68085 | Arkansas       | trees                 | tree changes plot/county/unit                                     |    26 |          212257 |
+|   5 | CA    |       6 | 1779778 | California     | neither               | OK                                                                |     0 |          201767 |
+|   6 | CO    |       8 | 1779779 | Colorado       | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             |  8536 |          145355 |
+|   7 | CT    |       9 | 1779780 | Connecticut    | neither               | OK                                                                |     0 |           11734 |
+|   8 | DE    |      10 | 1779781 | Delaware       | neither               | OK                                                                |     0 |            7106 |
+|  10 | FL    |      12 |  294478 | Florida        | trees                 | tree changes plot/county/unit                                     |   110 |          165170 |
+|  11 | GA    |      13 | 1705317 | Georgia        | both                  | cycle with missing PREV_TRE_CNs and tree changes plot/county/unit |   272 |          296533 |
+|  12 | HI    |      15 | 1779782 | Hawaii         | neither               | OK                                                                |     0 |           14084 |
+|  13 | ID    |      16 | 1779783 | Idaho          | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             |  1108 |          114697 |
+|  14 | IL    |      17 | 1779784 | Illinois       | cns                   | cycle with missing PREV_TRE_CNs                                   |    14 |           34345 |
+|  15 | IN    |      18 |  448508 | Indiana        | cns                   | cycle with missing PREV_TRE_CNs                                   |    23 |           54641 |
+|  16 | IA    |      19 | 1779785 | Iowa           | neither               | OK                                                                |     0 |           19410 |
+|  17 | KS    |      20 |  481813 | Kansas         | neither               | OK                                                                |     0 |           14558 |
+|  18 | KY    |      21 | 1779786 | Kentucky       | trees                 | tree changes plot/county/unit                                     |   110 |           91639 |
+|  19 | LA    |      22 | 1629543 | Louisiana      | neither               | OK                                                                |     0 |          146389 |
+|  20 | ME    |      23 | 1779787 | Maine          | neither               | OK                                                                |     0 |          229423 |
+|  21 | MD    |      24 | 1714934 | Maryland       | neither               | OK                                                                |     0 |           21362 |
+|  22 | MA    |      25 |  606926 | Massachusetts  | neither               | OK                                                                |     0 |           23708 |
+|  23 | MI    |      26 | 1779789 | Michigan       | neither               | OK                                                                |     0 |          494218 |
+|  24 | MN    |      27 |  662849 | Minnesota      | cns                   | cycle with missing PREV_TRE_CNs                                   |    18 |          351211 |
+|  25 | MS    |      28 | 1779790 | Mississippi    | neither               | OK                                                                |     0 |          217692 |
+|  26 | MO    |      29 | 1779791 | Missouri       | neither               | OK                                                                |     0 |          153908 |
+|  27 | MT    |      30 |  767982 | Montana        | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             |  2144 |          167422 |
+|  28 | NE    |      31 | 1779792 | Nebraska       | neither               | OK                                                                |     0 |            8132 |
+|  29 | NV    |      32 | 1779793 | Nevada         | both                  | multiple visits in one cycle with no PREV_TRE_CN link             |   424 |           44838 |
+|  30 | NH    |      33 | 1779794 | New Hampshire  | neither               | OK                                                                |     0 |           68058 |
+|  31 | NJ    |      34 | 1779795 | New Jersey     | neither               | OK                                                                |     0 |           24265 |
+|  32 | NM    |      35 |  897535 | New Mexico     | neither               | OK                                                                |     0 |           86954 |
+|  33 | NY    |      36 | 1779796 | New York       | neither               | OK                                                                |     0 |          156959 |
+|  34 | NC    |      37 | 1027616 | North Carolina | neither               | tree changes plot/county/unit and INVYR = 9999                    |  1533 |          291155 |
+|  35 | ND    |      38 | 1779797 | North Dakota   | neither               | OK                                                                |     0 |            5552 |
+|  36 | OH    |      39 | 1085497 | Ohio           | neither               | OK                                                                |     0 |           58999 |
+|  37 | OK    |      40 | 1102857 | Oklahoma       | neither               | OK                                                                |     0 |           71711 |
+|  38 | OR    |      41 | 1155107 | Oregon         | trees                 | tree changes plot/county/unit                                     |    27 |          382221 |
+|  39 | PA    |      42 | 1779798 | Pennsylvania   | neither               | OK                                                                |     0 |          132527 |
+|  40 | RI    |      44 | 1219835 | Rhode Island   | neither               | OK                                                                |     0 |            5226 |
+|  41 | SC    |      45 | 1779799 | South Carolina | neither               | tree changes plot/county/unit                                     |    22 |          213560 |
+|  42 | SD    |      46 | 1785534 | South Dakota   | neither               | OK                                                                |     0 |           15193 |
+|  43 | TN    |      47 | 1325873 | Tennessee      | cns                   | multiple visits in one cycle                                      |  1096 |          141400 |
+|  44 | TX    |      48 | 1779801 | Texas          | neither               | OK                                                                |     0 |          258416 |
+|  45 | UT    |      49 | 1455989 | Utah           | cns                   | multiple visits in one cycle with no PREV_TRE_CN link             |  2560 |           92537 |
+|  46 | VT    |      50 | 1779802 | Vermont        | neither               | OK                                                                |     0 |           51461 |
+|  47 | VA    |      51 | 1779803 | Virginia       | trees                 | tree changes plot/county/unit                                     |    32 |          203303 |
+|  48 | WA    |      53 | 1779804 | Washington     | neither               | OK                                                                |     0 |          279379 |
+|  49 | WV    |      54 | 1779805 | West Virginia  | cns                   | cycle with missing PREV_TRE_CNs                                   | 49095 |          111491 |
+|  50 | WI    |      55 | 1779806 | Wisconsin      | neither               | OK                                                                |     0 |          323024 |
+|  51 | WY    |      56 | 1779807 | Wyoming        | neither               | OK                                                                |     0 |          129626 |
+
+    "","x"
+    "1","C:/Users/renatadiaz/OneDrive - University of Arizona/Documents/GitHub/FIA/in-the-trees/reports/state_situations.csv"
