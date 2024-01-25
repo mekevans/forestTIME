@@ -1,0 +1,13 @@
+---
+title: "Species codes"
+format: gfm
+editor: visual
+---
+
+```{r}
+
+species_codes <- read.csv(here::here("data", "rawdat", "species", "REF_SPECIES.csv")) |>
+  dplyr::select(SPCD, GENUS, SPECIES)
+
+knitr::kable(species_codes)
+```
