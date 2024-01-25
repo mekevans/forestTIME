@@ -14,16 +14,16 @@ Workshopping scripts related to the FIA timeseries project.
 - use_cases/
   - Contains .qmd documents and occasional helper functions executing various tasks. These documents call functions in R/.
   - Contents:
-  -  access_data_remotely/
-    - Illustrates querying the forestTIME tables without having to download them, using `duckdbfs`. Some of these scripts may have broken paths but the code is there.
-  - compare_daisychain_to_composite/
-    - Works through a comparison of persistent tree IDs obtained via stitching ('daisy-chaining') together previous tree CNs, to IDS obtained by combining columns in the TREE table (STATE UNIT COUNTY PLOT SUBPLOT TREE). 
-  - flexible_data_query/
-    - Demos a set of functions to query forestTIME tables with user-defined criteria.
-  - generate_tables/
-    - Function and wrapper for loop to do the Whole Pipeline of creating the forestTIME tables. Downloads, stores, adds persistent IDS, adds TREE_INFO. Downloads can be slow; the rest is pretty quick. But you still only really want to do this occasionally.
-  - whitebark_pine
-    - Pull whitebark pine records from three states for Ceci.
+    - access_data_remotely/
+       - Illustrates querying the forestTIME tables without having to download them, using `duckdbfs`. Some of these scripts may have broken paths but the code is there.
+    - compare_daisychain_to_composite/
+        - Works through a comparison of persistent tree IDs obtained via stitching ('daisy-chaining') together previous tree CNs, to IDS obtained by combining columns in the TREE table (STATE UNIT COUNTY PLOT SUBPLOT TREE). 
+    - flexible_data_query/
+        - Demos a set of functions to query forestTIME tables with user-defined criteria.
+    - generate_tables/
+       - Function and wrapper for loop to do the Whole Pipeline of creating the forestTIME tables. Downloads, stores, adds persistent IDS, adds TREE_INFO. Downloads can be slow; the rest is pretty quick. But you still only really want to do this occasionally.
+    - whitebark_pine
+        - Pull whitebark pine records from three states for Ceci.
 - useful_information/
   - Some quarto docs containing information that it can be useful to refer to. Species codes and the columns of forestTIME tables.
     
