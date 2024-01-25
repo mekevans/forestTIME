@@ -1,7 +1,10 @@
-raw_trees_hive <-
-  function(state_to_use = "CT",
+raw_hive <-
+  function(state_to_use = "MN",
            rawdat_dir = "data/rawdat/state",
-           arrow_dir = "data/arrow") {
+           arrow_dir = "data/arrow",
+           tables = c("TREE", "PLOT", "COND")) {
+    
+    if("TREE" %in% tables) {
     trees <-
       read_csv(
         here::here(rawdat_dir, paste0(state_to_use, "_TREE.csv")),
@@ -11,6 +14,7 @@ raw_trees_hive <-
         col_select = c(
           CN,
           PREV_TRE_CN,
+          PLT_CN,
           INVYR,
           STATECD,
           UNITCD,
@@ -26,7 +30,9 @@ raw_trees_hive <-
           CYCLE
         )
       ) |>
-      filter(INVYR >= 2000)
+      filter(INVYR >= 2000) |>
+      mutate(TREE_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE, sep = "_"),
+             PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
     
     write_dataset(
       trees,
@@ -34,4 +40,73 @@ raw_trees_hive <-
       format = "csv",
       partitioning = c("STATECD", "COUNTYCD")
     )
+    }
+    
+    if("PLOT" %in% tables) {
+      
+      plots <-
+        read_csv(
+          here::here(rawdat_dir, paste0(state_to_use, "_PLOT.csv")),
+         col_select = c(
+           CN,
+           PREV_PLT_CN,
+           INVYR,
+           STATECD,
+           UNITCD,
+           COUNTYCD,
+           PLOT,
+           PLOT_STATUS_CD,
+           PLOT_NONSAMPLE_REASN_CD,
+           MEASYEAR,
+           MEASMON,
+           MEASDAY,
+           REMPER,
+           KINDCD,
+           DESIGNCD,
+           RDDISTCD,
+           WATERCD,
+           LAT,
+           LON,
+           ELEV
+         )
+        ) |>
+        filter(INVYR >= 2000) |>
+        mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
+      
+      write_dataset(
+        plots,
+        here::here(arrow_dir, "PLOT_RAW"),
+        format = "csv",
+        partitioning = c("STATECD", "COUNTYCD")
+      )
+    }
+    
+    if("COND" %in% tables) {
+      
+      cond <-
+        read_csv(
+          here::here(rawdat_dir, paste0(state_to_use, "_COND.csv")),
+          col_select = c(
+            CN,
+            PLT_CN,
+            INVYR,
+            STATECD,
+            UNITCD,
+            COUNTYCD,
+            PLOT,
+           CONDID,
+           COND_STATUS_CD,
+           COND_NONSAMPLE_REASN_CD
+          )
+        ) |>
+        filter(INVYR >= 2000) |>
+        mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
+      
+      write_dataset(
+        cond,
+        here::here(arrow_dir, "COND_RAW"),
+        format = "csv",
+        partitioning = c("STATECD", "COUNTYCD")
+      )
+    }
   }

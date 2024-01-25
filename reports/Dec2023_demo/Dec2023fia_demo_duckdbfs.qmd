@@ -40,7 +40,7 @@ By default, `select_trees` returns all trees:
 
 ```{r}
 
-my_trees <- select_trees()
+my_trees <- select_trees(connection = "local")
 
 nrow(my_trees)
 
@@ -54,7 +54,7 @@ Passing additional options filters the trees:
 
 # Extract all red maples (SPCD = 316)
 
-my_red_maples <- select_trees(spcd = 316)
+my_red_maples <- select_trees(spcd = 316, connection = "local")
 
 nrow(my_red_maples)
 
@@ -64,10 +64,10 @@ knitr::kable(head(my_red_maples))
 
 ```{r}
 
-# Extract red maples on plot 20010
+# Extract red maples on plot 27_3_65_20067
 
 my_red_maples_one_plot <- select_trees(spcd = 316,
-                                   plot = 20010)
+                                   plot_unique_id = "27_3_65_20067")
 
 nrow(my_red_maples_one_plot)
 
@@ -75,6 +75,17 @@ knitr::kable(head(my_red_maples_one_plot))
 
 ```
 
+```{r}
+
+my_red_maples_one_county <- select_trees(spcd = 316,
+                                         state = 27,
+                                         county = 65)
+
+nrow(my_red_maples_one_county)
+
+knitr::kable(head(my_red_maples_one_county))
+
+```
 
 ## 2. `get_timeseries`
 
@@ -97,7 +108,7 @@ For example, extracting the default measurements for all years for red maples on
 
 ```{r}
 
-my_maple_timeseries <- get_timeseries(my_red_maples_one_plot)
+my_maple_timeseries <- get_timeseries(my_red_maples_one_plot, connection = 'local')
 
 nrow(my_maple_timeseries)
 
