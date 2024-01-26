@@ -1,4 +1,4 @@
-# in-the-trees
+# forestTIME
 
 Workshopping scripts related to the FIA timeseries project.
 
