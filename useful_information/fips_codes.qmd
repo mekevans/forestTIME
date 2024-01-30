@@ -1,0 +1,13 @@
+---
+title: "FIPS codes"
+format: gfm
+editor: visual
+---
+
+```{r}
+
+fipses <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  dplyr::select(STATE, STATEFP, STATE_NAME)
+
+knitr::kable(fipses)
+```
