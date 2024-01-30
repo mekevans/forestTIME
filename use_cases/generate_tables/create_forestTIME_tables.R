@@ -18,7 +18,7 @@ mega_tables_function <- function(state_to_use, state_number, raw_dir = "data/raw
   
   #### Download data ####
   
-  download_state_data(state_to_use, "data/rawdat/state")
+ # download_state_data(state_to_use, "data/rawdat/state")
   
   #### Store data in a hive ####
   

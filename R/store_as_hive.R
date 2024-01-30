@@ -96,7 +96,8 @@ raw_hive <-
             PLOT,
            CONDID,
            COND_STATUS_CD,
-           COND_NONSAMPLE_REASN_CD
+           COND_NONSAMPLE_REASN_CD,
+           OWNCD
           )
         ) |>
         filter(INVYR >= 2000) |>

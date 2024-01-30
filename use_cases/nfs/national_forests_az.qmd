@@ -1,0 +1,82 @@
+---
+title: "Extract trees from national forests"
+format: gfm
+editor: source
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+library(duckdbfs)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("R", "query_tables.R"))
+
+theme_set(theme_bw())
+
+```
+
+Here I am attempting to pull records of trees on national forests in Arizona.
+
+```{r}
+
+system.time(az_nfs <- get_timeseries(
+  conditions = list(STATECD = list("==", c(4)),
+                    OWNCD = list("==", 11)),
+  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID")
+))
+
+knitr::kable(head(az_nfs))
+
+```
+
+The above query takes about 3-4 minutes.
+
+Here is a map of where those trees are - although they may be swapped and fuzzed:
+
+
+```{r, output = F, message = F, warning= F}
+
+library(tigris)
+
+az_nfs_trees <- az_nfs |>
+  group_by(TREE_UNIQUE_ID, LAT, LON, OWNCD) |>
+  summarize(NYEARS = as.factor(length(unique(INVYR))))
+
+az_state <- tigris::states() |>
+  filter(STATEFP == "04")
+```
+
+
+```{r}
+
+ggplot(az_state) +
+  geom_sf() +
+  geom_jitter(data = az_nfs_trees, aes(LON, LAT, color = NYEARS)) +
+  ggtitle("National forest trees in AZ") +
+  scale_color_brewer(palette = "PuBuGn") +
+  theme_bw()
+
+```
+
+
+Here is how many trees have been sampled for how many years:
+
+```{r}
+
+knitr::kable(az_nfs_trees |> group_by(NYEARS) |> tally() |> rename("Number of trees" = n))
+```
+
+
+Here is how big the data file of all these trees' measurements is:
+
+```{r}
+
+write.csv(az_nfs, here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv"), row.names = F)
+
+file.size(here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv"))/1e6
+
+```
