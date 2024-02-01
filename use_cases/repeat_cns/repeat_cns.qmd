@@ -1,0 +1,120 @@
+---
+title: "Multiple conditions per PLT_CN"
+format: gfm
+editor: source
+---
+
+```{r, include = F, echo = F, output = F, message = F, warning = F}
+library(duckdbfs)
+library(dplyr)
+
+local_dir = here::here("data", "arrow")
+
+tree_info_sources = list.files(
+  here::here(local_dir, "TREE_INFO"),
+  recursive = T,
+  full.names = T)
+
+
+tree_info <-  duckdbfs::open_dataset(
+  sources = tree_info_sources,
+  hive_style = T,
+  format = "csv",
+  schema = schema(STATECD = float64())
+) |>
+  dplyr::mutate(STATECD = as.numeric(STATECD),
+                COUNTYCD = as.numeric(COUNTYCD)) |>
+  compute()
+
+filter_tree_info <- function(tree_info, ...) {
+  
+  filter_criteria <- rlang::enquos(...)
+  
+  tree_info |>
+    filter(!!!filter_criteria) |>
+    collect()
+  
+}
+
+wbp_id <- filter_tree_info(tree_info, STATECD == 16, SPCD == 101)
+
+
+tree_sources <-  list.files(
+    here::here(local_dir, "TREE_RAW"),
+    recursive = T,
+    full.names = T)
+
+tree <-  duckdbfs::open_dataset(
+  sources = tree_sources,
+  hive_style = T,
+  format = "csv",
+  schema = schema(STATECD = float64())
+) |>
+  dplyr::mutate(STATECD = as.numeric(STATECD),
+                COUNTYCD = as.numeric(COUNTYCD)) |>
+  compute()
+
+tree_unique_ids <- wbp_id$TREE_UNIQUE_ID
+
+wbp_id_trees <- filter_tree_info(tree, TREE_UNIQUE_ID %in% tree_unique_ids)
+
+wbp_id_duplicates <- wbp_id_trees |>
+  group_by(TREE_UNIQUE_ID, INVYR) |>
+  tally()
+
+
+cond_sources <-  list.files(
+  here::here(local_dir, "COND_RAW"),
+  recursive = T,
+  full.names = T)
+
+cond <-  duckdbfs::open_dataset(
+  sources = cond_sources,
+  hive_style = T,
+  format = "csv",
+  schema = schema(STATECD = float64())
+) |>
+  dplyr::mutate(STATECD = as.numeric(STATECD),
+                COUNTYCD = as.numeric(COUNTYCD)) |>
+  compute()
+
+wbp_id_cns <- wbp_id_trees$PLT_CN
+
+cond_id <- filter_tree_info(cond, PLT_CN %in% wbp_id_cns)
+
+multiple_conds_per_plt_cn <- cond_id |>
+  group_by(PLT_CN) |>
+  mutate(n = dplyr::n()) |>
+  filter(n > 1) |>
+  arrange(PLT_CN)
+
+
+tree_plus_cond <- wbp_id_trees |>
+  filter(PLT_CN %in% multiple_conds_per_plt_cn$PLT_CN) |>
+  select(-CN) |>
+  left_join(cond_id |> select(-CN)) |>
+  arrange(PLT_CN, TREE_UNIQUE_ID)
+
+
+multiple_conds_per_plt_cn <- multiple_conds_per_plt_cn |>
+  mutate(PLT_CN = as.character(PLT_CN))
+tree_plus_cond <- tree_plus_cond |>
+  mutate(PLT_CN = as.character(PLT_CN))
+```
+
+```{r}
+
+knitr::kable(head(multiple_conds_per_plt_cn, 10))
+
+```
+
+These are some examples of `PLT_CN`s with multiple matching rows in the `CONDITION` table. Joining (e.g. to the `TREE` table) based on `PLT_CN` will then result in duplicates of the `TREE` records, one per row in the `CONDITION` table:
+
+
+```{r}
+
+knitr::kable(head(tree_plus_cond, 10))
+
+```
+
+The CONDITION codes appear to apply at the level of the PLOT. I wonder if we should be using the SUBPLOT_CONDITION table and linking CONDITIONS to the *subplot* level, to get accurate condition codes resolved to the level of the tree?
