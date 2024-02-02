@@ -29,9 +29,9 @@ STATECD = 16, 30, 56
 ```{r}
 
 whitebark_pine <- get_timeseries(
-  conditions = list(STATECD = list("%in%", c(16, 30)),
+  conditions = list(STATECD = list("%in%", c(16, 30, 56)),
                     SPCD = list("==", 101)),
-  variables = c("STATUSCD", "DIA", "HT")
+  variables = c("STATUSCD", "DIA", "HT", "COND_STATUS_CD", "LAT", "LON")
 )
 
 knitr::kable(head(whitebark_pine))
