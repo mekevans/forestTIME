@@ -7,30 +7,28 @@ Arizona.
 system.time(az_nfs <- get_timeseries(
   conditions = list(STATECD = list("==", c(4)),
                     OWNCD = list("==", 11)),
-  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID")
+  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID", "CYCLE")
 ))
 ```
 
     Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, PLOT_UNIQUE_ID, COUNTYCD, STATECD)`
-    Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, PLOT_UNIQUE_ID, COUNTYCD, STATECD)`
+    Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, CONDID, PLOT_UNIQUE_ID, COUNTYCD, STATECD)`
 
        user  system elapsed 
-     139.84  233.68  141.39 
+       8.84    3.03   18.98 
 
 ``` r
 knitr::kable(head(az_nfs))
 ```
 
-| TREE_UNIQUE_ID   | PLOT_UNIQUE_ID |           CN | INVYR | STATECD | COUNTYCD | UNITCD |  PLOT | SUBP | TREE | SPCD | STATUSCD |  DIA |  HT | OWNCD |      LAT |       LON | CONDID |
-|:-----------------|:---------------|-------------:|------:|--------:|---------:|-------:|------:|-----:|-----:|-----:|---------:|-----:|----:|------:|---------:|----------:|-------:|
-| 4_1_11_80122_1_1 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    1 |   63 |        1 |  9.5 |  19 |    11 | 33.11304 | -109.1213 |      1 |
-| 4_1_11_80122_1_2 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    2 |  810 |        1 |  9.3 |  19 |    11 | 33.11304 | -109.1213 |      1 |
-| 4_1_11_80122_1_3 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    3 |   63 |        1 |  8.8 |  12 |    11 | 33.11304 | -109.1213 |      1 |
-| 4_1_11_80122_1_4 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    4 |  810 |        2 |  9.4 |  12 |    11 | 33.11304 | -109.1213 |      1 |
-| 4_1_11_80122_1_5 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    5 |  810 |        1 |  7.1 |  14 |    11 | 33.11304 | -109.1213 |      1 |
-| 4_1_11_80122_1_6 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    6 |  803 |        1 | 11.8 |  18 |    11 | 33.11304 | -109.1213 |      1 |
-
-The above query takes about 3-4 minutes.
+| TREE_UNIQUE_ID   | PLOT_UNIQUE_ID |           CN | INVYR | STATECD | COUNTYCD | UNITCD |  PLOT | SUBP | TREE | SPCD | STATUSCD |  DIA |  HT | OWNCD |      LAT |       LON | CONDID | CYCLE |
+|:-----------------|:---------------|-------------:|------:|--------:|---------:|-------:|------:|-----:|-----:|-----:|---------:|-----:|----:|------:|---------:|----------:|-------:|------:|
+| 4_1_11_80122_1_1 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    1 |   63 |        1 |  9.5 |  19 |    11 | 33.11304 | -109.1213 |      1 |     3 |
+| 4_1_11_80122_1_2 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    2 |  810 |        1 |  9.3 |  19 |    11 | 33.11304 | -109.1213 |      1 |     3 |
+| 4_1_11_80122_1_3 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    3 |   63 |        1 |  8.8 |  12 |    11 | 33.11304 | -109.1213 |      1 |     3 |
+| 4_1_11_80122_1_4 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    4 |  810 |        2 |  9.4 |  12 |    11 | 33.11304 | -109.1213 |      1 |     3 |
+| 4_1_11_80122_1_5 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    5 |  810 |        1 |  7.1 |  14 |    11 | 33.11304 | -109.1213 |      1 |     3 |
+| 4_1_11_80122_1_6 | 4_1_11_80122   | 4.241832e+13 |  2010 |       4 |       11 |      1 | 80122 |    1 |    6 |  803 |        1 | 11.8 |  18 |    11 | 33.11304 | -109.1213 |      1 |     3 |
 
 Here is a map of where those trees are - although they may be swapped
 and fuzzed:
@@ -65,8 +63,8 @@ knitr::kable(az_nfs_trees |> group_by(NYEARS) |> tally() |> rename("Number of tr
 
 | NYEARS | Number of trees |
 |:-------|----------------:|
-| 1      |            6537 |
-| 2      |           26548 |
+| 1      |            6461 |
+| 2      |           26453 |
 | 3      |             714 |
 
 Here is how big the data file of all these trees’ measurements is:
@@ -77,4 +75,4 @@ write.csv(az_nfs, here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv"
 file.size(here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv"))/1e6
 ```
 
-    [1] 7.602582
+    [1] 6.892948

@@ -23,6 +23,7 @@ raw_hive <-
           TREE,
           PLOT,
           STATUSCD,
+          CONDID,
           DIA,
           HT,
           ACTUALHT,
