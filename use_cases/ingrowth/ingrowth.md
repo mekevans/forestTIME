@@ -33,7 +33,7 @@ ct_trees <- get_timeseries(conditions = list(
     Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, PLOT_UNIQUE_ID,
     COUNTYCD, STATECD)`
 
-    Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, PLOT_UNIQUE_ID,
+    Joining with `by = join_by(PLT_CN, INVYR, UNITCD, PLOT, CONDID, PLOT_UNIQUE_ID,
     COUNTYCD, STATECD)`
 
 Pull out timeseries of trees that have ever been recorded as saplings.
@@ -45,7 +45,7 @@ ct_saplings <- ct_trees |>
   filter(DIA < 5) |>
   select(TREE_UNIQUE_ID) |>
   distinct() |>
-  left_join(ct_trees |> select(-COND_STATUS_CD, -CONDID, -OWNCD, -CN) |> distinct())
+  left_join(ct_trees)
 ```
 
     Joining with `by = join_by(TREE_UNIQUE_ID)`
