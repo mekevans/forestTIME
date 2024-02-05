@@ -26,14 +26,12 @@ Here I am attempting to pull records of trees on national forests in Arizona.
 system.time(az_nfs <- get_timeseries(
   conditions = list(STATECD = list("==", c(4)),
                     OWNCD = list("==", 11)),
-  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID")
+  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID", "CYCLE")
 ))
 
 knitr::kable(head(az_nfs))
 
 ```
-
-The above query takes about 3-4 minutes.
 
 Here is a map of where those trees are - although they may be swapped and fuzzed:
 

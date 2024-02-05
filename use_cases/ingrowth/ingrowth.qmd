@@ -27,7 +27,7 @@ ct_saplings <- ct_trees |>
   filter(DIA < 5) |>
   select(TREE_UNIQUE_ID) |>
   distinct() |>
-  left_join(ct_trees |> select(-COND_STATUS_CD, -CONDID, -OWNCD, -CN) |> distinct())
+  left_join(ct_trees)
 
 ```
 
