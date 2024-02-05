@@ -1,27 +1,11 @@
-create_tree_info <- function(states_to_include = NULL, arrow_dir = "data/arrow") {
+create_tree_info <- function(state_to_use = "AL" , arrow_dir = "data/arrow") {
   
-  if(is.null(states_to_include)) {
-    states_to_include = 1:56
-  }
-  # 
-  # cns <-
-  #   open_dataset(
-  #     here::here(arrow_dir, "TREE_CN_JOIN"),
-  #     partitioning = c("STATECD", "COUNTYCD"),
-  #     format = "csv",
-  #     hive_style = T,
-  #     col_types = schema(
-  #       CN = float64(),
-  #       TREE_FIRST_CN = float64()
-  #     )) |>
-  #   filter(STATECD %in% states_to_include)
   
   trees <- open_dataset(
-    here::here(arrow_dir, "TREE_RAW"),
+    here::here(arrow_dir, "TREE_RAW", state_to_use),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
-    hive_style = T) |>
-    filter(STATECD %in% states_to_include)
+    hive_style = T) 
   
   trees_info <- trees |>
     group_by(TREE_UNIQUE_ID,
@@ -40,7 +24,7 @@ create_tree_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
     # Removes trees with multiple species codes recorded.
     filter(SPCDS == 1)
   
-  write_dataset(trees_info, path = here::here(arrow_dir, "TREE_INFO"), 
+  write_dataset(trees_info, path = here::here(arrow_dir, "TREE_INFO", state_to_use), 
                 format = "csv",
                 partitioning = c("STATECD", "COUNTYCD"))
 }

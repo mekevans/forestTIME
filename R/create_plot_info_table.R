@@ -1,17 +1,13 @@
-create_plot_info <- function(states_to_include = NULL, arrow_dir = "data/arrow") {
+create_plot_info <- function(state_to_use = "AL", arrow_dir = "data/arrow") {
   
-  if(is.null(states_to_include)) {
-    states_to_include = 1:56
-  }
   
   
   plots <- open_dataset(
-    here::here(arrow_dir, "PLOT_RAW"),
+    here::here(arrow_dir, "PLOT_RAW", state_to_use),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
     hive_style = T,
     col_types = schema(PLOT_NONSAMPLE_REASN_CD = float64())) |>
-    filter(STATECD %in% states_to_include) |>
     compute()
   
   plot_info <- plots |>
@@ -36,7 +32,7 @@ create_plot_info <- function(states_to_include = NULL, arrow_dir = "data/arrow")
     compute()
   
   
-  write_dataset(plot_info, path = here::here(arrow_dir, "PLOT_INFO"), 
+  write_dataset(plot_info, path = here::here(arrow_dir, "PLOT_INFO", state_to_use), 
                 format = "csv",
                 partitioning = c("STATECD", "COUNTYCD"))
 }

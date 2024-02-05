@@ -14,7 +14,7 @@ source(here::here("R", "cns_on_hive.R"))
 # raw_dir <- "data/rawdat/state"
 # arrow_dir <- "data/arrow"
 
-mega_tables_function <- function(state_to_use, state_number, raw_dir = "data/rawdat/state", arrow_dir = "data/arrow") {
+mega_tables_function <- function(state_to_use, raw_dir = "data/rawdat/state", arrow_dir = "data/arrow") {
   
   #### Download data ####
   
@@ -28,13 +28,13 @@ mega_tables_function <- function(state_to_use, state_number, raw_dir = "data/raw
   
   #### Create CN tables and store in a hive of the same structure ####
   
-  system.time(create_cn_tables_join(state_number = state_number, arrow_dir = arrow_dir))
+  system.time(create_cn_tables_join(state_to_use = state_to_use, arrow_dir = arrow_dir))
   
   #### Create PLOT INFO table ####
   
-  system.time(create_plot_info(arrow_dir = arrow_dir))
+  system.time(create_plot_info(state_to_use = state_to_use, arrow_dir = arrow_dir))
   
   #### Create TREE INFO table ####
   
-  system.time(create_tree_info(arrow_dir = arrow_dir))
+  system.time(create_tree_info(state_to_use = state_to_use, arrow_dir = arrow_dir))
 }
