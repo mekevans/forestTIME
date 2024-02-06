@@ -1,13 +1,19 @@
 create_plot_info <- function(state_to_use = "AL", arrow_dir = "data/arrow") {
   
-  
-  
   plots <- open_dataset(
     here::here(arrow_dir, "PLOT_RAW", state_to_use),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
-    hive_style = T,
-    col_types = schema(PLOT_NONSAMPLE_REASN_CD = float64())) |>
+    hive_style = T) |>
+    select(PLOT_UNIQUE_ID, 
+           PLOT,
+           STATECD,
+           COUNTYCD,
+           UNITCD,
+           INVYR,
+           LAT,
+           LON,
+           ELEV) |>
     compute()
   
   plot_info <- plots |>

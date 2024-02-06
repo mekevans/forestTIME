@@ -9,9 +9,8 @@ create_cn_tables_join <- function(state_to_use,
     hive_style = T,
     col_types = schema(
       CN = float64(),
-      PREV_TRE_CN = float64(),
-      MORTCD = float64()
-    ))  
+      PREV_TRE_CN = float64())) |>
+    select(CN, PREV_TRE_CN, CYCLE, STATECD, COUNTYCD)
 
   trees_cns <- chain_by_joins(raw_trees) 
   

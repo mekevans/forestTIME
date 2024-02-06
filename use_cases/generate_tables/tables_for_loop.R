@@ -7,10 +7,9 @@ not_states <- c(11, 60, 66, 69, 72, 74, 78)
 fipses <- fipses |>
   filter(!(STATEFP %in% not_states))
 
-for(i in 1:5) {
-  
-  mega_tables_function(state_to_use = fipses$STATE[i])
-  
-}
-
-mega_tables_function("MN")
+# for(i in c(3, 7, 13, 24, 27)) {
+#   
+#   mega_tables_function(state_to_use = fipses$STATE[i])
+#   
+# }
+mega_tables_function("ID")
