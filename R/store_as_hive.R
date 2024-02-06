@@ -33,8 +33,11 @@ raw_hive <-
             HTCD,
             MORTYR, 
             MORTCD,
-            SUBCYCLE
-          ),           col_types = cols(.default = "d")
+            SUBCYCLE,
+            RECONCILED
+          ),           col_types = cols(.default = "d",
+                                        STATECD = "i", 
+                                        COUNTYCD = "i")
         ) |>
         filter(INVYR >= 2000) |>
         mutate(TREE_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE, sep = "_"),
@@ -77,7 +80,9 @@ raw_hive <-
             CYCLE,
             SUBCYCLE
           ),
-          col_types = cols(.default = "d")
+          col_types = cols(.default = "d",
+                           STATECD = "i", 
+                           COUNTYCD = "i")
         ) |>
         filter(INVYR >= 2000) |>
         mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
@@ -131,7 +136,9 @@ raw_hive <-
             SDIMAX_RMRS,
             SDIPCT_RMRS
           ),
-          col_types = cols(.default = "d", PROP_BASIS = "c")
+          col_types = cols(.default = "d", PROP_BASIS = "c",
+                           STATECD = "i", 
+                           COUNTYCD = "i")
         ) |>
         filter(INVYR >= 2000) |>
         mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
