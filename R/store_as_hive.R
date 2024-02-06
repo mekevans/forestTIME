@@ -7,34 +7,6 @@ raw_hive <-
       trees <-
         read_csv(
           here::here(rawdat_dir, paste0(state_to_use, "_TREE.csv")),
-          # here would be where to select additional columns from the TREE table used either for QC or for computing variables for the derived tables
-          # here also note that some of the included columns in the TREE table (DAM-related ones for example) confuse arrow's assumed data types
-          # can specify col types with col_types and schema(), but that is labor intensive. For now I am avoiding this problem by retaining only necessary cols.
-          # col_select = c(
-          #   CN,
-          #   PREV_TRE_CN,
-          #   PLT_CN,
-          #   INVYR,
-          #   STATECD,
-          #   UNITCD,
-          #   COUNTYCD,
-          #   SUBP,
-          #   TREE,
-          #   PLOT,
-          #   STATUSCD,
-          #   DIA,
-          #   HT,
-          #   ACTUALHT,
-          #   SPCD,
-          #   CYCLE,
-          #   CONDID,
-          #   DIAHTCD,
-          #   HTCD,
-          #   MORTYR,
-          #   MORTCD,
-          #   SUBCYCLE,
-          #   RECONCILED
-          # ),
           col_types = cols(
             .default = "d",
             STATECD = "i",
@@ -64,30 +36,6 @@ raw_hive <-
       plots <-
         read_csv(
           here::here(rawdat_dir, paste0(state_to_use, "_PLOT.csv")),
-          # col_select = c(
-          #   CN,
-          #   PREV_PLT_CN,
-          #   INVYR,
-          #   STATECD,
-          #   UNITCD,
-          #   COUNTYCD,
-          #   PLOT,
-          #   PLOT_STATUS_CD,
-          #   PLOT_NONSAMPLE_REASN_CD,
-          #   MEASYEAR,
-          #   MEASMON,
-          #   MEASDAY,
-          #   REMPER,
-          #   KINDCD,
-          #   DESIGNCD,
-          #   RDDISTCD,
-          #   WATERCD,
-          #   LAT,
-          #   LON,
-          #   ELEV,
-          #   CYCLE,
-          #   SUBCYCLE
-          # ),
           col_types = cols(
             .default = "d",
             STATECD = "i",
@@ -116,42 +64,6 @@ raw_hive <-
       cond <-
         read_csv(
           here::here(rawdat_dir, paste0(state_to_use, "_COND.csv")),
-          # col_select = c(
-          #   CN,
-          #   PLT_CN,
-          #   INVYR,
-          #   STATECD,
-          #   UNITCD,
-          #   COUNTYCD,
-          #   PLOT,
-          #   CONDID,
-          #   COND_STATUS_CD,
-          #   COND_NONSAMPLE_REASN_CD,
-          #   OWNCD,
-          #   ADFORCD,
-          #   BALIVE,
-          #   SICOND,
-          #   SISP,
-          #   SIBASE,
-          #   PROP_BASIS,
-          #   CONDPROP_UNADJ,
-          #   MICRPROP_UNADJ,
-          #   SUBPPROP_UNADJ,
-          #   MACRPROP_UNADJ,
-          #   SLOPE,
-          #   ASPECT,
-          #   DSTRBCD1,
-          #   DSTRBYR1,
-          #   DSTRBCD2,
-          #   DSTRBYR2,
-          #   DSTRBCD3,
-          #   DSTRBYR3,
-          #   CYCLE,
-          #   SUBCYCLE,
-          #   SDI_RMRS,
-          #   SDIMAX_RMRS,
-          #   SDIPCT_RMRS
-          # ),
           col_types = cols(
             .default = "d",
             PROP_BASIS = "c",
