@@ -126,7 +126,7 @@ get_temporal_data <- function(selected_trees,
     duckdbfs::open_dataset(sources = raw_cond_sources,
                            hive_style = T,
                            format = "csv")|>
-    select(-HABTYPCD1) |>
+    select(-HABTYPCD1, -HABTYPCD2) |>
     rename(COND_CN = CN) |>
     select(-any_of(c("CREATED_BY", "CREATED_DATE", "CREATED_IN_INSTANCE", "MODIFIED_BY", "MODIFIED_DATE", "MODIFIED_IN_INSTANCE")))
 
