@@ -25,8 +25,8 @@ Here I am attempting to pull records of trees on national forests in Arizona.
 
 system.time(az_nfs <- get_timeseries(
   conditions = list(STATECD = list("==", c(4)),
-                    OWNCD = list("==", 11)),
-  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "CONDID", "CYCLE")
+                   OWNCD = list("==", 11)),
+  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "OWNCD", "ADFORCD")
 ))
 
 knitr::kable(head(az_nfs))

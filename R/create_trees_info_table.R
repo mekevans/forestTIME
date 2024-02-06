@@ -5,7 +5,17 @@ create_tree_info <- function(state_to_use = "AL" , arrow_dir = "data/arrow") {
     here::here(arrow_dir, "TREE_RAW", state_to_use),
     partitioning = c("STATECD", "COUNTYCD"),
     format = "csv",
-    hive_style = T) 
+    hive_style = T) |>
+    select(TREE_UNIQUE_ID,
+           PLOT_UNIQUE_ID,
+           STATUSCD,
+           INVYR,
+           SPCD,
+           PLOT,
+           SUBP,
+           STATECD,
+           COUNTYCD) |>
+    compute()
   
   trees_info <- trees |>
     group_by(TREE_UNIQUE_ID,

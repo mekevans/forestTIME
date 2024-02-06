@@ -10,6 +10,7 @@ select_trees <-
                               full.names = T)
     tree_hive = T
     
+
     if (length(conditions) < 1) {
       calls <- NULL
     } else {
@@ -25,7 +26,6 @@ select_trees <-
         lapply(purrr::pluck, 1) |>
         as.numeric()
       
-      
       tree_sources = tree_sources[which(tree_sources_states %in% states_to_use)]
       
     }
@@ -33,13 +33,13 @@ select_trees <-
     tree_info <-  duckdbfs::open_dataset(
       sources = tree_sources,
       hive_style = tree_hive,
-      format = "csv",
-      schema = schema(STATECD = float64())
+      format = "csv"
     ) |>
       dplyr::mutate(STATECD = as.numeric(STATECD),
                     COUNTYCD = as.numeric(COUNTYCD)) |>
       dplyr::filter(!!!calls) |>
       collect()
+    tree_info
     
   }
 
@@ -57,8 +57,7 @@ get_temporal_data <- function(selected_trees,
   raw_cond_sources = list.files(here::here(local_dir, "COND_RAW"),
                                 recursive = T,
                                 full.names = T)
-  
-  
+
   selected_tree_ids <- selected_trees$TREE_UNIQUE_ID
   
   if (length(conditions) < 1) {
@@ -76,7 +75,6 @@ get_temporal_data <- function(selected_trees,
       lapply(purrr::pluck, 1) |>
       as.numeric()
     
-    
     raw_tree_sources = raw_tree_sources[which(raw_tree_sources_states %in% states_to_use)]
     
     raw_plot_sources_states <- raw_plot_sources |>
@@ -86,7 +84,6 @@ get_temporal_data <- function(selected_trees,
       strsplit("/COUNTYCD") |>
       lapply(purrr::pluck, 1) |>
       as.numeric()
-    
     
     raw_plot_sources = raw_plot_sources[which(raw_plot_sources_states %in% states_to_use)]
     
@@ -98,67 +95,67 @@ get_temporal_data <- function(selected_trees,
       lapply(purrr::pluck, 1) |>
       as.numeric()
     
-    
     raw_cond_sources = raw_cond_sources[which(raw_cond_sources_states %in% states_to_use)]
     
   }
   
-  
+  needed_variables <- c('TREE_UNIQUE_ID',
+                        'PLOT_UNIQUE_ID',
+                        'SPCD',
+                        'PLOT',
+                        'SUBPLOT',
+                        'SPCDS',
+                        'COUNTYCD',
+                        'STATECD',
+                        'PLT_CN',
+                        'INVYR',
+                        'CYCLE',
+                        'MEASYEAR',
+                        'CN',
+                        'COND_CN',
+                        'CONDID')
   
   plot_raw <-
     duckdbfs::open_dataset(sources = raw_plot_sources,
                            hive_style = T,
                            format = "csv") |>
-    rename(PLT_CN = CN)
+    rename(PLT_CN = CN) |>
+    select(-any_of(c("CREATED_BY", "CREATED_DATE", "CREATED_IN_INSTANCE", "MODIFIED_BY", "MODIFIED_DATE", "MODIFIED_IN_INSTANCE")))
   
   cond_raw <-
     duckdbfs::open_dataset(sources = raw_cond_sources,
                            hive_style = T,
-                           format = "csv")
-  
+                           format = "csv")|>
+    select(-HABTYPCD1, -HABTYPCD2) |>
+    rename(COND_CN = CN) |>
+    select(-any_of(c("CREATED_BY", "CREATED_DATE", "CREATED_IN_INSTANCE", "MODIFIED_BY", "MODIFIED_DATE", "MODIFIED_IN_INSTANCE")))
+
   
   tree_timeseries <-
     duckdbfs::open_dataset(sources = raw_tree_sources,
                            hive_style = T,
                            format = "csv") |>
     rename(TREE_CN = CN) |>
+    filter(TREE_UNIQUE_ID %in% selected_tree_ids) |>
     left_join(plot_raw) |>
     left_join(cond_raw) |>
     dplyr::mutate(STATECD = as.numeric(STATECD),
                   COUNTYCD = as.numeric(COUNTYCD)) |>
-    filter(TREE_UNIQUE_ID %in% selected_tree_ids) |>
     filter(!!!calls) |>
     arrange(PLOT_UNIQUE_ID, TREE_UNIQUE_ID, INVYR) |>
     compute()
   
   if (any(variables != "all")) {
     report_cols <- c(
-      c(
-        "TREE_UNIQUE_ID",
-        "PLOT_UNIQUE_ID",
-        "CN",
-        "INVYR",
-        "STATECD",
-        "COUNTYCD",
-        "UNITCD",
-        "PLOT",
-        "SUBP",
-        "TREE",
-        "SPCD"
-      ),
+      needed_variables,
       variables
     )
   } else {
-    report_cols <-
-      c("TREE_UNIQUE_ID",
-        "PLOT_UNIQUE_ID",
-        colnames(tree_timeseries)[which(!(
-          colnames(tree_timeseries) %in% c("PLOT_UNIQUE_ID", "TREE_UNIQUE_ID")
-        ))])
+    report_cols <- colnames(tree_timeseries)
   }
   
   tree_timeseries <- tree_timeseries |>
-    select(all_of(report_cols)) |>
+    select(any_of(report_cols)) |>
     compute()
   
   tree_timeseries |>
