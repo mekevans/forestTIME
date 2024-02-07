@@ -4,3 +4,4 @@
 .Ruserdata
 data/*
 test_material/temp*
+*.duckdb

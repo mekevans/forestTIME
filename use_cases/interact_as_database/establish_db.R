@@ -3,11 +3,17 @@ library(dplyr)
 library(arrow)
 library(tidyverse)
 
-
 con <- dbConnect(duckdb::duckdb(), dbdir="use_cases/interact_as_database/forestTIME.duckdb", read_only=FALSE)
 
+
+states_to_use <- c("ID", "MT", "AZ", "WY", "CT", "MN", "WV")
+
+i = 1
+
+#for(i in 1:6) {
+
 rawdat_dir = "data/rawdat/state"
-state_to_use = "WV"
+state_to_use = states_to_use[i]
 arrow_dir = "data/arrow"
 
 trees <-
@@ -78,14 +84,14 @@ cond <-
   mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
 
 
-arrow::to_duckdb(trees, table_name = "tree_raw", con = con)
-dbSendQuery(con, "CREATE TABLE tree_raw AS SELECT * FROM tree_raw")
+arrow::to_duckdb(trees, table_name = "tree_raw_state", con = con)
+dbSendQuery(con, "CREATE TABLE tree_raw AS SELECT * FROM tree_raw_state")
 
-arrow::to_duckdb(plots, table_name = "plot_raw", con = con)
-dbSendQuery(con, "CREATE TABLE plot_raw AS SELECT * FROM plot_raw")
+arrow::to_duckdb(plots, table_name = "plot_raw_state", con = con)
+dbSendQuery(con, "CREATE TABLE plot_raw AS SELECT * FROM plot_raw_state")
 
-arrow::to_duckdb(cond, table_name = "cond_raw", con = con)
-dbSendQuery(con, "CREATE TABLE cond_raw AS SELECT * FROM cond_raw")
+arrow::to_duckdb(cond, table_name = "cond_raw_state", con = con)
+dbSendQuery(con, "CREATE TABLE cond_raw AS SELECT * FROM cond_raw_state")
 
 tree_cns  <- arrow::open_dataset(
   here::here(arrow_dir, "TREE_CN_JOIN", state_to_use),
@@ -97,11 +103,13 @@ tree_cns  <- arrow::open_dataset(
     PREV_TRE_CN = float64())) |>
   compute()
 
-arrow::to_duckdb(tree_cns, table_name = "tree_cns", con = con)
-dbSendQuery(con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
+arrow::to_duckdb(tree_cns, table_name = "tree_cns_state", con = con)
+dbSendQuery(con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns_state")
+
+#}
 
 dbListTables(con)
-dbDisconnect(con)
+# dbDisconnect(con)
 
 
 # pick up tomorrow trying dplyr style operations to generate tree_info, plot_info, unmatched_cns tables from duckdb storage
