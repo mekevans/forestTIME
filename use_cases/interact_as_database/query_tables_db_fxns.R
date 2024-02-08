@@ -5,17 +5,13 @@ query_tables_db <- function(con,
                             tree_id_method = "composite",
                             conditions = create_conditions(...),
                             variables = c("DIA")) {
-  
   # Connect to tables
-  
   
   trees <- tbl(con, "tree_raw")# |> compute()
   
-  if(tree_id_method == "composite") {
-    
+  if (tree_id_method == "composite") {
     tree_info <- tbl(con, "tree_info_composite_id")# |> compute()
   } else {
-    
     tree_info <- tbl(con, "tree_info_first_cn")# |> compute()
     
     cns <- tbl(con, "tree_cns")
@@ -35,7 +31,7 @@ query_tables_db <- function(con,
         "MODIFIED_IN_INSTANCE"
       )
     ))# |>
-    #compute()
+  #compute()
   
   cond <-
     tbl(con, "cond_raw") |> rename(COND_CN = CN) |> select(-any_of(
@@ -74,46 +70,58 @@ query_tables_db <- function(con,
       'STATECD'
     )
   
-
-  static_filters <- conditions[ which(filter_args %in% static_names)]
   
-  dynamic_filters <- conditions[ which(!(filter_args %in% static_names))]
+  if (any(filter_args %in% static_names)) {
+    static_filters <- conditions[which(filter_args %in% static_names)]
+  } else {
+    static_filters <- NULL
+  }
+  
+  if (!any(filter_args %in% static_names)) {
+    dynamic_filters <- NULL
+  } else {
+    dynamic_filters <-
+      conditions[which(!(filter_args %in% static_names))]
+  }
   
   # Prepare variables to pull
   
-  if(tree_id_method == "composite") {
-  
-  needed_variables <- c('TREE_UNIQUE_ID',
-                        'PLOT_UNIQUE_ID',
-                        'SPCD',
-                        'PLOT',
-                        'SUBPLOT',
-                        'SPCDS',
-                        'COUNTYCD',
-                        'STATECD',
-                        'PLT_CN',
-                        'INVYR',
-                        'CYCLE',
-                        'MEASYEAR',
-                        'CN',
-                        'COND_CN',
-                        'CONDID')
+  if (tree_id_method == "composite") {
+    needed_variables <- c(
+      'TREE_UNIQUE_ID',
+      'PLOT_UNIQUE_ID',
+      'SPCD',
+      'PLOT',
+      'SUBPLOT',
+      'SPCDS',
+      'COUNTYCD',
+      'STATECD',
+      'PLT_CN',
+      'INVYR',
+      'CYCLE',
+      'MEASYEAR',
+      'CN',
+      'COND_CN',
+      'CONDID'
+    )
   } else {
-    needed_variables <- c('TREE_FIRST_CN',
-                          'PLOT_UNIQUE_ID',
-                          'SPCD',
-                          'PLOT',
-                          'SUBPLOT',
-                          'SPCDS',
-                          'COUNTYCD',
-                          'STATECD',
-                          'PLT_CN',
-                          'INVYR',
-                          'CYCLE',
-                          'MEASYEAR',
-                          'CN',
-                          'COND_CN',
-                          'CONDID')
+    needed_variables <- c(
+      'TREE_FIRST_CN',
+      'PLOT_UNIQUE_ID',
+      'SPCD',
+      'PLOT',
+      'SUBPLOT',
+      'SPCDS',
+      'COUNTYCD',
+      'STATECD',
+      'PLT_CN',
+      'INVYR',
+      'CYCLE',
+      'MEASYEAR',
+      'CN',
+      'COND_CN',
+      'CONDID'
+    )
   }
   
   all_variables <- c(needed_variables, variables)
@@ -122,7 +130,7 @@ query_tables_db <- function(con,
   
   selected_trees <- tree_info |>
     filter(!!!static_filters) #|>
-   # compute()
+  # compute()
   
   # Pull timeseries
   
@@ -134,23 +142,21 @@ query_tables_db <- function(con,
     select(all_of(all_variables)) |>
     collect()
   
-    tree_timeseries
+  tree_timeseries
 }
 
-create_conditions <- function(...){
-  
+create_conditions <- function(...) {
   rlang:::enquos(...)
   
 }
 
 connect_to_tables <- function(db_path) {
-
-   con <- dbConnect(duckdb(
+  con <- dbConnect(duckdb(
     dbdir = here::here("use_cases", "interact_as_database", "forestTIME.duckdb")
   ))
-   
-   con
- 
+  
+  con
+  
 }
 
 #dbDisconnect(con)
