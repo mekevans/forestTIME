@@ -6,7 +6,7 @@ con <-
   ))
 dbListTables(con)
 
-trees <- tbl(con, "tree_raw") |> compute()
+trees <- tbl(con, "tree_raw") #|> compute()
 
 plots <-
   tbl(con, "plot_raw") |> rename(PLT_CN = CN) |> select(-any_of(
@@ -18,7 +18,7 @@ plots <-
       "MODIFIED_DATE",
       "MODIFIED_IN_INSTANCE"
     )
-  )) |>
+  ))# |>
   compute()
 
 cond <-
@@ -31,7 +31,7 @@ cond <-
       "MODIFIED_DATE",
       "MODIFIED_IN_INSTANCE"
     )
-  )) |>  compute()
+  ))# |>  compute()
 
 variables <-
   c(
@@ -98,3 +98,5 @@ tree_timeseries |>
   ungroup() |>
   group_by(STATECD, n_records) |>
   tally()
+
+dbDisconnect(con, shutdown =T)

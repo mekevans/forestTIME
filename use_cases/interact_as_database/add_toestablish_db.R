@@ -4,11 +4,19 @@ library(arrow)
 library(tidyverse)
 
 con <- dbConnect(duckdb::duckdb(), dbdir="use_cases/interact_as_database/forestTIME.duckdb", read_only=FALSE)
+dbListTables(con)
 
+dbTrees <- tbl(con, "tree_raw")
+dbPlot <- tbl(con, "plot_raw")
+dbCond <- tbl(con, "cond_raw")
+dbCNs <- tbl(con, "tree_cns")
 
-states_to_use <- c("ID", "MT", "AZ", "WY", "CT", "MN", "WV")
+stateabbrevs <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  filter(!(STATE %in% c("DC", "AS", "GU", "MP", "PR", "UM", "VI"))) 
 
-for(i in 3:6) {
+states_to_use <- stateabbrevs$STATE
+
+for(i in 30:50) {
   
   rawdat_dir = "data/rawdat/state"
   state_to_use = states_to_use[i]
@@ -32,7 +40,8 @@ for(i in 3:6) {
     mutate(
       TREE_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE, sep = "_"),
       PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")
-    )
+    ) |>
+    filter(!(CN %in% collect(dbTrees |> select(CN))$CN))
   
   plots <-
     read_csv(
@@ -51,7 +60,8 @@ for(i in 3:6) {
       )
     ) |>
     filter(INVYR >= 2000) |>
-    mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
+    mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")) |>
+    filter(!(CN %in% collect(dbPlot |> select(CN))$CN))
   
   cond <-
     read_csv(
@@ -79,18 +89,11 @@ for(i in 3:6) {
       )
     ) |>
     filter(INVYR >= 2000) |>
-    mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_"))
+    mutate(PLOT_UNIQUE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")) |>
+    filter(!(CN %in% collect(dbCond |> select(CN))$CN))
   
   
-  arrow::to_duckdb(trees, table_name = "tree_raw_state", con = con)
-  dbSendQuery(con, "INSERT INTO tree_raw SELECT * FROM tree_raw_state")
-  
-  arrow::to_duckdb(plots, table_name = "plot_raw_state", con = con)
-  dbSendQuery(con, "INSERT INTO plot_raw SELECT * FROM plot_raw_state")
-  
-  arrow::to_duckdb(cond, table_name = "cond_raw_state", con = con)
-  dbSendQuery(con, "INSERT INTO cond_raw SELECT * FROM cond_raw_state")
-  
+ 
   tree_cns  <- arrow::open_dataset(
     here::here(arrow_dir, "TREE_CN_JOIN", state_to_use),
     partitioning = c("STATECD", "COUNTYCD"),
@@ -99,11 +102,28 @@ for(i in 3:6) {
     col_types = schema(
       CN = float64(),
       PREV_TRE_CN = float64())) |>
-    compute()
+    filter(!(CN %in% collect(dbCNs |> select(CN))$CN)) |>
+    compute() 
   
+  if(nrow(trees) > 0) {
+  arrow::to_duckdb(trees, table_name = "tree_raw_state", con = con)
+  dbSendQuery(con, "INSERT INTO tree_raw SELECT * FROM tree_raw_state")
+  }
+  
+  if(nrow(plots) > 0) {
+  arrow::to_duckdb(plots, table_name = "plot_raw_state", con = con)
+  dbSendQuery(con, "INSERT INTO plot_raw SELECT * FROM plot_raw_state")
+  }
+  
+  if(nrow(cond) > 0) {
+  arrow::to_duckdb(cond, table_name = "cond_raw_state", con = con)
+  dbSendQuery(con, "INSERT INTO cond_raw SELECT * FROM cond_raw_state")
+  }
+  
+  if(nrow(tree_cns) > 0) {
   arrow::to_duckdb(tree_cns, table_name = "tree_cns_state", con = con)
   dbSendQuery(con, "INSERT INTO tree_cns SELECT * FROM tree_cns_state")
-  
+  }
 }
 
 dbListTables(con)

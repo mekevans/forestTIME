@@ -18,7 +18,13 @@ tree_info_composite_id <- tbl(con, "tree_raw") |>
             SPCDS = n_distinct(SPCD),
             TREE_FIRST_CNS = n_distinct(TREE_FIRST_CN)) |>
   ungroup() |>
-  compute()
+  collect()
+
+
+arrow::to_duckdb(tree_info_composite_id, table_name = "tree_info_composite_id", con = con)
+dbSendQuery(con, "CREATE TABLE tree_info_composite_id AS SELECT * FROM tree_info_composite_id")
+
+rm(tree_info_composite_id)
 
 tree_info_first_cn <- tbl(con, "tree_cns") |>
   left_join(tbl(con, "tree_raw")) |>
@@ -38,12 +44,12 @@ tree_info_first_cn <- tbl(con, "tree_cns") |>
             SPCDS = n_distinct(SPCD),
             TREE_UNIQUE_IDS = n_distinct(TREE_UNIQUE_ID)) |>
   ungroup() |>
-  compute()
+  collect()
 
-copy_to(con, df = tree_info_composite_id, name = "tree_info_composite_id")
 
-copy_to(con, df = tree_info_first_cn, name = "tree_info_first_cn")
+arrow::to_duckdb(tree_info_first_cn, table_name = "tree_info_first_cn", con = con)
+dbSendQuery(con, "CREATE TABLE tree_info_first_cn AS SELECT * FROM tree_info_first_cn")
 
 
 dbListTables(con)
-dbDisconnect(con)
+dbDisconnect(con, shutdown = TRUE)
