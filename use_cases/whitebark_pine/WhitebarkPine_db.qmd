@@ -1,0 +1,121 @@
+---
+title: "Extracting FIA timeseries"
+format: gfm
+editor: source
+---
+
+```{r}
+
+library(duckdb)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+theme_set(theme_bw())
+
+```
+
+
+# To use
+
+To use this:
+
+1. Clone this repository and open the `forestTIME.Rproj` R project.
+2. Make sure you have the `duckdb` R package installed (`install.packages("duckdb"))`.
+3. Download the file `whitebark.duckdb` and save it to `data/db/whitebark.duckdb`. [Link here (this will download 300MB)](https://arizona.box.com/s/c6851saedilk8wic0o4z452i365q80c7)
+4. Then you should be able to render this document or use the code under "Connect to database", below. 
+
+
+# Whitebark pine for Montana, Idaho, and Wyoming
+
+SPCD = 101
+
+STATECD = 16, 30, 56
+
+```{r}
+
+con <- connect_to_tables(here::here("data", "db", "forestTIME-whitebark.duckdb"))
+
+whitebark_pine <-
+  query_tables_db(con = con,
+  conditions = create_conditions(STATECD %in% c(16, 30, 56),
+                    SPCD == 101,
+                    SPCDS == 1),
+  variables = c("STATUSCD", "DIA", "HT", "COND_STATUS_CD", "LAT", "LON",
+                "BALIVE", "SICOND", "SISP", "SIBASE",
+                "DSTRBCD1",
+                "DSTRBYR1",
+                "DSTRBCD2",
+                "DSTRBYR2",
+                "DSTRBCD3",
+                "DSTRBYR3",
+                "SDIMAX_RMRS",
+                "SDI_RMRS",
+                "SLOPE",
+                "ASPECT",
+                "CONDPROP_UNADJ",
+                "RECONCILECD")
+)
+
+dbDisconnect(con, shutdown = TRUE)
+
+knitr::kable(head(whitebark_pine))
+
+```
+
+
+## How many trees have been surveyed how many times in each state?
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+whitebark_pine_measures <- whitebark_pine |> 
+  group_by(STATECD, TREE_UNIQUE_ID) |>
+  summarize(n = length(unique(INVYR))) 
+
+knitr::kable(whitebark_pine_measures |>
+               group_by(STATECD, n) |>
+               tally() |>
+               rename(n_measures = n,
+                      n_trees = nn))
+
+
+```
+
+**Notably, zero trees in Wyoming (STATECD = 56) have been surveyed more than one time.**
+
+## Plotting DIA, HT of trees with repeated measurements
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+whitebark_pine_repeats <- filter(whitebark_pine_measures, n > 1) |>
+  left_join(whitebark_pine)
+
+ggplot(whitebark_pine_repeats, aes(INVYR, DIA, group = TREE_UNIQUE_ID)) +
+  geom_line() +
+  facet_wrap(vars(STATECD), scales = "free") +
+  ggtitle("DIA")
+
+
+ggplot(whitebark_pine_repeats, aes(INVYR, HT, group = TREE_UNIQUE_ID)) +
+  geom_line() +
+  facet_wrap(vars(STATECD), scales = "free") +
+  ggtitle("HT")
+
+```
+
+## Saving data to share
+
+```{r}
+
+write.csv(whitebark_pine, here::here("use_cases", "whitebark_pine", "whitebark_pine.csv"))
+
+```
+
+The saved file is `r trunc(file.size(here::here("use_cases", "whitebark_pine", "whitebark_pine.csv")) / 1E6, 3)` MB.

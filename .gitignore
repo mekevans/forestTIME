@@ -2,5 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
-data/*
+data/db/*
+data/arrow/*
+data/rawdat/state/*
+data/rawdat/species/*
 test_material/temp*
+*.duckdb
+foresttime/*
+*.wal
+use_cases/tree_rings/tree_ring.csv
