@@ -8,18 +8,7 @@ sp_kelly <-
 states_kelly <-
   read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
   filter(STATE %in% c(
-    "WV",
-    "MD",
-    "OH",
-    "PA",
-    "NY",
-    "CT",
-    "RI",
-    "MA",
-    "DE",
-    "VT",
-    "NH",
-    "ME"
+    "OH", "PA", "MD", "MA", "NJ", "VT", "NH", "RI", "ME", "CT", "WV", "NY", "IN", "IA", "IL", "MI", "MO", "WI", "MN"
   ))
 states_kelly <- states_kelly$STATEFP
 

@@ -12,7 +12,7 @@ To use this:
 
 1. Clone this repository and open the `forestTIME.Rproj` R project.
 2. Make sure you have the `duckdb` R package installed (`install.packages("duckdb"))`.
-3. Download the file `treering.duckdb` and save it to `data/db/treering.duckdb`. [Link here (this will download 800 MB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
+3. Download the file `treering.duckdb` and save it to `data/db/treering.duckdb`. [Link here (this will download 1.5 GB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
 4. Then you should be able to render this document or use the code under "Connect to database", below. 
 
 ```{r}
@@ -36,18 +36,7 @@ sp_kelly <-
 states_kelly <-
   read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
   filter(STATE %in% c(
-    "WV",
-    "MD",
-    "OH",
-    "PA",
-    "NY",
-    "CT",
-    "RI",
-    "MA",
-    "DE",
-    "VT",
-    "NH",
-    "ME"
+    "OH", "PA", "MD", "MA", "NJ", "VT", "NH", "RI", "ME", "CT", "WV", "NY", "IN", "IA", "IL", "MI", "MO", "WI", "MN"
   ))
 states_kelly <- states_kelly$STATEFP
 ```

@@ -8,8 +8,8 @@ To use this:
 2.  Make sure you have the `duckdb` R package installed
     (`install.packages("duckdb"))`.
 3.  Download the file `treering.duckdb` and save it to
-    `data/db/treering.duckdb`. [Link here (this will download 800
-    MB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
+    `data/db/treering.duckdb`. [Link here (this will download 1.5
+    GB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
 4.  Then you should be able to render this document or use the code
     under “Connect to database”, below.
 
@@ -52,18 +52,7 @@ sp_kelly <-
 states_kelly <-
   read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
   filter(STATE %in% c(
-    "WV",
-    "MD",
-    "OH",
-    "PA",
-    "NY",
-    "CT",
-    "RI",
-    "MA",
-    "DE",
-    "VT",
-    "NH",
-    "ME"
+    "OH", "PA", "MD", "MA", "NJ", "VT", "NH", "RI", "ME", "CT", "WV", "NY", "IN", "IA", "IL", "MI", "MO", "WI", "MN"
   ))
 states_kelly <- states_kelly$STATEFP
 ```
@@ -114,10 +103,18 @@ dbDisconnect(con, shutdown = TRUE)
 | CT    |       9 |          2 |    1650 |
 | CT    |       9 |          3 |    3780 |
 | CT    |       9 |          4 |    1571 |
-| DE    |      10 |          1 |     427 |
-| DE    |      10 |          2 |     929 |
-| DE    |      10 |          3 |    1033 |
-| DE    |      10 |          4 |     167 |
+| IL    |      17 |          1 |    1205 |
+| IL    |      17 |          2 |    1866 |
+| IL    |      17 |          3 |    2391 |
+| IL    |      17 |          4 |    2810 |
+| IN    |      18 |          1 |    9291 |
+| IN    |      18 |          2 |    5219 |
+| IN    |      18 |          3 |    3472 |
+| IN    |      18 |          4 |    6664 |
+| IA    |      19 |          1 |     760 |
+| IA    |      19 |          2 |     441 |
+| IA    |      19 |          3 |     445 |
+| IA    |      19 |          4 |    1078 |
 | ME    |      23 |          1 |   20424 |
 | ME    |      23 |          2 |   35576 |
 | ME    |      23 |          3 |   30060 |
@@ -131,10 +128,27 @@ dbDisconnect(con, shutdown = TRUE)
 | MA    |      25 |          2 |    3804 |
 | MA    |      25 |          3 |    9595 |
 | MA    |      25 |          4 |    2165 |
+| MI    |      26 |          1 |   77496 |
+| MI    |      26 |          2 |   78643 |
+| MI    |      26 |          3 |   16054 |
+| MI    |      26 |          4 |   45651 |
+| MN    |      27 |          1 |   15358 |
+| MN    |      27 |          2 |   14836 |
+| MN    |      27 |          3 |   11684 |
+| MN    |      27 |          4 |   16186 |
+| MN    |      27 |          5 |    6733 |
+| MO    |      29 |          1 |   18233 |
+| MO    |      29 |          2 |    7366 |
+| MO    |      29 |          3 |    6498 |
+| MO    |      29 |          4 |   17434 |
 | NH    |      33 |          1 |   10964 |
 | NH    |      33 |          2 |   16828 |
 | NH    |      33 |          3 |   16146 |
 | NH    |      33 |          4 |    7625 |
+| NJ    |      34 |          1 |    3753 |
+| NJ    |      34 |          2 |    2172 |
+| NJ    |      34 |          3 |    2418 |
+| NJ    |      34 |          4 |    1154 |
 | NY    |      36 |          1 |   19249 |
 | NY    |      36 |          2 |   23506 |
 | NY    |      36 |          3 |   53878 |
@@ -159,26 +173,30 @@ dbDisconnect(con, shutdown = TRUE)
 | WV    |      54 |          2 |   19145 |
 | WV    |      54 |          3 |   25345 |
 | WV    |      54 |          4 |    3121 |
+| WI    |      55 |          1 |   32899 |
+| WI    |      55 |          2 |   21481 |
+| WI    |      55 |          3 |   21359 |
+| WI    |      55 |          4 |   50310 |
 
 ## How many trees have been surveyed of each species?
 
 | SPCD |      n |
 |-----:|-------:|
-|   12 |  88330 |
-|   97 |  42455 |
-|  129 |  33285 |
-|  261 |  40304 |
-|  316 | 133133 |
-|  318 |  66814 |
-|  400 |    216 |
-|  531 |  56705 |
-|  541 |  27437 |
-|  621 |  17778 |
-|  762 |  31222 |
-|  802 |  19411 |
-|  832 |  20855 |
-|  833 |  25598 |
-|  837 |   8717 |
+|   12 | 185704 |
+|   97 |  42456 |
+|  129 |  60273 |
+|  261 |  51792 |
+|  316 | 242416 |
+|  318 | 167095 |
+|  400 |    217 |
+|  531 |  65226 |
+|  541 |  43071 |
+|  621 |  21666 |
+|  762 |  59385 |
+|  802 |  58012 |
+|  832 |  22017 |
+|  833 |  57297 |
+|  837 |  36437 |
 
 ## Saving data to share
 
@@ -186,4 +204,4 @@ dbDisconnect(con, shutdown = TRUE)
 write.csv(tree_ring, here::here("use_cases", "tree_rings", "tree_ring.csv"))
 ```
 
-The saved file is 249 MB.
+The saved file is 439 MB.
