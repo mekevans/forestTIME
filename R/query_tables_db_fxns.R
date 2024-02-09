@@ -77,7 +77,7 @@ query_tables_db <- function(con,
     static_filters <- NULL
   }
   
-  if (!any(filter_args %in% static_names)) {
+  if (all(filter_args %in% static_names)) {
     dynamic_filters <- NULL
   } else {
     dynamic_filters <-
