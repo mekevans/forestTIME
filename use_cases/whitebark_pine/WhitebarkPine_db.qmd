@@ -17,6 +17,16 @@ theme_set(theme_bw())
 ```
 
 
+# To use
+
+To use this:
+
+1. Clone this repository and open the `forestTIME.Rproj` R project.
+2. Make sure you have the `duckdb` R package installed (`install.packages("duckdb"))`.
+3. Download the file `whitebark.duckdb` and save it to `data/db/whitebark.duckdb`. [Link here (this will download 300MB)](https://arizona.box.com/s/c6851saedilk8wic0o4z452i365q80c7)
+4. Then you should be able to render this document or use the code under "Connect to database", below. 
+
+
 # Whitebark pine for Montana, Idaho, and Wyoming
 
 SPCD = 101

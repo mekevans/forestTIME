@@ -1,5 +1,49 @@
 # Extracting FIA timeseries for tree rings
 
+# To use
+
+To use this:
+
+1.  Clone this repository and open the `forestTIME.Rproj` R project.
+2.  Make sure you have the `duckdb` R package installed
+    (`install.packages("duckdb"))`.
+3.  Download the file `treering.duckdb` and save it to
+    `data/db/treering.duckdb`. [Link here (this will download 800
+    MB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
+4.  Then you should be able to render this document or use the code
+    under “Connect to database”, below.
+
+``` r
+library(duckdb)
+```
+
+    Loading required package: DBI
+
+``` r
+library(dplyr)
+```
+
+    Warning: package 'dplyr' was built under R version 4.3.2
+
+
+    Attaching package: 'dplyr'
+
+    The following objects are masked from 'package:stats':
+
+        filter, lag
+
+    The following objects are masked from 'package:base':
+
+        intersect, setdiff, setequal, union
+
+``` r
+library(ggplot2)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+theme_set(theme_bw())
+```
+
 # States and species
 
 ``` r
