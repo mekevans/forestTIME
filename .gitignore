@@ -5,3 +5,5 @@
 data/*
 test_material/temp*
 *.duckdb
+foresttime/*
+*.wal
