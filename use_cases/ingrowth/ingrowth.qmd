@@ -5,21 +5,25 @@ editor: source
 ---
 
 ```{r}
+library(duckdb)
 library(dplyr)
 library(ggplot2)
-source(here::here("R", "query_tables.R"))
 
-ct_trees <- get_timeseries(conditions = list(
-  STATECD = list("==", "9")
-))
+source(here::here("R", "query_tables_db_fxns.R"))
 
+con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
+
+ct_trees <- query_tables_db(con = con,
+  conditions = create_conditions(STATECD  == 9),
+  variables = c("STATUSCD", "DIA", "HT")
+)
+
+dbDisconnect(con, shutdown = TRUE)
 ```
 
 
 
 Pull out timeseries of trees that have ever been recorded as saplings.
-
-For now, dropping the duplicated CYCLES with changing CONDIDS.
 
 ```{r}
 
