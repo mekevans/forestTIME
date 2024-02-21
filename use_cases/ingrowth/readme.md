@@ -15,6 +15,10 @@ Here is Renata's understanding of the seedlings/ingrowth problem:
       * Sapling --> Dead
       * Nothing --> Sapling
       * (Cannot calculate Nothing --> Tree without doing some fancy mapping)
+  * There are some additional things that can happen:
+      * Sapling that die may simply not be recorded next census. This is accomplished by tracking how many saplings in year X don't show up in year X + 1.
+      * Saplings may get a STATUSCD == 0 in the next census.
+      * Saplings may have a STATUSCD == 1 in a census and not be sampled (maybe if they are on the wrong CONDITION?).
   * If you do this only focusing on Saplings, you can then scale to the whole plot/subplot by multiplying by the %area accounted for by the microplot. 
   
   

@@ -44,16 +44,20 @@ ct_sapling_fates <- ct_saplings |>
   mutate(
     last_meas_year = lag(MEASYEAR, default = NA),
     last_status = lag(STATUSCD, default = NA),
-    last_DIA = lag(DIA, default = NA)
+    last_DIA = lag(DIA, default = NA),
+    next_meas_year = lead(MEASYEAR, 1, default = NA)
   ) |>
   group_by_all() |>
   mutate(
-    is_sapling = STATUSCD == 1 && DIA < 5,
+    is_sapling_measured = STATUSCD == 1 && DIA < 5,
     new_sapling = is.na(last_meas_year) && is.na(last_status)  && is.na(last_DIA) && STATUSCD == 1,
     sapling_sapling = last_status ==1 && STATUSCD == 1 && DIA < 5 && last_DIA < 5,
     sapling_tree = last_status == 1 && STATUSCD == 1 && DIA >= 5 && last_DIA < 5,
     sapling_dead = last_status == 1 && STATUSCD == 2 && last_DIA < 5,
-    sapling_removed = last_status == 1 && STATUSCD == 3 && last_DIA < 5
+    sapling_removed = last_status == 1 && STATUSCD == 3 && last_DIA < 5,
+    sapling_vanishes_next_year = is.na(next_meas_year) && DIA <5,
+    sapling_not_sampled = last_status == 1 && STATUSCD == 0 && last_DIA < 5,
+    sapling_not_measured = STATUSCD == 1 && last_status == 1 && last_DIA <5 && is.na(DIA)
   )
 
 ```
@@ -63,33 +67,41 @@ Calculate absolute numbers of trees making each transition, and calculate these 
 ```{r}
 
 ct_sapling_transitions <- ct_sapling_fates |>
-  group_by(PLOT_UNIQUE_ID, CYCLE, MEASYEAR) |>
+  group_by(PLOT_UNIQUE_ID, MEASYEAR) |>
   summarize(
-    n_saplings = sum(is_sapling, na.rm = T),
+    n_saplings = sum(is_sapling_measured, na.rm = T),
     n_new_saplings = sum(new_sapling, na.rm = T),
     n_sapling_saplings = sum(sapling_sapling, na.rm = T),
     n_saplings_to_trees = sum(sapling_tree, na.rm = T),
     n_saplings_died = sum(sapling_dead, na.rm = T),
-    n_saplings_removed = sum(sapling_removed, na.rm = T)
+    n_saplings_removed = sum(sapling_removed, na.rm = T),
+    n_saplings_not_sampled = sum(sapling_not_sampled, na.rm = T),
+    n_saplings_vanish_next = sum(sapling_vanishes_next_year, na.rm = T),
+    n_saplings_not_measured = sum(sapling_not_measured, na.rm =T)
   ) |>
   ungroup() |>
-  arrange(PLOT_UNIQUE_ID, CYCLE, MEASYEAR) |> 
+  arrange(PLOT_UNIQUE_ID, MEASYEAR) |> 
   group_by(PLOT_UNIQUE_ID) |> 
   mutate(n_saplings_previous = lag(n_saplings, default = NA),
-         prev_measyear = lag(MEASYEAR),
-         first_measyear = min(MEASYEAR)) |>
+         n_saplings_vanished_last = lag(n_saplings_vanish_next, default = NA),
+         prev_MEASYEAR = lag(MEASYEAR),
+         first_MEASYEAR = min(MEASYEAR),
+         last_MEASYEAR = max(MEASYEAR))|>
   group_by_all() |>
-  mutate(is_first_measyear = MEASYEAR == first_measyear) |>
-  ungroup()
-
+  mutate(is_first_MEASYEAR = MEASYEAR == first_MEASYEAR,
+         is_last_MEASYEAR = MEASYEAR == last_MEASYEAR) |>
+  ungroup() 
 
 ct_transition_probabilities <- ct_sapling_transitions |>
-  filter(!is_first_measyear) |>
+  filter(!is_first_MEASYEAR) |>
+  mutate(n_saplings_died_or_gone = n_saplings_died+ n_saplings_vanished_last) |> 
   mutate(across(all_of(c('n_sapling_saplings',
                 'n_saplings_to_trees',
-                'n_saplings_died',
+                'n_saplings_died_or_gone',
                 'n_saplings_removed')),
-                .fns = list(prop = (\(x) x / n_saplings_previous))))
+                .fns = list(prop = (\(x) x / n_saplings_previous))),
+         saplings_second_total = n_saplings_previous + n_new_saplings - n_saplings_to_trees - n_saplings_died - n_saplings_removed - n_saplings_vanished_last - n_saplings_not_sampled - n_saplings_not_measured) |>
+  mutate(prop_sums = n_sapling_saplings_prop + n_saplings_to_trees_prop + n_saplings_died_or_gone_prop + n_saplings_removed_prop)
 ```
 
 
@@ -100,8 +112,11 @@ knitr::kable(head(ct_transition_probabilities))
 
 hist(ct_transition_probabilities$n_saplings_to_trees_prop)
 
-hist(ct_transition_probabilities$n_saplings_died_prop)
+hist(ct_transition_probabilities$n_saplings_died_or_gone_prop)
 
+hist(ct_transition_probabilities$n_saplings_removed_prop)
+
+hist(ct_transition_probabilities$prop_sums)
 
 ```
 
