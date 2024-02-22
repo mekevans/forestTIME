@@ -1,0 +1,78 @@
+---
+title: "Sapling abundance and transition rates"
+format: gfm
+editor: source
+---
+
+```{r}
+library(duckdb)
+library(dplyr)
+library(ggplot2)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+source(here::here("use_cases", "ingrowth", "sapling_functions.R"))
+
+con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
+
+```
+
+# Sapling presence
+
+We can pull saplings for a state (or any other set of filter variables) with this function:
+
+```{r}
+
+ct_saplings <- generate_sapling_table(con = con,
+                                      tree_id_method = "composite",
+                                      conditions = create_conditions(STATECD == 9))
+
+knitr::kable(head(ct_saplings))
+
+```
+
+This table contains the necessary information to compute the abundance or biomass of saplings on a (sub)plot, and includes the `TPA_UNADJ` column for scaling to the whole plot scale. 
+
+# Transition rates
+
+We can pull a sapling transition table for Connecticut:
+
+```{r}
+
+ct_transitions <- generate_sapling_transition_table(con = con,
+                                                    tree_id_method = "composite",
+                                                    conditions = create_conditions(STATECD == 9))
+
+knitr::kable(head(ct_transitions))
+```
+
+And look at the distribution of death and recruitment rates:
+
+```{r}
+
+ggplot(ct_transitions, aes(presumed_dead_nb_prop)) +
+  geom_histogram(boundary = 0)
+
+ggplot(ct_transitions, aes(sapling_tree_nb_prop)) +
+  geom_histogram(boundary = 0)
+
+```
+
+You can also pull for, for example, just one species:
+
+```{r}
+mn_red_maple_transitions <- generate_sapling_transition_table(con = con,
+                                                    tree_id_method = "composite",
+                                                    conditions = create_conditions(STATECD == 27,
+                                                                                   SPCD == 316,
+                                                                                   SPCDS == 1)) # this removes some records of trees changing species, which mess up the proportion sums
+
+knitr::kable(head(mn_red_maple_transitions))
+
+
+```
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+
+```
+
