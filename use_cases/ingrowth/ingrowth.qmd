@@ -15,7 +15,7 @@ con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
 
 ct_trees <- query_tables_db(con = con,
   conditions = create_conditions(STATECD  == 9),
-  variables = c("STATUSCD", "DIA", "HT")
+  variables = c("STATUSCD", "DIA", "HT", "TPA_UNADJ")
 )
 
 dbDisconnect(con, shutdown = TRUE)
@@ -104,6 +104,15 @@ ct_transition_probabilities <- ct_sapling_transitions |>
   mutate(prop_sums = n_sapling_saplings_prop + n_saplings_to_trees_prop + n_saplings_died_or_gone_prop + n_saplings_removed_prop)
 ```
 
+Check out any mismatches:
+
+```{r}
+
+ct_mismatches <- ct_transition_probabilities |>
+  filter(n_saplings != saplings_second_total)
+
+```
+
 
 Look at these counts and transition "probabilities":
 
@@ -119,6 +128,19 @@ hist(ct_transition_probabilities$n_saplings_removed_prop)
 hist(ct_transition_probabilities$prop_sums)
 
 ```
+
+Look at the number of saplings on each plot over time:
+
+```{r}
+
+ggplot(ct_sapling_transitions, aes(MEASYEAR, n_saplings, group = PLOT_UNIQUE_ID)) + 
+  geom_line(alpha = .1) +
+  geom_smooth(aes(MEASYEAR, n_saplings), inherit.aes = F) +
+  theme_bw()
+
+```
+
+
 
 Export these tables for sharing:
 

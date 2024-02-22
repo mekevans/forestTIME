@@ -32,7 +32,7 @@ con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
 
 ct_trees <- query_tables_db(con = con,
   conditions = create_conditions(STATECD  == 9),
-  variables = c("STATUSCD", "DIA", "HT")
+  variables = c("STATUSCD", "DIA", "HT", "TPA_UNADJ")
 )
 ```
 
@@ -132,6 +132,13 @@ ct_transition_probabilities <- ct_sapling_transitions |>
   mutate(prop_sums = n_sapling_saplings_prop + n_saplings_to_trees_prop + n_saplings_died_or_gone_prop + n_saplings_removed_prop)
 ```
 
+Check out any mismatches:
+
+``` r
+ct_mismatches <- ct_transition_probabilities |>
+  filter(n_saplings != saplings_second_total)
+```
+
 Look at these counts and transition “probabilities”:
 
 ``` r
@@ -151,25 +158,38 @@ knitr::kable(head(ct_transition_probabilities))
 hist(ct_transition_probabilities$n_saplings_to_trees_prop)
 ```
 
-![](ingrowth_files/figure-commonmark/unnamed-chunk-5-1.png)
+![](ingrowth_files/figure-commonmark/unnamed-chunk-6-1.png)
 
 ``` r
 hist(ct_transition_probabilities$n_saplings_died_or_gone_prop)
 ```
 
-![](ingrowth_files/figure-commonmark/unnamed-chunk-5-2.png)
+![](ingrowth_files/figure-commonmark/unnamed-chunk-6-2.png)
 
 ``` r
 hist(ct_transition_probabilities$n_saplings_removed_prop)
 ```
 
-![](ingrowth_files/figure-commonmark/unnamed-chunk-5-3.png)
+![](ingrowth_files/figure-commonmark/unnamed-chunk-6-3.png)
 
 ``` r
 hist(ct_transition_probabilities$prop_sums)
 ```
 
-![](ingrowth_files/figure-commonmark/unnamed-chunk-5-4.png)
+![](ingrowth_files/figure-commonmark/unnamed-chunk-6-4.png)
+
+Look at the number of saplings on each plot over time:
+
+``` r
+ggplot(ct_sapling_transitions, aes(MEASYEAR, n_saplings, group = PLOT_UNIQUE_ID)) + 
+  geom_line(alpha = .1) +
+  geom_smooth(aes(MEASYEAR, n_saplings), inherit.aes = F) +
+  theme_bw()
+```
+
+    `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ingrowth_files/figure-commonmark/unnamed-chunk-7-1.png)
 
 Export these tables for sharing:
 
