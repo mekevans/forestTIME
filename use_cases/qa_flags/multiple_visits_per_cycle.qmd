@@ -1,0 +1,46 @@
+---
+title: "Trees with multiple visits per cycle"
+format: gfm
+---
+
+```{r, echo = F, message = F, warning = F}
+
+library(duckdb)
+library(dplyr)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv"))
+
+con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
+```
+
+```{r}
+repeat_trees <- tbl(con, "tree_raw") |>
+  group_by(TREE_UNIQUE_ID, CYCLE) |>
+  tally() |> 
+  ungroup() |>
+  filter(n > 1) |>
+  collect()
+
+repeat_tree_ids <- repeat_trees$TREE_UNIQUE_ID
+
+repeat_tree_records <- query_tables_db(con, conditions = create_conditions(TREE_UNIQUE_ID %in% repeat_tree_ids), variables = c("MANUAL", "PREV_TRE_CN")) |>
+  right_join(repeat_trees)
+
+repeat_tree_records <- repeat_tree_records |>
+  arrange(TREE_UNIQUE_ID, CYCLE, INVYR)
+
+
+```
+
+
+There are `r length(repeat_tree_ids)` trees with 2 visits in one cycle. They're distributed over `r length(unique(repeat_tree_records$STATECD))` states. All have MANUAL > 1. Most, except for records in TN and NC, have PREV_TRE_CN as NA. The records are saved in `multiple_visits_per_cycle.csv` for more digging. 
+
+
+```{r, echo = F, message = F, output = F}
+write.csv(repeat_tree_records, here::here("use_cases", "qa_flags", "multiple_visits_per_cycle.csv"), row.names = F)
+
+dbDisconnect(con, shutdown = TRUE)
+
+```

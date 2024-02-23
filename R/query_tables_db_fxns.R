@@ -129,7 +129,8 @@ query_tables_db <- function(con,
   # Select trees
   
   selected_trees <- tree_info |>
-    filter(!!!static_filters) #|>
+    filter(!!!static_filters) |>
+    select(-SPCD)#|>
   # compute()
   
   # Pull timeseries

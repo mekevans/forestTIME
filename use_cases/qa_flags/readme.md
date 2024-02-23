@@ -11,7 +11,7 @@ Here are what Renata has seen in the data so far, and proposed responses:
     * Flag + default to replacing with the most recently recorded SPCD
 * A tree has been visited multiple times per CYCLE.
     * ??? Flag? Filter out (usually the first) visit? 
-    * Usually I see this where the PREV_TRE_CN is not recorded for one of the visits. Perhaps I should check if filtering by the manual version (aka protocol) resolves this. 
+    * Usually I see this where the PREV_TRE_CN is not recorded for one of the visits. 
 * A tree has had multiple OWNCDs over time.
     * ??? Is this a flag or likely valid?
 * A tree has had a STATUSCD == 2 (dead) or maybe 3 (removed) and then later shows up with a STATUSCD == 1 again. 
