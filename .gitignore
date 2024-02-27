@@ -11,3 +11,4 @@ test_material/temp*
 foresttime/*
 *.wal
 use_cases/tree_rings/tree_ring.csv
+*trees_annual_measures.RDS
