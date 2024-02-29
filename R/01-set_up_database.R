@@ -10,3 +10,5 @@
 # named "tree_raw", "plot_raw", and "cond_raw".
 # The path to this duckdb file is used in other scripts + functions. 
 # Mine is here::here("foresttime-cli.duckdb").
+
+# Alternatively, see the script in use_cases/get_tables_from_datamart to pull things in from DataMart using httpfs.
