@@ -1,66 +1,76 @@
-library("duckdb")
-library("dplyr")
+library(duckdb)
+library(dplyr)
 
-derived_con <- 
-  dbConnect(duckdb(
-    dbdir = here::here("data", "db", "derived_tables.duckdb")
-  ))
+source(here::here("R", "query_tables_db_fxns.R"))
 
-trees <- tbl(derived_con, "tree") 
+con <- dbConnect(duckdb(
+  dbdir = here::here("data", "db", "derived_tables.duckdb")
+))
 
-chain_by_joins <- function(tree_table) {
-  cycles <-
-    tree_table |>
-    select(INVYR) |>
-    distinct() |>
-    arrange(INVYR) |>
-    collect()
-  
-  cycle_trees <- tree_table |>
-    select(CN, PREV_TRE_CN, INVYR) |> compute()
-  
-  known_trees <- cycle_trees |>
-    select(CN, INVYR) |>
-    mutate(TREE_FIRST_CN = ifelse(INVYR == !!cycles$INVYR[1], CN, NA)) |>
-    select(-INVYR) |>
-    compute()
-  
-  for (i in 2:nrow(cycles)) {
-    thiscycle_trees <- cycle_trees |>
-      filter(INVYR == !!cycles$INVYR[i]) |>
-      select(-INVYR) |>
-      left_join(select(known_trees, CN, TREE_FIRST_CN),
-                by = c("PREV_TRE_CN" = "CN")) |>
-      mutate(TREE_FIRST_CN = 
-               ifelse(is.na(TREE_FIRST_CN), 
-                      CN, TREE_FIRST_CN)) |>
-      compute()
-    
-    known_trees <- known_trees |>
-      left_join(thiscycle_trees |> 
-                  select(-PREV_TRE_CN), by = c("CN")) |>
-      mutate(TREE_FIRST_CN = ifelse(
-        is.na(TREE_FIRST_CN.x),
-        ifelse(is.na(TREE_FIRST_CN.y), NA, TREE_FIRST_CN.y),
-        TREE_FIRST_CN.x
-      )) |>
-      select(CN, TREE_FIRST_CN) |>
-      compute()
-    
-  }
-  
-  known_trees <- known_trees |>
-    left_join(tree_table) |>
-    select(CN, TREE_FIRST_CN, STATECD, COUNTYCD)
-  
-  known_trees
-}
+trees <- tbl(con, "tree")
 
-chain_by_joins(trees) |>
+
+# Backfill SPCDs to last recorded SPCD  ####
+
+tree_latest_species <- trees |>
+  select(CN, TREE_COMPOSITE_ID, INVYR, SPCD) |>
+  distinct() |>
+  group_by(TREE_COMPOSITE_ID) |>
+  mutate(last_invyr = max(INVYR)) |>
+  mutate(SPCD_CORR = ifelse(INVYR == last_invyr, SPCD, NA)) |>
+  mutate(SPCD_CORR = max(SPCD_CORR)) |>
+  ungroup() |>
+  mutate(SPCD_FLAG = SPCD != SPCD_CORR) |>
+  select(-last_invyr) 
+
+# Backfill status codes ####
+# any trees that are marked Dead and then later Alive receive a "5" which is a code I made up for "incorrectly marked dead". 
+trees_last_dead <- trees |>
+  select(CN, TREE_COMPOSITE_ID, INVYR, STATUSCD) |>
+  mutate(isdead = (STATUSCD %in% c(2, 3)))|> 
+  group_by(TREE_COMPOSITE_ID) |>
+  mutate(dead_invyr = ifelse(isdead, (INVYR), NA),
+         live_invyr = ifelse(STATUSCD == 1, INVYR, NA)) |>
+  mutate(first_dead_invyr = min(dead_invyr, na.rm = T),
+         last_live_invyr = max(live_invyr, na.rm = T)) |>
+  ungroup() |>
+  mutate(zombie = last_live_invyr > first_dead_invyr) |>
+  mutate(STATUSCD_CORR = ifelse(is.na(zombie), 
+                                STATUSCD,
+                                ifelse(zombie, 
+                                       ifelse(INVYR <= last_live_invyr,
+                                              ifelse(isdead, 
+                                                     5, 
+                                                     STATUSCD),
+                                              STATUSCD),
+                                       STATUSCD))) |>
+  mutate(STATUSCD_FLAG = (STATUSCD != STATUSCD_CORR)) |>
+  select(CN, TREE_COMPOSITE_ID, INVYR, STATUSCD, STATUSCD_CORR, STATUSCD_FLAG) 
+
+# Flag repeat visits in a cycle ####
+
+tree_cycles <- trees |>
+  select(TREE_COMPOSITE_ID, CYCLE, INVYR) |>
+  group_by(TREE_COMPOSITE_ID, CYCLE) |>
+  mutate(first_INVYR = min(INVYR),
+         last_INVYR = max(INVYR)) |>
+  mutate(CYCLE_VISIT = ifelse(INVYR == first_INVYR, 1, 2)) |>
+  mutate(CYCLE_MULTIPLE_VISITS = max(CYCLE_VISIT) > 1) |>
+  mutate(LAST_CYCLE_VISIT = ifelse(CYCLE_MULTIPLE_VISITS, 
+                              ifelse(CYCLE_VISIT == 1, FALSE, TRUE),
+                              TRUE)) |>
+  select(-first_INVYR, -last_INVYR, -CYCLE_VISIT) 
+
+
+# Combine all and add to db ####
+
+left_join(trees_last_dead, tree_latest_species) |>
+  left_join(tree_cycles) |>
   collect() |>
-  arrow::to_duckdb(table_name = "tree_cns", con = derived_con)
+  arrow::to_duckdb(table_name = "qa_flags", con = con)
 
-dbSendQuery(derived_con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
+dbSendQuery(con, "CREATE TABLE qa_flags AS SELECT * FROM qa_flags")
 
-dbDisconnect(derived_con, shutdown = TRUE)
+dbDisconnect(con, shutdown = TRUE)
+
 

@@ -1,14 +1,34 @@
-# I did this with the DuckDB CLI.
-# Commands:
-# D CREATE TABLE tree_raw AS SELECT * FROM read_csv_auto('foresttime/tree_raw.csv', sample_size = 200000);
-# D CREATE TABLE plot_raw AS SELECT * FROM read_csv_auto('foresttime/plot_raw.csv', sample_size = 200000);
-# D CREATE TABLE cond_raw AS SELECT * FROM read_csv_auto('foresttime/cond_raw.csv', sample_size = 200000);
-# The .csv files are from my downloads of FIA data over Jan 2023, stacked into a single .csv for all the states.
-# You could also populate this database with .csvs of single/subsets of states,
-# or tables drawn from a different database (e.g. NIMS).
-# At the end of the day you need to have a .duckdb containing the TREE, PLOT, and CONDITION tables,
+# At the end of the day you need to have a raw_tables.duckdb containing the TREE, PLOT, and CONDITION tables,
 # named "tree_raw", "plot_raw", and "cond_raw".
-# The path to this duckdb file is used in other scripts + functions. 
-# Mine is here::here("foresttime-cli.duckdb").
+# You could get this from NIMS or an internal access to the DataMart db.
+# You can also do it with the CLI, or using httpfs as in this script: 
 
-# Alternatively, see the script in use_cases/get_tables_from_datamart to pull things in from DataMart using httpfs.
+# run these once
+# install.packages("duckdb")
+# install.packages("DBI")
+
+library(duckdb)
+library(DBI)
+
+states = c("CT", "AZ", "MN", "WV", "MO", "ID") # expand to list of desired states
+
+con <- dbConnect(duckdb(dbdir = here::here("use_cases", "get_tables_from_datamart", "raw_tables.duckdb")))
+dbListTables(con)
+
+# dbExecute(con, "INSTALL httpfs;") # uncomment if httpfs is not installed
+dbExecute(con, "LOAD httpfs;")
+
+for(i in 1:length(states)) {
+  
+  if(i == 1) {
+    system.time(dbSendQuery(con, paste0("CREATE TABLE tree_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_TREE.csv'")))
+    system.time(dbSendQuery(con, paste0("CREATE TABLE plot_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_PLOT.csv'")))
+    system.time(dbSendQuery(con, paste0("CREATE TABLE cond_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_COND.csv'")))
+  } else {
+    system.time(dbSendQuery(con, paste0("INSERT INTO tree_raw SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_TREE.csv'")))
+    system.time(dbSendQuery(con, paste0("INSERT INTO plot_raw SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_PLOT.csv'")))
+    system.time(dbSendQuery(con, paste0("INSERT INTO cond_raw SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_COND.csv'")))
+  }
+}
+
+dbDisconnect(con, shutdown = T)
