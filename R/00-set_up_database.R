@@ -10,15 +10,15 @@
 library(duckdb)
 library(DBI)
 
-states = c("CT", "AZ", "MN", "WV", "MO", "ID") # expand to list of desired states
+states = c("CT", "AZ", "MN", "WV", "MO", "ID", "VA") # expand to list of desired states
 
-con <- dbConnect(duckdb(dbdir = here::here("use_cases", "get_tables_from_datamart", "raw_tables.duckdb")))
+con <- dbConnect(duckdb(dbdir = here::here("data", "db", "raw_tables.duckdb")))
 dbListTables(con)
 
 # dbExecute(con, "INSTALL httpfs;") # uncomment if httpfs is not installed
 dbExecute(con, "LOAD httpfs;")
 
-for(i in 1:length(states)) {
+for(i in 7:length(states)) {
   
   if(i == 1) {
     system.time(dbSendQuery(con, paste0("CREATE TABLE tree_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_TREE.csv'")))

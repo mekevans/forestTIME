@@ -16,12 +16,16 @@ tbl(raw_con, "tree_raw") |>
   filter(INVYR >= 2000) |>
   mutate(TREE_COMPOSITE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE, sep = "_"),
          PLOT_COMPOSITE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")) |>
+  rename(TREE_CN = CN) |>
+  select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE)) |>
   collect() |>
   arrow::to_duckdb(table_name = "tree", con = derived_con)
 
 tbl(raw_con, "plot_raw") |>
   filter(INVYR >= 2000) |>
   mutate(PLOT_COMPOSITE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")) |>
+  rename(PLOT_CN = CN) |>
+  select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE)) |>
   collect() |>
   arrow::to_duckdb(table_name = "plot", con = derived_con)
 
@@ -29,6 +33,8 @@ tbl(raw_con, "plot_raw") |>
 tbl(raw_con, "cond_raw")|>
   filter(INVYR >= 2000) |>
   mutate(PLOT_COMPOSITE_ID = paste(STATECD, UNITCD, COUNTYCD, PLOT, sep = "_")) |>
+  rename(COND_CN = CN) |>
+  select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE)) |>
   collect() |>
   arrow::to_duckdb(table_name = "cond", con = derived_con)
 

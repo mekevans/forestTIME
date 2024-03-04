@@ -17,11 +17,11 @@ chain_by_joins <- function(tree_table) {
     collect()
   
   cycle_trees <- tree_table |>
-    select(CN, PREV_TRE_CN, INVYR) |> compute()
+    select(TREE_CN, PREV_TRE_CN, INVYR) |> compute()
   
   known_trees <- cycle_trees |>
-    select(CN, INVYR) |>
-    mutate(TREE_FIRST_CN = ifelse(INVYR == !!cycles$INVYR[1], CN, NA)) |>
+    select(TREE_CN, INVYR) |>
+    mutate(TREE_FIRST_CN = ifelse(INVYR == !!cycles$INVYR[1], TREE_CN, NA)) |>
     select(-INVYR) |>
     compute()
   
@@ -29,29 +29,29 @@ chain_by_joins <- function(tree_table) {
     thiscycle_trees <- cycle_trees |>
       filter(INVYR == !!cycles$INVYR[i]) |>
       select(-INVYR) |>
-      left_join(select(known_trees, CN, TREE_FIRST_CN),
-                by = c("PREV_TRE_CN" = "CN")) |>
+      left_join(select(known_trees, TREE_CN, TREE_FIRST_CN),
+                by = c("PREV_TRE_CN" = "TREE_CN")) |>
       mutate(TREE_FIRST_CN = 
                ifelse(is.na(TREE_FIRST_CN), 
-                      CN, TREE_FIRST_CN)) |>
+                      TREE_CN, TREE_FIRST_CN)) |>
       compute()
     
     known_trees <- known_trees |>
       left_join(thiscycle_trees |> 
-                  select(-PREV_TRE_CN), by = c("CN")) |>
+                  select(-PREV_TRE_CN), by = c("TREE_CN")) |>
       mutate(TREE_FIRST_CN = ifelse(
         is.na(TREE_FIRST_CN.x),
         ifelse(is.na(TREE_FIRST_CN.y), NA, TREE_FIRST_CN.y),
         TREE_FIRST_CN.x
       )) |>
-      select(CN, TREE_FIRST_CN) |>
+      select(TREE_CN, TREE_FIRST_CN) |>
       compute()
     
   }
   
   known_trees <- known_trees |>
     left_join(tree_table) |>
-    select(CN, TREE_FIRST_CN, STATECD, COUNTYCD)
+    select(TREE_CN, TREE_FIRST_CN, STATECD, COUNTYCD)
   
   known_trees
 }

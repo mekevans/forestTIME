@@ -13,7 +13,7 @@ trees <- tbl(con, "tree")
 # Backfill SPCDs to last recorded SPCD  ####
 
 tree_latest_species <- trees |>
-  select(CN, TREE_COMPOSITE_ID, INVYR, SPCD) |>
+  select(TREE_CN, TREE_COMPOSITE_ID, INVYR, SPCD) |>
   distinct() |>
   group_by(TREE_COMPOSITE_ID) |>
   mutate(last_invyr = max(INVYR)) |>
@@ -26,7 +26,7 @@ tree_latest_species <- trees |>
 # Backfill status codes ####
 # any trees that are marked Dead and then later Alive receive a "5" which is a code I made up for "incorrectly marked dead". 
 trees_last_dead <- trees |>
-  select(CN, TREE_COMPOSITE_ID, INVYR, STATUSCD) |>
+  select(TREE_CN, TREE_COMPOSITE_ID, INVYR, STATUSCD) |>
   mutate(isdead = (STATUSCD %in% c(2, 3)))|> 
   group_by(TREE_COMPOSITE_ID) |>
   mutate(dead_invyr = ifelse(isdead, (INVYR), NA),
@@ -45,7 +45,7 @@ trees_last_dead <- trees |>
                                               STATUSCD),
                                        STATUSCD))) |>
   mutate(STATUSCD_FLAG = (STATUSCD != STATUSCD_CORR)) |>
-  select(CN, TREE_COMPOSITE_ID, INVYR, STATUSCD, STATUSCD_CORR, STATUSCD_FLAG) 
+  select(TREE_CN, TREE_COMPOSITE_ID, INVYR, STATUSCD, STATUSCD_CORR, STATUSCD_FLAG) 
 
 # Flag repeat visits in a cycle ####
 
