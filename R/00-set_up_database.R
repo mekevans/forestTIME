@@ -22,13 +22,15 @@ fipses <- fipses |>
 
 states <- fipses$STATE
 
-con <- dbConnect(duckdb(dbdir = here::here("data", "db", "raw_tables2.duckdb")))
+con <- dbConnect(duckdb(dbdir = here::here("data", "db", "raw_tablestoy.duckdb")))
 dbListTables(con)
 
 # dbExecute(con, "INSTALL httpfs;") # uncomment if httpfs is not installed
 dbExecute(con, "LOAD httpfs;")
 # began at 9:34 
-for(i in 1:length(states)) {
+# stopped at 1:12; got to i = 36
+# there's a problem in the plot table for state=37.
+for(i in 37:length(states)) {
   
   if(i == 1) {
     system.time(dbSendQuery(con, paste0("CREATE TABLE tree_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_TREE.csv'")))

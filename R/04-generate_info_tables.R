@@ -3,7 +3,7 @@ library(dplyr)
 library(stringr)
 
 con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables.duckdb")
+  dbdir = here::here("data", "db", "derived_tables3.duckdb")
 ))
 
 dbListTables(con)

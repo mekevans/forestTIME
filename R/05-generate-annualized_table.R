@@ -3,12 +3,14 @@ library(dplyr)
 library(stringr)
 
 con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables.duckdb")
+  dbdir = here::here("data", "db", "derived_tables3.duckdb")
 ))
 
 dbListTables(con)
 
 trees <- tbl(con, "tree") |>
+  left_join(tbl(con, "tree_info_composite_id")) |>
+  filter(NRECORDS > 1) |>
   filter(!is.na(DIA), !is.na(HT)) |>
   select(TREE_COMPOSITE_ID, INVYR, DIA, HT) |> 
   group_by(TREE_COMPOSITE_ID) |>

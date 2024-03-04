@@ -3,7 +3,7 @@ library("dplyr")
 
 derived_con <- 
   dbConnect(duckdb(
-    dbdir = here::here("data", "db", "derived_tables.duckdb")
+    dbdir = here::here("data", "db", "derived_tables3.duckdb")
   ))
 
 trees <- tbl(derived_con, "tree") 
