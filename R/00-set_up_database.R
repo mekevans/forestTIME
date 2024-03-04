@@ -9,16 +9,26 @@
 
 library(duckdb)
 library(DBI)
+library(dplyr)
 
-states = c("CT", "AZ", "MN", "WV", "MO", "ID", "VA") # expand to list of desired states
+# states = c("CT", "AZ", "MN", "WV", "MO", "ID", "VA") # expand to list of desired states
 
-con <- dbConnect(duckdb(dbdir = here::here("data", "db", "raw_tables.duckdb")))
+fipses <- read.csv(here::here("data", "rawdat", "fips", "fips.csv"))
+
+not_states <- c(11, 60, 66, 69, 72, 74, 78)
+
+fipses <- fipses |>
+  filter(!(STATEFP %in% not_states))
+
+states <- fipses$STATE
+
+con <- dbConnect(duckdb(dbdir = here::here("data", "db", "raw_tables2.duckdb")))
 dbListTables(con)
 
 # dbExecute(con, "INSTALL httpfs;") # uncomment if httpfs is not installed
 dbExecute(con, "LOAD httpfs;")
-
-for(i in 7:length(states)) {
+# began at 9:34 
+for(i in 1:length(states)) {
   
   if(i == 1) {
     system.time(dbSendQuery(con, paste0("CREATE TABLE tree_raw AS SELECT * FROM 'https://apps.fs.usda.gov/fia/datamart/CSV/", states[i], "_TREE.csv'")))
