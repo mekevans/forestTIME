@@ -1,12 +1,12 @@
-library("duckdb")
-library("dplyr")
+# library("duckdb")
+# library("dplyr")
+# 
+# con <- 
+#   dbConnect(duckdb(
+#     dbdir = here::here("data", "db", "derived_tables3.duckdb")
+#   ))
 
-derived_con <- 
-  dbConnect(duckdb(
-    dbdir = here::here("data", "db", "derived_tables3.duckdb")
-  ))
-
-trees <- tbl(derived_con, "tree") 
+trees <- tbl(con, "tree") 
 
 chain_by_joins <- function(tree_table) {
   cycles <-
@@ -58,9 +58,9 @@ chain_by_joins <- function(tree_table) {
 
 chain_by_joins(trees) |>
   collect() |>
-  arrow::to_duckdb(table_name = "tree_cns", con = derived_con)
+  arrow::to_duckdb(table_name = "tree_cns", con = con)
 
-dbSendQuery(derived_con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
+dbSendQuery(con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
 
-dbDisconnect(derived_con, shutdown = TRUE)
+# dbDisconnect(con, shutdown = TRUE)
 

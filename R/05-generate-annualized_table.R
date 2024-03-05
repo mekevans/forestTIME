@@ -1,12 +1,12 @@
-library(duckdb)
-library(dplyr)
-library(stringr)
-
-con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables3.duckdb")
-))
-
-dbListTables(con)
+# library(duckdb)
+# library(dplyr)
+# library(stringr)
+# 
+# con <- dbConnect(duckdb(
+#   dbdir = here::here("data", "db", "derived_tables3.duckdb")
+# ))
+# 
+# dbListTables(con)
 
 all_invyrs <- data.frame(INVYR = c(2000:2024))
 
@@ -14,7 +14,6 @@ arrow::to_duckdb(all_invyrs, con, "all_invyrs")
 dbSendQuery(con, "CREATE TABLE all_invyrs AS SELECT * FROM all_invyrs")
 
 trees <- tbl(con, "tree") |>
-  filter(PLOT_COMPOSITE_ID == "4_1_11_80527") |>
   left_join(tbl(con, "tree_info_composite_id")) |>
   filter(NRECORDS > 1) |>
   filter(!is.na(DIA), !is.na(HT), !is.na(ACTUALHT)) |>
@@ -35,7 +34,6 @@ trees <- tbl(con, "tree") |>
          ACTUALHT_slope = (next_ACTUALHT - ACTUALHT) / ((next_INVYR + 1) - INVYR)) 
 
 all_years <- tbl(con, "tree") |>
-  filter(PLOT_COMPOSITE_ID == "4_1_11_80527") |>
   select(TREE_COMPOSITE_ID) |>
   distinct() |>
   cross_join(tbl(con, "all_invyrs")) |>
@@ -59,4 +57,4 @@ trees_annual_measures <- all_years |>
 
 arrow::to_duckdb(trees_annual_measures, table_name = "tree_annualized", con = con)
 dbSendQuery(con, "CREATE TABLE tree_annualized AS SELECT * FROM tree_annualized")
-dbDisconnect(con, shutdown = TRUE)
+# dbDisconnect(con, shutdown = TRUE)

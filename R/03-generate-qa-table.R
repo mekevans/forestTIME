@@ -1,11 +1,11 @@
-library(duckdb)
-library(dplyr)
-
-source(here::here("R", "query_tables_db_fxns.R"))
-
-con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables3.duckdb")
-))
+# library(duckdb)
+# library(dplyr)
+# 
+# source(here::here("R", "query_tables_db_fxns.R"))
+# 
+# con <- dbConnect(duckdb(
+#   dbdir = here::here("data", "db", "derived_tables3.duckdb")
+# ))
 
 trees <- tbl(con, "tree")
 
@@ -71,6 +71,6 @@ left_join(trees_last_dead, tree_latest_species) |>
 
 dbSendQuery(con, "CREATE TABLE qa_flags AS SELECT * FROM qa_flags")
 
-dbDisconnect(con, shutdown = TRUE)
+# dbDisconnect(con, shutdown = TRUE)
 
 

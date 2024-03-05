@@ -1,12 +1,12 @@
-library(duckdb)
-library(dplyr)
-library(stringr)
-
-con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables3.duckdb")
-))
-
-dbListTables(con)
+# library(duckdb)
+# library(dplyr)
+# library(stringr)
+# 
+# con <- dbConnect(duckdb(
+#   dbdir = here::here("data", "db", "derived_tables3.duckdb")
+# ))
+# 
+# dbListTables(con)
 
 cns_multiple_locations <- tbl(con, "tree") |>
   left_join(tbl(con, "tree_cns")) |>
@@ -96,6 +96,6 @@ dbSendQuery(con, "CREATE TABLE tree_info_composite_id AS SELECT * FROM tree_info
 # arrow::to_duckdb(tree_info_first_cn, table_name = "tree_info_first_cn", con = con)
 # dbSendQuery(con, "CREATE TABLE tree_info_first_cn AS SELECT * FROM tree_info_first_cn")
 # 
-
-dbListTables(con)
-dbDisconnect(con, shutdown = TRUE)
+# 
+# dbListTables(con)
+# dbDisconnect(con, shutdown = TRUE)
