@@ -2,26 +2,18 @@ library("duckdb")
 library("dplyr")
 
 query_tables_db <- function(con,
-                            tree_id_method = "composite",
                             conditions = create_conditions(...),
                             variables = c("DIA")) {
   # Connect to tables
   
-  trees <- tbl(con, "tree_raw")# |> compute()
+  trees <- tbl(con, "tree")
   
-  if (tree_id_method == "composite") {
-    tree_info <- tbl(con, "tree_info_composite_id")# |> compute()
-  } else {
-    tree_info <- tbl(con, "tree_info_first_cn")# |> compute()
-    
-    cns <- tbl(con, "tree_cns")
-    
-    trees <- left_join(trees, cns)
-    
-  }
+  tree_info <- tbl(con, "tree_info_composite_id")
+  
+  qa_flags <- tbl(con, "qa_flags")
   
   plots <-
-    tbl(con, "plot_raw") |> rename(PLT_CN = CN) |> select(-any_of(
+    tbl(con, "plot") |> rename(PLT_CN = PLOT_CN) |> select(-any_of(
       c(
         "CREATED_BY",
         "CREATED_DATE",
@@ -30,11 +22,10 @@ query_tables_db <- function(con,
         "MODIFIED_DATE",
         "MODIFIED_IN_INSTANCE"
       )
-    ))# |>
-  #compute()
+    ))
   
   cond <-
-    tbl(con, "cond_raw") |> rename(COND_CN = CN) |> select(-any_of(
+    tbl(con, "cond")  |> select(-any_of(
       c(
         "CREATED_BY",
         "CREATED_DATE",
@@ -43,7 +34,7 @@ query_tables_db <- function(con,
         "MODIFIED_DATE",
         "MODIFIED_IN_INSTANCE"
       )
-    )) #|>  compute()
+    ))
   
   # Prepare filter args
   
@@ -54,92 +45,74 @@ query_tables_db <- function(con,
     lapply(purrr::pluck, 1) |>
     unlist()
   
-  static_names <-
+  tree_info_names <-
     c(
-      'TREE_UNIQUE_ID',
-      'PLOT_UNIQUE_ID',
-      'NYEARS',
-      'NYEARS_MEASURED',
+      'TREE_COMPOSITE_ID',
+      'PLOT_COMPOSITE_ID',
+      'PLOT',
+      'SUBP',
+      'STATECD',
+      'COUNTYCD',
+      'SPCD_CORR',
+      'NRECORDS',
       'FIRSTYR',
       'LASTYR',
-      'SPCD',
-      'PLOT',
-      'SUBPLOT',
-      'SPCDS',
-      'COUNTYCD',
-      'STATECD'
+      'ANY_SPCD_FLAG',
+      'ANY_STATUSCD_FLAG',
+      'ANY_CYCLE_VISITS_FLAG',
+      'MULTIPLE_LOCATIONS_FLAG',
+      'MULTIPLE_CNS_FLAG',
+      'MULTI_OWNCD_FLAG',
+      'MULTI_ADFORCD_FLAG'
     )
   
-  
-  if (any(filter_args %in% static_names)) {
-    static_filters <- conditions[which(filter_args %in% static_names)]
+  if (any(filter_args %in% tree_info_names)) {
+    tree_info_filters <- conditions[which(filter_args %in% tree_info_names)]
   } else {
-    static_filters <- NULL
+    tree_info_filters <- NULL
   }
   
-  if (all(filter_args %in% static_names)) {
-    dynamic_filters <- NULL
+  if (all(filter_args %in% tree_info_names)) {
+    tree_filters <- NULL
   } else {
-    dynamic_filters <-
-      conditions[which(!(filter_args %in% static_names))]
+    tree_filters <-
+      conditions[which(!(filter_args %in% tree_info_names))]
   }
   
   # Prepare variables to pull
   
-  if (tree_id_method == "composite") {
-    needed_variables <- c(
-      'TREE_UNIQUE_ID',
-      'PLOT_UNIQUE_ID',
-      'SPCD',
-      'PLOT',
-      'SUBPLOT',
-      'SPCDS',
-      'COUNTYCD',
-      'STATECD',
-      'PLT_CN',
-      'INVYR',
-      'CYCLE',
-      'MEASYEAR',
-      'CN',
-      'COND_CN',
-      'CONDID'
-    )
-  } else {
-    needed_variables <- c(
-      'TREE_FIRST_CN',
-      'PLOT_UNIQUE_ID',
-      'SPCD',
-      'PLOT',
-      'SUBPLOT',
-      'SPCDS',
-      'COUNTYCD',
-      'STATECD',
-      'PLT_CN',
-      'INVYR',
-      'CYCLE',
-      'MEASYEAR',
-      'CN',
-      'COND_CN',
-      'CONDID'
-    )
-  }
+  needed_variables <- c(
+    'TREE_COMPOSITE_ID',
+    'PLOT_COMPOSITE_ID',
+    'SPCD',
+    'PLOT',
+    'SUBP',
+    'COUNTYCD',
+    'STATECD',
+    'PLT_CN',
+    'INVYR',
+    'CYCLE',
+    'MEASYEAR',
+    'TREE_CN',
+    'COND_CN',
+    'CONDID'
+  )
   
   all_variables <- c(needed_variables, variables)
   
   # Select trees
   
   selected_trees <- tree_info |>
-    filter(!!!static_filters) |>
-    select(-SPCD)#|>
-  # compute()
+    filter(!!!tree_info_filters)
   
   # Pull timeseries
   
   tree_timeseries <- selected_trees |>
     left_join(trees) |>
+    left_join(qa_flags) |>
     left_join(plots) |>
     left_join(cond) |>
-    filter(!!!dynamic_filters) |>
+    filter(!!!tree_filters) |>
     select(all_of(all_variables)) |>
     collect()
   

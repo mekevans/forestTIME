@@ -14,6 +14,7 @@ source("R/02-generate_cns.R")
 source("R/03-generate-qa-table.R")
 source("R/04-generate_info_tables.R")
 source("R/05-generate-annualized_table.R")
+source("R/06-generate-sapling-tables.R")
 
 dbListTables(con)
 dbDisconnect(con, shutdown = TRUE)
