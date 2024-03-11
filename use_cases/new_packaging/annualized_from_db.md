@@ -26,7 +26,7 @@ source(here::here("R", "query_tables_db_fxns.R"))
 ``` r
 source(here::here("R", "query_annualized.R"))
 
-con <- connect_to_tables(here::here("data", "db", "derived_tables3.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-new.duckdb"))
 ```
 
 ``` r

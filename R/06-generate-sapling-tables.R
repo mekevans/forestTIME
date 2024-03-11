@@ -1,10 +1,10 @@
 library(duckdb)
 library(dplyr)
 library(stringr)
-
-con <- dbConnect(duckdb(
-  dbdir = here::here("data", "db", "derived_tables3.duckdb")
-))
+# 
+# con <- dbConnect(duckdb(
+#   dbdir = here::here("data", "db", "derived_tables3.duckdb")
+# ))
 
 dbListTables(con)
 

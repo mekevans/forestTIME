@@ -5,7 +5,7 @@ library(duckdb)
 library(DBI)
 library(dplyr)
 
-con <- dbConnect(duckdb(dbdir = here::here("data", "db", "derived_tables3.duckdb")))
+con <- dbConnect(duckdb(dbdir = here::here("data", "db", "foresttime-new.duckdb")))
 dbListTables(con)
 
 source("R/01-set_up_database_from_csvs.R")

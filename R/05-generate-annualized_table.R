@@ -19,10 +19,12 @@ trees <- tbl(con, "tree") |>
   filter(!is.na(DIA), !is.na(HT), !is.na(ACTUALHT)) |>
   select(TREE_COMPOSITE_ID, INVYR, DIA, HT, ACTUALHT, TREE_CN, PLT_CN, CONDID) |> 
   group_by(TREE_COMPOSITE_ID) |>
-  mutate(next_INVYR = lead(INVYR, order_by = INVYR),
+  mutate(NRECORDS_NONA = n(),
+         next_INVYR = lead(INVYR, order_by = INVYR),
          next_DIA = lead(DIA, order_by = INVYR),
          next_HT = lead(HT, order_by = INVYR),
          next_ACTUALHT = lead(ACTUALHT, order_by = INVYR)) |>
+  filter(NRECORDS_NONA > 1) |>
   mutate(next_INVYR = next_INVYR - 1) |>
   mutate(
     next_INVYR = ifelse(is.na(next_INVYR), INVYR, next_INVYR),
