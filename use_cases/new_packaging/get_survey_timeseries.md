@@ -28,7 +28,7 @@ con <- connect_to_tables(here::here("data", "db", "derived_tables3.duckdb"))
 Here’s an unmodified query for whitebark pine in MT:
 
 ``` r
-wb_pine_raw <- query_tables_db(
+wb_pine_raw <- query_tree_surveys(
   con,
   conditions = create_conditions(STATECD == 30,
                                  SPCD == 101),
@@ -65,7 +65,7 @@ wb_pine_raw <- query_tables_db(
     Joining with `by = join_by(PLOT_COMPOSITE_ID, PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, UNITCD, CONDID, CYCLE, SUBCYCLE)`
 
 ``` r
-qa_d_wb_pine <- query_tables_db(
+qa_d_wb_pine <- query_tree_surveys(
   con = con,
   conditions = create_conditions(
     STATECD == 30,

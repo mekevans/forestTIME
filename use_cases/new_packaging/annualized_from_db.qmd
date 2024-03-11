@@ -1,0 +1,48 @@
+---
+title: "Extract annualized measurements"
+format: gfm
+editor: source
+---
+
+# Pulling trees
+
+
+```{r}
+
+source(here::here("R", "query_tables_db_fxns.R"))
+source(here::here("R", "query_annualized.R"))
+
+con <- connect_to_tables(here::here("data", "db", "derived_tables3.duckdb"))
+
+```
+
+```{r}
+
+az_nfs_annualized <- query_annualized(con,
+                                      conditions = create_conditions(
+                                        STATECD == 4,
+                                        OWNCD == 11,
+                                        MULTI_OWNCD_FLAG == FALSE,
+                                        MULTI_ADFORCD_FLAG == FALSE
+                                      ),
+                                      variables = c("DIA_est", "HT_est", "YEAR", "ADFORCD", "SPCD_CORR", "SPCD_FLAG"))
+
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(filter(az_nfs_annualized, PLOT_COMPOSITE_ID == "4_1_11_80342"), aes(YEAR, DIA_est, group = TREE_COMPOSITE_ID)) +
+  geom_line() +
+  geom_point() +
+  theme_bw()
+
+```
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```
+
+

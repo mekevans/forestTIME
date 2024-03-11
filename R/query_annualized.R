@@ -1,12 +1,9 @@
-library("duckdb")
-library("dplyr")
-
-query_tree_surveys <- function(con,
-                            conditions = create_conditions(...),
-                            variables = c("DIA")) {
+query_annualized <- function(con,
+                               conditions = create_conditions(...),
+                               variables = c("DIA")) {
   # Connect to tables
   
-  trees <- tbl(con, "tree")
+  trees_annualized <- tbl(con, "tree_annualized")
   
   tree_info <- tbl(con, "tree_info_composite_id")
   
@@ -84,6 +81,7 @@ query_tree_surveys <- function(con,
   needed_variables <- c(
     'TREE_COMPOSITE_ID',
     'PLOT_COMPOSITE_ID',
+    'YEAR',
     'SPCD',
     'PLOT',
     'SUBP',
@@ -108,29 +106,15 @@ query_tree_surveys <- function(con,
   # Pull timeseries
   
   tree_timeseries <- selected_trees |>
-    left_join(trees) |>
+    left_join(trees_annualized) |>
+    filter(!is.na(YEAR)) |> 
     left_join(qa_flags) |>
     left_join(plots) |>
     left_join(cond) |>
     filter(!!!tree_filters) |>
     select(all_of(all_variables)) |>
+    arrange(TREE_COMPOSITE_ID, YEAR) |>
     collect()
   
   tree_timeseries
 }
-
-create_conditions <- function(...) {
-  rlang:::enquos(...)
-  
-}
-
-connect_to_tables <- function(db_path) {
-  con <- dbConnect(duckdb(
-    dbdir = db_path
-  ))
-  
-  con
-  
-}
-
-#dbDisconnect(con)
