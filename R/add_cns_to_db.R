@@ -1,13 +1,44 @@
-# library("duckdb")
-# library("dplyr")
-# 
-# con <- 
-#   dbConnect(duckdb(
-#     dbdir = here::here("data", "db", "derived_tables3.duckdb")
-#   ))
 
-trees <- tbl(con, "tree") 
+#' Add tree_cn table to database
+#'
+#' @param con database connection; must contain tree table
+#'
+#' @return nothing
+#' @importFrom dplyr collect tbl
+#' @importFrom DBI dbListTables dbSendQuery
+#' @importFrom arrow to_duckdb
+add_cns_to_db <- function(con) {
+  
+  existing_tables <- dbListTables(con)
+  
+  if("tree_cns" %in% existing_tables) {
+    return(warning("tree_cn table already present in database!"))
+  }
+  
+  if(!("tree" %in% existing_tables)) {
+    return(warning("tree table not present in database; needed for cn table!"))
+  }
+  
+  trees <- tbl(con, "tree") 
+  
+  chain_by_joins(trees) |>
+    collect() |>
+    arrow::to_duckdb(table_name = "tree_cns", con = con)
+  
+  dbExecute(con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
+  
+  return()
+}
 
+
+#' Create cns by chain by joins method
+#'
+#' @param tree_table tree table
+#'
+#' @return table of CN, TREE_FIRST_CN
+#' @export
+#'
+#' @importFrom dplyr select distinct arrange collect compute mutate filter left_join 
 chain_by_joins <- function(tree_table) {
   cycles <-
     tree_table |>
@@ -56,11 +87,4 @@ chain_by_joins <- function(tree_table) {
   known_trees
 }
 
-chain_by_joins(trees) |>
-  collect() |>
-  arrow::to_duckdb(table_name = "tree_cns", con = con)
-
-dbSendQuery(con, "CREATE TABLE tree_cns AS SELECT * FROM tree_cns")
-
-# dbDisconnect(con, shutdown = TRUE)
 

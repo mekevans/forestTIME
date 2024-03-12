@@ -1,3 +1,12 @@
+#' Download state data
+#'
+#' @param state two letter state abbreviation code
+#' @param rawdat_dir where to put the data
+#' @param max_time seconds at which to time out
+#'
+#' @return nothing
+#' @export
+#' 
 download_state_data <- function(state = "CT", rawdat_dir = "data/csv", max_time = 300) {
   
   if(!dir.exists(here::here(rawdat_dir))) {
@@ -13,6 +22,14 @@ download_state_data <- function(state = "CT", rawdat_dir = "data/csv", max_time 
 }
 
 
+#' Workhorse function to download tables from datamart
+#'
+#' @param state two letter state code
+#' @param table TREE, PLOT, or COND
+#' @param file_dir where to put the data
+#' @param max_time seconds at which to time out download
+#'
+#' @return
 download_from_datamart <- function(state, table = "TREE", file_dir, max_time = 300) {
   
   url <- paste0("https://apps.fs.usda.gov/fia/datamart/CSV/", state, "_", table, ".csv")
