@@ -5,11 +5,23 @@ library(duckdb)
 library(DBI)
 library(dplyr)
 
-con <- dbConnect(duckdb(dbdir = here::here("data", "db", "foresttime-new.duckdb")))
+csv_dir <- here::here("data", "rawdat", "state")
+
+con <- dbConnect(duckdb(dbdir = here::here("data", "db", "foresttime-new2.duckdb")))
 dbListTables(con)
 
-source("R/01-set_up_database_from_csvs.R")
-# Here one could insert different step 1s to set up the database from another database or over HTTPS
+source(here::here("R", "download_csv_wrapper.R"))
+fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  filter(!(STATEFP %in% c(11, 60, 66, 69, 72, 74, 78)))
+
+download_csv_from_datamart(states = fips$STATE,
+                          rawdat_dir = csv_dir,
+                          overwrite = FALSE)
+
+source(here::here("R", "import_tables_from_csvs.R"))
+import_tables_from_csvs(con = con,
+                        csv_dir = csv_dir)
+
 source("R/02-generate_cns.R")
 source("R/03-generate-qa-table.R")
 source("R/04-generate_info_tables.R")
