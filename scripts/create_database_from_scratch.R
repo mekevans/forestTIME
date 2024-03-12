@@ -8,6 +8,8 @@ csv_dir <- here::here("data", "csv")
 # path to .duckdb file for database
 database_dir <- here::here("data", "db", "foresttime-tiny.duckdb")
 
+# file.remove(database_dir)
+
 # set up or connect to database
 con <- dbConnect(duckdb(dbdir = database_dir))
 dbListTables(con)
@@ -18,13 +20,13 @@ source(here::here("R", "download_csv_wrapper.R"))
 fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
   filter(!(STATEFP %in% c(11, 60, 66, 69, 72, 74, 78)))
 
-download_csv_from_datamart(states = c("CT", "MA"),
+download_csv_from_datamart(states = c("MT", "AZ", "MN"),
                           rawdat_dir = csv_dir,
                           overwrite = FALSE)
 
 # create database tables 
 source(here::here("R", "create_all_tables.R"))
-create_all_tables(con, rawdat_dir = csv_dir)
+create_all_tables(con, rawdat_dir = csv_dir, overwrite = TRUE)
 
 # clean up
 dbDisconnect(con, shutdown = TRUE)

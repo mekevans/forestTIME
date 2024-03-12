@@ -1,3 +1,11 @@
+#' Pull records from the sapling transition tables
+#'
+#' @param con database connection
+#' @param conditions use `create_conditions` to create a list of logical conditions involving columns from the PLOT table
+#' @param variables character vector or variables to return
+#'
+#' @return data frame of sapling transitions + any additional variables for plots satisfying conditions
+#' @export
 query_saplings <- function(con,
                            conditions = create_conditions(...),
                            variables = c("STATECD")) {
@@ -6,7 +14,7 @@ query_saplings <- function(con,
   saplings <- tbl(con, "sapling_transitions")
   
   plots <-
-    tbl(con, "plot") |> rename(PLT_CN = PLOT_CN) |> select(-any_of(
+    tbl(con, "plot") |>  select(-any_of(
       c(
         "CREATED_BY",
         "CREATED_DATE",

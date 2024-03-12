@@ -10,6 +10,7 @@ source(here::here("R", "add_sapling_transitions_to_db.R"))
 #'
 #' @param con db connection
 #' @param rawdat_dir where the raw csvs are
+#' @param overwrite T/F, whether to delete an existing database or throw errors
 #'
 #' @return nothing
 #' @export

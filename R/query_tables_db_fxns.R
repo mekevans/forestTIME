@@ -1,6 +1,18 @@
-library("duckdb")
-library("dplyr")
+library(ducdkb)
+library(dplyr)
 
+#' Query tree surveys
+#' 
+#' Pull timeseries of records for individual trees. 
+#' You can filter based on any logical conditions involving columns from the TREE, PLOT, COND, qa_flags, or tree_info_composite_id tables. 
+#'
+#' @param con database connection
+#' @param conditions use `create_conditions` to create a set of conditions
+#' @param variables character vector of variables to pull
+#'
+#' @return data frame of variables for all tree records satisfying conditions
+#' @export
+#'
 query_tree_surveys <- function(con,
                             conditions = create_conditions(...),
                             variables = c("DIA")) {
@@ -13,7 +25,7 @@ query_tree_surveys <- function(con,
   qa_flags <- tbl(con, "qa_flags")
   
   plots <-
-    tbl(con, "plot") |> rename(PLT_CN = PLOT_CN) |> select(-any_of(
+    tbl(con, "plot") |> select(-any_of(
       c(
         "CREATED_BY",
         "CREATED_DATE",
@@ -119,11 +131,27 @@ query_tree_surveys <- function(con,
   tree_timeseries
 }
 
+#' Create conditions
+#'
+#' Creates a list of conditions to pass to query_tables functions
+#' 
+#' @param ... 
+#'
+#' @return list of conditions
+#' @export
+#'
 create_conditions <- function(...) {
   rlang:::enquos(...)
   
 }
 
+#' Connect to duckdb
+#'
+#' @param db_path path to duckdb
+#'
+#' @return db connection
+#' @export
+#'
 connect_to_tables <- function(db_path) {
   con <- dbConnect(duckdb(
     dbdir = db_path
@@ -132,5 +160,3 @@ connect_to_tables <- function(db_path) {
   con
   
 }
-
-#dbDisconnect(con)

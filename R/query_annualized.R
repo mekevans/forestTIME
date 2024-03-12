@@ -1,3 +1,14 @@
+#' Query annualized estimates of measurements
+#'
+#' Pulls timeseries of *annual* measurements interpolated for trees. 
+#'
+#' @param con database connection
+#' @param conditions use `create_conditions` to create a list of conditions involving columns from the tree, plot, cond, qa_flags, or tree_info_composite_id tables
+#' @param variables character vector of variables to return
+#'
+#' @return data frame of annual measurements and additional varaibles estimated for trees satisfying conditions 
+#' @export
+#'
 query_annualized <- function(con,
                                conditions = create_conditions(...),
                                variables = c("DIA")) {
@@ -10,7 +21,7 @@ query_annualized <- function(con,
   qa_flags <- tbl(con, "qa_flags")
   
   plots <-
-    tbl(con, "plot") |> rename(PLT_CN = PLOT_CN) |> select(-any_of(
+    tbl(con, "plot") |> select(-any_of(
       c(
         "CREATED_BY",
         "CREATED_DATE",
