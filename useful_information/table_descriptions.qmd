@@ -1,69 +1,304 @@
 ---
 title: "Tables (currently)"
 format: 
-  gfm:
+  html:
     toc: true
+    toc-depth: 2
+    echo: false
 editor: source
 ---
 
-```{r}
+```{r, echo = F, message = F, warning = F, output = F}
 
-source(here::here("R", "filtering.R"))
-library(duckdbfs)
 library(duckdb)
-library(ggplot2)
+library(DBI)
 library(dplyr)
 
+database_dir <- here::here("data", "db", "foresttime-tiny.duckdb")
+
+con <- dbConnect(duckdb(dbdir = database_dir))
+
+dbListTables(con)
 ```
 
-## PLOT_INFO
+# Nearly-raw from FIADB
 
-```{r}
+## `tree` table
 
-plot_info <- open_arrow_table_with_duck("PLOT_INFO") |>
-  filter(PLOT_UNIQUE_ID %in% c("27_2_1_20400", "27_2_1_21053", "27_2_1_21054", "27_2_1_21055", "27_2_1_20206", "27_2_1_21007", "27_2_1_20829", "27_2_1_20401", "27_2_1_20667", "27_2_1_20943")) |>
-  collect()
+The `tree` table contains *most* columns from the FIADB TREE table, and all records for which `INVYR >= 2000`. 
 
-knitr::kable(plot_info)
+These columns are removed:
 
-```
+* CREATED_BY
+* CREATED_DATE
+* CREATED_IN_INSTANCE
+* MODIFIED_BY
+* MODIFIED_DATE
+* MODIFIED_IN_INSTANCE
 
-## TREE_INFO
+These columns are added:
 
+* `TREE_COMPOSITE_ID`: a unique, temporally persistent identifier for each tree created by concatenating STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE
+* `PLOT_COMPOSITE_ID`: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT
 
-```{r}
+This column is renamed:
 
-tree_info <- open_arrow_table_with_duck("TREE_INFO") |>
-  filter(PLOT_UNIQUE_ID %in% c("27_2_1_20400", "27_2_1_21053", "27_2_1_21054", "27_2_1_21055", "27_2_1_20206", "27_2_1_21007", "27_2_1_20829", "27_2_1_20401", "27_2_1_20667", "27_2_1_20943")) |>
-  collect()
+* CN is renamed to TREE_CN
 
-knitr::kable(head(tree_info))
-
-```
-
-## PLOT
-
-
-```{r}
-
-plot_raw <- open_arrow_table_with_duck(table = "PLOT") |>
-  filter(PLOT_UNIQUE_ID %in% c("27_2_1_20400", "27_2_1_21053", "27_2_1_21054", "27_2_1_21055", "27_2_1_20206", "27_2_1_21007", "27_2_1_20829", "27_2_1_20401", "27_2_1_20667", "27_2_1_20943")) |>
-  collect()
-
-knitr::kable(head(plot_raw))
-
-```
-
-## TREE
+::: {.callout-note title="Full column list for tree table" collapse="true"}
 
 
 ```{r}
 
-tree_raw <- open_arrow_table_with_duck("TREE") |>
-  filter(PLOT_UNIQUE_ID %in% c("27_2_1_20400", "27_2_1_21053", "27_2_1_21054", "27_2_1_21055", "27_2_1_20206", "27_2_1_21007", "27_2_1_20829", "27_2_1_20401", "27_2_1_20667", "27_2_1_20943")) |>
-  collect()
-
-knitr::kable(head(tree_raw))
+colnames(tbl(con, "tree"))
 
 ```
 
+:::
+
+## `plot` table
+
+The `plot` table contains *most* columns from the FIADB PLOT table, and all records for which `INVYR >= 2000`. 
+
+These columns are removed:
+
+* CREATED_BY
+* CREATED_DATE
+* CREATED_IN_INSTANCE
+* MODIFIED_BY
+* MODIFIED_DATE
+* MODIFIED_IN_INSTANCE
+
+These columns are added:
+
+* `PLOT_COMPOSITE_ID`: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT
+
+This column is renamed:
+
+* CN is renamed to PLT_CN
+
+::: {.callout-note title="Full column list for plot table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "plot"))
+
+```
+
+:::
+
+
+## `cond` table
+
+The `cond` table contains *most* columns from the FIADB COND table, and all records for which `INVYR >= 2000`. 
+
+These columns are removed:
+
+* CREATED_BY
+* CREATED_DATE
+* CREATED_IN_INSTANCE
+* MODIFIED_BY
+* MODIFIED_DATE
+* MODIFIED_IN_INSTANCE
+
+These columns are added:
+
+* `PLOT_COMPOSITE_ID`: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT
+
+This column is renamed:
+
+* CN is renamed to COND_CN
+
+
+::: {.callout-note title="Full column list for cond table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "cond"))
+
+```
+
+:::
+
+# Derived as part of forestTIME
+
+## `tree_cns` table
+
+This table links the survey-to-survey TREE_CN with the TREE_FIRST_CN, or the first CN number associated with that tree in the database. 
+
+::: {.callout-note title="Column descriptions for tree_cns table" collapse="true"}
+
+* TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.
+* TREE_FIRST_CN: a persistent identifier for each tree; the first CN number associated with that tree throughout its history in the database.
+
+:::
+
+::: {.callout-note title="Full column list for tree_cns table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "tree_cns"))
+
+```
+
+:::
+
+
+## `qa_flags` table
+
+This table tracks any QA flags associated with survey-to-survey records of individual trees. 
+
+::: {.callout-note title="Column descriptions for qa_flags table" collapse="true"}
+
+* TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.
+* TREE_COMPOSITE_ID: the TREE_COMPOSITE_ID created as part of the tree table (see above).
+* INVYR: INVYR
+* STATUSCD: STATUSCD as recorded in the TREE table
+* STATUSCD_CORR: If a  tree has been recorded as dead, and then in a later census recorded as alive, the "dead" STATUSCD is changed to `5` (a code RMD made up for "zombie tree, or, probably never dead"). All other STATUSCDs are copied directly over to this column.
+* STATUSCD_FLAG: T/F, notes whether the STATUSCD for this record is changed in STATUSCD_CORR
+* SPCD: SPCD as recorded in the TREE table
+* SPCD_CORR: If a tree has had multiple SPCDs recorded over time, all previous SPCDs are corrected to the *last* SPCD observed for that tree.
+* SPCD_FLAG: T/F, notes whether the SPCD for this record is changed in SPCD_CORR
+* CYCLE: CYCLE from TREE table
+* CYCLE_MULTIPLE_VISITS: T/F, notes whether this tree has multiple records from this CYCLE.
+* LAST_CYCLE_VISIT: T/F, notes whether this is the most recent visit for this tree within this cycle. If a cycle has only one visit, always TRUE; if there are multiple visits, the last visit will have TRUE. 
+
+:::
+
+::: {.callout-note title="Full column list for qa_flags table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "qa_flags"))
+
+```
+
+:::
+
+
+## `tree_info_composite_id` table
+
+This table summarizes information from the `tree` and `qa_flags` to get information about individual trees across the whole survey period. 
+
+::: {.callout-note title="Column descriptions for tree_info_composite_id table" collapse="true"}
+
+* TREE_COMPOSITE_ID: Persistent composite ID.
+* PLOT_COMPOSITE_ID: Persistent composite ID.
+* PLOT: PLOT
+* SUBP: SUBP
+* STATECD: STATECD
+* COUNTYCD: COUNTYCD
+* SPCD_CORR: The most recent SPCD ever associated with this tree
+* NRECORDS: The number of records for this tree in the whole database
+* FIRSTYR: The year of the first record for this tree
+* LASTYR: The year of the last record for this tree
+* ANY_SPCD_FLAG: T/F, whether this tree has had any inconsistencies in SPCD over time (any records for this tree have SPCD_FLAG = TRUE in the qa_flags table).
+* ANY_STATUSCD_FLAG: T/F, whether this tree has had any logical inconsistencies in STATUSCD over time (any records for this tree have STATUSCD_CORR = 5 and STATUSCD_FLAG = TRUE in the qa_flags table).
+* ANY_CYCLE_VISITS_FLAG: T/F, whether this tree has had multiple visits recorded in any cycle over time (any records for this tree have CYCLE_MULTIPLE_VISITS = TRUE in qa_flags table)
+* MULTIPLE_LOCATIONS_FLAG: T/F, whether the chain of CN + PREV_TRE_CN for this tree links to trees found in other plots/counties than this tree. If this occurs, the other records will have a different TREE_COMPOSITE_ID than the one recorded for this tree. These instances are assumed to be incorrect (that is, those other records are in fact different trees) unless there is another explanation. 
+* MULTIPLE_CNS_FLAG: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain). 
+* MULTI_OWNCD_FLAG: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time. 
+* MULTI_ADFORCD_FLAG: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know  whether this is more likely to be an error or to reflect changes in land ownership over time. 
+
+:::
+
+::: {.callout-note title="Full column list for tree_info_composite_id table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "tree_info_composite_id"))
+
+```
+
+:::
+
+## `all_invyrs` table
+
+This table is just a list of all possible INVYRs from 2000 to 2024. Its only column is `INVYR`.
+
+## `tree_annualized` table
+
+This table contains year-to-year estimates of DIA, HT, and ACTUALHT for each tree with more than one survey with non-NA values for all of these variables.
+Estimates are generated as linear functions from one value to the next for each variable for each tree. 
+
+
+::: {.callout-note title="Column descriptions for tree_annualized table" collapse="true"}
+
+
+* TREE_COMPOSITE_ID: Persistent composite ID.
+* TREE_CN: CN from TREE table; CN for the record in the TREE table on which this estimate is based
+* PLT_CN: PLT_CN from TREE table corresponding to the record on which this estimate is based.
+* CONDID: CONDID from TREE table corresponding to the record on which this estimate is based.
+* YEAR: YEAR for this estimate. If the YEAR is an INVYR in the TREE table, this record is copied from there. If the YEAR falls between INVYRs, this record is interpolated between the records from the two flanking INVYRS.
+* DIA_est: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.
+* HT_est: Estimated HT for this year.
+* ACTUALHT_est: Estimated ACTUALHT for this year. 
+
+:::
+
+::: {.callout-note title="Full column list for tree_annualized table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "tree_annualized"))
+
+```
+
+:::
+
+## `sapling_transitions` table
+
+This table contains survey-to-survey counts and proportions of *saplings* undergoing various demographic transitions on each plot. 
+
+
+::: {.callout-note title="Column descriptions for sapling_transitions table" collapse="true"}
+
+
+* PLOT_COMPOSITE_ID: Persistent composite ID.
+* INVYR: INVYR for the survey defining the *end* of the time period considered for transition calculations.
+* PREV_INVYR: INVYR for the survey defining the *beginning* of the time period considered for transition calculations.
+* timespan: Difference between INVYR and PREV_INVYR
+* live_sapling: Count of all live saplings on this plot in INVYR
+* new_sapling: Count of live saplings on  this plot in INVYR that have not been recorded before
+* sapling_sapling: Count of live saplings on this plot in INVYR that were also saplings in PREV_INVYR
+* sapling_tree: Count of live trees on this plot in INVYR that were saplings in PREV_INVYR
+* sapling_dead: Count of dead trees/saplings on this plot in INVYR that were live saplings in PREV_INVYR
+* sapling_removed: Count of removed trees/saplings in INVYR that were live saplings in PREV_INVYR
+* sapling_not_sampled: Count of saplings that were live saplings in PREV_INVYR that are present in the database but marked not sampled (STATUSCD = 0) in INVYR
+* sapling_missing_data: Count of live saplings in INVYR with missing DIA in INVYR
+* sapling_vanishes_next_year: Count of live saplings in INVYR not present in the database in the next INVYR
+* PREV_live_sapling: Count of saplings alive in PREV_INVYR
+* sapling_vanished: Count of saplings present in PREV_INVYR that are not present in INVYR; presumed dead
+* presumed_dead: Sum of sapling_dead and sapling_vanished
+* sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.
+* sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.
+* sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.
+* presumed_dead_prop: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).
+* sapling_not_sampled_prop: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.
+* sapling_missing_data_prop: Proportion of live sapligns in PREV_INVYR marked as alive, but missing DIA information, in INVYR.
+
+:::
+
+::: {.callout-note title="Full column list for sapling_transitions table" collapse="true"}
+
+
+```{r}
+
+colnames(tbl(con, "sapling_transitions"))
+
+```
+
+:::
+
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```

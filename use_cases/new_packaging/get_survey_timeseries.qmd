@@ -1,0 +1,62 @@
+---
+title: "Pulling timeseries of surveys"
+format: gfm
+editor: source
+---
+
+```{r}
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-tiny.duckdb"))
+
+```
+
+```{r}
+
+
+
+qa_d_wb_pine <- query_tree_surveys(
+  con = con,
+  conditions = create_conditions(
+    STATECD == 30,
+    SPCD == 101,
+    ANY_SPCD_FLAG == FALSE
+  ),
+  variables = c(
+    "STATUSCD",
+    "STATUSCD_CORR",
+    "STATUSCD_FLAG",
+    "DIA",
+    "HT",
+    "COND_STATUS_CD",
+    "LAT",
+    "LON",
+    "BALIVE",
+    "SICOND",
+    "SISP",
+    "SIBASE",
+    "DSTRBCD1",
+    "DSTRBYR1",
+    "DSTRBCD2",
+    "DSTRBYR2",
+    "DSTRBCD3",
+    "DSTRBYR3",
+    "SDIMAX_RMRS",
+    "SDI_RMRS",
+    "SLOPE",
+    "ASPECT",
+    "CONDPROP_UNADJ",
+    "RECONCILECD"
+  )
+)
+
+knitr::kable(head(qa_d_wb_pine, 20))
+
+```
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```

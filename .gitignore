@@ -6,6 +6,7 @@ data/db/*
 data/arrow/*
 data/rawdat/state/*
 data/rawdat/species/*
+data/csv/*
 test_material/temp*
 *.duckdb
 foresttime/*

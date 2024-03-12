@@ -1,24 +1,20 @@
-library(duckdb)
-library(dplyr)
-
-#' Query tree surveys
-#' 
-#' Pull timeseries of records for individual trees. 
-#' You can filter based on any logical conditions involving columns from the TREE, PLOT, COND, qa_flags, or tree_info_composite_id tables. 
+#' Query annualized estimates of measurements
+#'
+#' Pulls timeseries of *annual* measurements interpolated for trees. 
 #'
 #' @param con database connection
-#' @param conditions use `create_conditions` to create a set of conditions
-#' @param variables character vector of variables to pull
+#' @param conditions use `create_conditions` to create a list of conditions involving columns from the tree, plot, cond, qa_flags, or tree_info_composite_id tables
+#' @param variables character vector of variables to return
 #'
-#' @return data frame of variables for all tree records satisfying conditions
+#' @return data frame of annual measurements and additional varaibles estimated for trees satisfying conditions 
 #' @export
 #'
-query_tree_surveys <- function(con,
-                            conditions = create_conditions(...),
-                            variables = c("DIA")) {
+query_annualized <- function(con,
+                               conditions = create_conditions(...),
+                               variables = c("DIA")) {
   # Connect to tables
   
-  trees <- tbl(con, "tree")
+  trees_annualized <- tbl(con, "tree_annualized")
   
   tree_info <- tbl(con, "tree_info_composite_id")
   
@@ -96,6 +92,7 @@ query_tree_surveys <- function(con,
   needed_variables <- c(
     'TREE_COMPOSITE_ID',
     'PLOT_COMPOSITE_ID',
+    'YEAR',
     'SPCD',
     'PLOT',
     'SUBP',
@@ -120,43 +117,15 @@ query_tree_surveys <- function(con,
   # Pull timeseries
   
   tree_timeseries <- selected_trees |>
-    left_join(trees) |>
+    left_join(trees_annualized) |>
+    filter(!is.na(YEAR)) |> 
     left_join(qa_flags) |>
     left_join(plots) |>
     left_join(cond) |>
     filter(!!!tree_filters) |>
     select(all_of(all_variables)) |>
+    arrange(TREE_COMPOSITE_ID, YEAR) |>
     collect()
   
   tree_timeseries
-}
-
-#' Create conditions
-#'
-#' Creates a list of conditions to pass to query_tables functions
-#' 
-#' @param ... 
-#'
-#' @return list of conditions
-#' @export
-#'
-create_conditions <- function(...) {
-  rlang:::enquos(...)
-  
-}
-
-#' Connect to duckdb
-#'
-#' @param db_path path to duckdb
-#'
-#' @return db connection
-#' @export
-#'
-connect_to_tables <- function(db_path) {
-  con <- dbConnect(duckdb(
-    dbdir = db_path
-  ))
-  
-  con
-  
 }
