@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Tables (currently)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="table_descriptions_files/libs/clipboard/clipboard.min.js"></script>
+<script src="table_descriptions_files/libs/quarto-html/quarto.js"></script>
+<script src="table_descriptions_files/libs/quarto-html/popper.min.js"></script>
+<script src="table_descriptions_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="table_descriptions_files/libs/quarto-html/anchor.min.js"></script>
+<link href="table_descriptions_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="table_descriptions_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="table_descriptions_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="table_descriptions_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="table_descriptions_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#nearly-raw-from-fiadb" id="toc-nearly-raw-from-fiadb" class="nav-link active" data-scroll-target="#nearly-raw-from-fiadb">Nearly-raw from FIADB</a>
+  <ul class="collapse">
+  <li><a href="#tree-table" id="toc-tree-table" class="nav-link" data-scroll-target="#tree-table"><code>tree</code> table</a></li>
+  <li><a href="#plot-table" id="toc-plot-table" class="nav-link" data-scroll-target="#plot-table"><code>plot</code> table</a></li>
+  <li><a href="#cond-table" id="toc-cond-table" class="nav-link" data-scroll-target="#cond-table"><code>cond</code> table</a></li>
+  </ul></li>
+  <li><a href="#derived-as-part-of-foresttime" id="toc-derived-as-part-of-foresttime" class="nav-link" data-scroll-target="#derived-as-part-of-foresttime">Derived as part of forestTIME</a>
+  <ul class="collapse">
+  <li><a href="#tree_cns-table" id="toc-tree_cns-table" class="nav-link" data-scroll-target="#tree_cns-table"><code>tree_cns</code> table</a></li>
+  <li><a href="#qa_flags-table" id="toc-qa_flags-table" class="nav-link" data-scroll-target="#qa_flags-table"><code>qa_flags</code> table</a></li>
+  <li><a href="#tree_info_composite_id-table" id="toc-tree_info_composite_id-table" class="nav-link" data-scroll-target="#tree_info_composite_id-table"><code>tree_info_composite_id</code> table</a></li>
+  <li><a href="#all_invyrs-table" id="toc-all_invyrs-table" class="nav-link" data-scroll-target="#all_invyrs-table"><code>all_invyrs</code> table</a></li>
+  <li><a href="#tree_annualized-table" id="toc-tree_annualized-table" class="nav-link" data-scroll-target="#tree_annualized-table"><code>tree_annualized</code> table</a></li>
+  <li><a href="#sapling_transitions-table" id="toc-sapling_transitions-table" class="nav-link" data-scroll-target="#sapling_transitions-table"><code>sapling_transitions</code> table</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tables (currently)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="nearly-raw-from-fiadb" class="level1">
+<h1>Nearly-raw from FIADB</h1>
+<section id="tree-table" class="level2">
+<h2 class="anchored" data-anchor-id="tree-table"><code>tree</code> table</h2>
+<p>The <code>tree</code> table contains <em>most</em> columns from the FIADB TREE table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>These columns are removed:</p>
+<ul>
+<li>CREATED_BY</li>
+<li>CREATED_DATE</li>
+<li>CREATED_IN_INSTANCE</li>
+<li>MODIFIED_BY</li>
+<li>MODIFIED_DATE</li>
+<li>MODIFIED_IN_INSTANCE</li>
+</ul>
+<p>These columns are added:</p>
+<ul>
+<li><code>TREE_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each tree created by concatenating STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE</li>
+<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+</ul>
+<p>This column is renamed:</p>
+<ul>
+<li>CN is renamed to TREE_CN</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for tree table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for tree table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "TREE_CN"                        "PLT_CN"                        
+  [3] "PREV_TRE_CN"                    "INVYR"                         
+  [5] "STATECD"                        "UNITCD"                        
+  [7] "COUNTYCD"                       "PLOT"                          
+  [9] "SUBP"                           "TREE"                          
+ [11] "CONDID"                         "AZIMUTH"                       
+ [13] "DIST"                           "PREVCOND"                      
+ [15] "STATUSCD"                       "SPCD"                          
+ [17] "SPGRPCD"                        "DIA"                           
+ [19] "DIAHTCD"                        "HT"                            
+ [21] "HTCD"                           "ACTUALHT"                      
+ [23] "TREECLCD"                       "CR"                            
+ [25] "CCLCD"                          "TREEGRCD"                      
+ [27] "AGENTCD"                        "CULL"                          
+ [29] "DAMLOC1"                        "DAMTYP1"                       
+ [31] "DAMSEV1"                        "DAMLOC2"                       
+ [33] "DAMTYP2"                        "DAMSEV2"                       
+ [35] "DECAYCD"                        "STOCKING"                      
+ [37] "WDLDSTEM"                       "VOLCFNET"                      
+ [39] "VOLCFGRS"                       "VOLCSNET"                      
+ [41] "VOLCSGRS"                       "VOLBFNET"                      
+ [43] "VOLBFGRS"                       "VOLCFSND"                      
+ [45] "DIACHECK"                       "MORTYR"                        
+ [47] "SALVCD"                         "UNCRCD"                        
+ [49] "CPOSCD"                         "CLIGHTCD"                      
+ [51] "CVIGORCD"                       "CDENCD"                        
+ [53] "CDIEBKCD"                       "TRANSCD"                       
+ [55] "TREEHISTCD"                     "BHAGE"                         
+ [57] "TOTAGE"                         "CULLDEAD"                      
+ [59] "CULLFORM"                       "CULLMSTOP"                     
+ [61] "CULLBF"                         "CULLCF"                        
+ [63] "BFSND"                          "CFSND"                         
+ [65] "SAWHT"                          "BOLEHT"                        
+ [67] "FORMCL"                         "HTCALC"                        
+ [69] "HRDWD_CLUMP_CD"                 "SITREE"                        
+ [71] "MORTCD"                         "HTDMP"                         
+ [73] "ROUGHCULL"                      "MIST_CL_CD"                    
+ [75] "CULL_FLD"                       "RECONCILECD"                   
+ [77] "PREVDIA"                        "P2A_GRM_FLG"                   
+ [79] "TREECLCD_NERS"                  "TREECLCD_SRS"                  
+ [81] "TREECLCD_NCRS"                  "TREECLCD_RMRS"                 
+ [83] "STANDING_DEAD_CD"               "PREV_STATUS_CD"                
+ [85] "PREV_WDLDSTEM"                  "TPA_UNADJ"                     
+ [87] "DRYBIO_BOLE"                    "DRYBIO_STUMP"                  
+ [89] "DRYBIO_BG"                      "CARBON_AG"                     
+ [91] "CARBON_BG"                      "CYCLE"                         
+ [93] "SUBCYCLE"                       "BORED_CD_PNWRS"                
+ [95] "DAMLOC1_PNWRS"                  "DAMLOC2_PNWRS"                 
+ [97] "DIACHECK_PNWRS"                 "DMG_AGENT1_CD_PNWRS"           
+ [99] "DMG_AGENT2_CD_PNWRS"            "DMG_AGENT3_CD_PNWRS"           
+[101] "MIST_CL_CD_PNWRS"               "SEVERITY1_CD_PNWRS"            
+[103] "SEVERITY1A_CD_PNWRS"            "SEVERITY1B_CD_PNWRS"           
+[105] "SEVERITY2_CD_PNWRS"             "SEVERITY2A_CD_PNWRS"           
+[107] "SEVERITY2B_CD_PNWRS"            "SEVERITY3_CD_PNWRS"            
+[109] "UNKNOWN_DAMTYP1_PNWRS"          "UNKNOWN_DAMTYP2_PNWRS"         
+[111] "PREV_PNTN_SRS"                  "DISEASE_SRS"                   
+[113] "DIEBACK_SEVERITY_SRS"           "DAMAGE_AGENT_CD1"              
+[115] "DAMAGE_AGENT_CD2"               "DAMAGE_AGENT_CD3"              
+[117] "CENTROID_DIA"                   "CENTROID_DIA_HT"               
+[119] "CENTROID_DIA_HT_ACTUAL"         "UPPER_DIA"                     
+[121] "UPPER_DIA_HT"                   "VOLCSSND"                      
+[123] "DRYBIO_SAWLOG"                  "DAMAGE_AGENT_CD1_SRS"          
+[125] "DAMAGE_AGENT_CD2_SRS"           "DAMAGE_AGENT_CD3_SRS"          
+[127] "DRYBIO_AG"                      "ACTUALHT_CALC"                 
+[129] "ACTUALHT_CALC_CD"               "CULL_BF_ROTTEN"                
+[131] "CULL_BF_ROTTEN_CD"              "CULL_BF_ROUGH"                 
+[133] "CULL_BF_ROUGH_CD"               "PREVDIA_FLD"                   
+[135] "TREECLCD_31_NCRS"               "TREE_GRADE_NCRS"               
+[137] "BOUGHS_AVAILABLE_NCRS"          "BOUGHS_HRVST_NCRS"             
+[139] "TREECLCD_31_NERS"               "AGENTCD_NERS"                  
+[141] "BFSNDCD_NERS"                   "AGECHKCD_RMRS"                 
+[143] "PREV_ACTUALHT_RMRS"             "PREV_AGECHKCD_RMRS"            
+[145] "PREV_BHAGE_RMRS"                "PREV_HT_RMRS"                  
+[147] "PREV_TOTAGE_RMRS"               "PREV_TREECLCD_RMRS"            
+[149] "RADAGECD_RMRS"                  "RADGRW_RMRS"                   
+[151] "VOLBSGRS"                       "VOLBSNET"                      
+[153] "SAPLING_FUSIFORM_SRS"           "EPIPHYTE_PNWRS"                
+[155] "ROOT_HT_PNWRS"                  "CAVITY_USE_PNWRS"              
+[157] "CORE_LENGTH_PNWRS"              "CULTURALLY_KILLED_PNWRS"       
+[159] "DIA_EST_PNWRS"                  "GST_PNWRS"                     
+[161] "INC10YR_PNWRS"                  "INC5YRHT_PNWRS"                
+[163] "INC5YR_PNWRS"                   "RING_COUNT_INNER_2INCHES_PNWRS"
+[165] "RING_COUNT_PNWRS"               "SNAG_DIS_CD_PNWRS"             
+[167] "CONEPRESCD1"                    "CONEPRESCD2"                   
+[169] "CONEPRESCD3"                    "MASTCD"                        
+[171] "VOLTSGRS"                       "VOLTSGRS_BARK"                 
+[173] "VOLTSSND"                       "VOLTSSND_BARK"                 
+[175] "VOLCFGRS_STUMP"                 "VOLCFGRS_STUMP_BARK"           
+[177] "VOLCFSND_STUMP"                 "VOLCFSND_STUMP_BARK"           
+[179] "VOLCFGRS_BARK"                  "VOLCFGRS_TOP"                  
+[181] "VOLCFGRS_TOP_BARK"              "VOLCFSND_BARK"                 
+[183] "VOLCFSND_TOP"                   "VOLCFSND_TOP_BARK"             
+[185] "VOLCFNET_BARK"                  "VOLCSGRS_BARK"                 
+[187] "VOLCSSND_BARK"                  "VOLCSNET_BARK"                 
+[189] "DRYBIO_STEM"                    "DRYBIO_STEM_BARK"              
+[191] "DRYBIO_STUMP_BARK"              "DRYBIO_BOLE_BARK"              
+[193] "DRYBIO_BRANCH"                  "DRYBIO_FOLIAGE"                
+[195] "DRYBIO_SAWLOG_BARK"             "TREE_COMPOSITE_ID"             
+[197] "PLOT_COMPOSITE_ID"             </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-table" class="level2">
+<h2 class="anchored" data-anchor-id="plot-table"><code>plot</code> table</h2>
+<p>The <code>plot</code> table contains <em>most</em> columns from the FIADB PLOT table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>These columns are removed:</p>
+<ul>
+<li>CREATED_BY</li>
+<li>CREATED_DATE</li>
+<li>CREATED_IN_INSTANCE</li>
+<li>MODIFIED_BY</li>
+<li>MODIFIED_DATE</li>
+<li>MODIFIED_IN_INSTANCE</li>
+</ul>
+<p>These columns are added:</p>
+<ul>
+<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+</ul>
+<p>This column is renamed:</p>
+<ul>
+<li>CN is renamed to PLT_CN</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for plot table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for plot table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "PLOT_CN"                        "SRV_CN"                        
+ [3] "CTY_CN"                         "PREV_PLT_CN"                   
+ [5] "INVYR"                          "STATECD"                       
+ [7] "UNITCD"                         "COUNTYCD"                      
+ [9] "PLOT"                           "PLOT_STATUS_CD"                
+[11] "PLOT_NONSAMPLE_REASN_CD"        "MEASYEAR"                      
+[13] "MEASMON"                        "MEASDAY"                       
+[15] "REMPER"                         "KINDCD"                        
+[17] "DESIGNCD"                       "RDDISTCD"                      
+[19] "WATERCD"                        "LAT"                           
+[21] "LON"                            "ELEV"                          
+[23] "GROW_TYP_CD"                    "MORT_TYP_CD"                   
+[25] "P2PANEL"                        "P3PANEL"                       
+[27] "ECOSUBCD"                       "CONGCD"                        
+[29] "MANUAL"                         "KINDCD_NC"                     
+[31] "QA_STATUS"                      "MICROPLOT_LOC"                 
+[33] "DECLINATION"                    "EMAP_HEX"                      
+[35] "SAMP_METHOD_CD"                 "SUBP_EXAMINE_CD"               
+[37] "MACRO_BREAKPOINT_DIA"           "INTENSITY"                     
+[39] "CYCLE"                          "SUBCYCLE"                      
+[41] "ECO_UNIT_PNW"                   "TOPO_POSITION_PNW"             
+[43] "NF_SAMPLING_STATUS_CD"          "NF_PLOT_STATUS_CD"             
+[45] "NF_PLOT_NONSAMPLE_REASN_CD"     "P2VEG_SAMPLING_STATUS_CD"      
+[47] "P2VEG_SAMPLING_LEVEL_DETAIL_CD" "INVASIVE_SAMPLING_STATUS_CD"   
+[49] "INVASIVE_SPECIMEN_RULE_CD"      "DESIGNCD_P2A"                  
+[51] "MANUAL_DB"                      "SUBPANEL"                      
+[53] "COLOCATED_CD_RMRS"              "CONDCHNGCD_RMRS"               
+[55] "FUTFORCD_RMRS"                  "MANUAL_NCRS"                   
+[57] "MANUAL_NERS"                    "MANUAL_RMRS"                   
+[59] "PAC_ISLAND_PNWRS"               "PLOT_SEASON_NERS"              
+[61] "PRECIPITATION"                  "PREV_MICROPLOT_LOC_RMRS"       
+[63] "PREV_PLOT_STATUS_CD_RMRS"       "REUSECD1"                      
+[65] "REUSECD2"                       "REUSECD3"                      
+[67] "PLOT_COMPOSITE_ID"             </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="cond-table" class="level2">
+<h2 class="anchored" data-anchor-id="cond-table"><code>cond</code> table</h2>
+<p>The <code>cond</code> table contains <em>most</em> columns from the FIADB COND table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>These columns are removed:</p>
+<ul>
+<li>CREATED_BY</li>
+<li>CREATED_DATE</li>
+<li>CREATED_IN_INSTANCE</li>
+<li>MODIFIED_BY</li>
+<li>MODIFIED_DATE</li>
+<li>MODIFIED_IN_INSTANCE</li>
+</ul>
+<p>These columns are added:</p>
+<ul>
+<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+</ul>
+<p>This column is renamed:</p>
+<ul>
+<li>CN is renamed to COND_CN</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for cond table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for cond table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "COND_CN"                       "PLT_CN"                       
+  [3] "INVYR"                         "STATECD"                      
+  [5] "UNITCD"                        "COUNTYCD"                     
+  [7] "PLOT"                          "CONDID"                       
+  [9] "COND_STATUS_CD"                "COND_NONSAMPLE_REASN_CD"      
+ [11] "RESERVCD"                      "OWNCD"                        
+ [13] "OWNGRPCD"                      "FORINDCD"                     
+ [15] "ADFORCD"                       "FORTYPCD"                     
+ [17] "FLDTYPCD"                      "MAPDEN"                       
+ [19] "STDAGE"                        "STDSZCD"                      
+ [21] "FLDSZCD"                       "SITECLCD"                     
+ [23] "SICOND"                        "SIBASE"                       
+ [25] "SISP"                          "STDORGCD"                     
+ [27] "STDORGSP"                      "PROP_BASIS"                   
+ [29] "CONDPROP_UNADJ"                "MICRPROP_UNADJ"               
+ [31] "SUBPPROP_UNADJ"                "MACRPROP_UNADJ"               
+ [33] "SLOPE"                         "ASPECT"                       
+ [35] "PHYSCLCD"                      "GSSTKCD"                      
+ [37] "ALSTKCD"                       "DSTRBCD1"                     
+ [39] "DSTRBYR1"                      "DSTRBCD2"                     
+ [41] "DSTRBYR2"                      "DSTRBCD3"                     
+ [43] "DSTRBYR3"                      "TRTCD1"                       
+ [45] "TRTYR1"                        "TRTCD2"                       
+ [47] "TRTYR2"                        "TRTCD3"                       
+ [49] "TRTYR3"                        "PRESNFCD"                     
+ [51] "BALIVE"                        "FLDAGE"                       
+ [53] "ALSTK"                         "GSSTK"                        
+ [55] "FORTYPCDCALC"                  "HABTYPCD1"                    
+ [57] "HABTYPCD1_PUB_CD"              "HABTYPCD1_DESCR_PUB_CD"       
+ [59] "HABTYPCD2"                     "HABTYPCD2_PUB_CD"             
+ [61] "HABTYPCD2_DESCR_PUB_CD"        "MIXEDCONFCD"                  
+ [63] "VOL_LOC_GRP"                   "SITECLCDEST"                  
+ [65] "SITETREE_TREE"                 "SITECL_METHOD"                
+ [67] "CARBON_DOWN_DEAD"              "CARBON_LITTER"                
+ [69] "CARBON_SOIL_ORG"               "CARBON_UNDERSTORY_AG"         
+ [71] "CARBON_UNDERSTORY_BG"          "CYCLE"                        
+ [73] "SUBCYCLE"                      "SOIL_ROOTING_DEPTH_PNW"       
+ [75] "GROUND_LAND_CLASS_PNW"         "PLANT_STOCKABILITY_FACTOR_PNW"
+ [77] "STND_COND_CD_PNWRS"            "STND_STRUC_CD_PNWRS"          
+ [79] "STUMP_CD_PNWRS"                "FIRE_SRS"                     
+ [81] "GRAZING_SRS"                   "HARVEST_TYPE1_SRS"            
+ [83] "HARVEST_TYPE2_SRS"             "HARVEST_TYPE3_SRS"            
+ [85] "LAND_USE_SRS"                  "OPERABILITY_SRS"              
+ [87] "STAND_STRUCTURE_SRS"           "NF_COND_STATUS_CD"            
+ [89] "NF_COND_NONSAMPLE_REASN_CD"    "CANOPY_CVR_SAMPLE_METHOD_CD"  
+ [91] "LIVE_CANOPY_CVR_PCT"           "LIVE_MISSING_CANOPY_CVR_PCT"  
+ [93] "NBR_LIVE_STEMS"                "OWNSUBCD"                     
+ [95] "INDUSTRIALCD_FIADB"            "RESERVCD_5"                   
+ [97] "ADMIN_WITHDRAWN_CD"            "CHAINING_CD"                  
+ [99] "LAND_COVER_CLASS_CD_RET"       "AFFORESTATION_CD"             
+[101] "PREV_AFFORESTATION_CD"         "DWM_FUELBED_TYPCD"            
+[103] "NVCS_PRIMARY_CLASS"            "NVCS_LEVEL_1_CD"              
+[105] "NVCS_LEVEL_2_CD"               "NVCS_LEVEL_3_CD"              
+[107] "NVCS_LEVEL_4_CD"               "NVCS_LEVEL_5_CD"              
+[109] "NVCS_LEVEL_6_CD"               "NVCS_LEVEL_7_CD"              
+[111] "NVCS_LEVEL_8_CD"               "AGE_BASIS_CD_PNWRS"           
+[113] "COND_STATUS_CHNG_CD_RMRS"      "CRCOVPCT_RMRS"                
+[115] "DOMINANT_SPECIES1_PNWRS"       "DOMINANT_SPECIES2_PNWRS"      
+[117] "DOMINANT_SPECIES3_PNWRS"       "DSTRBCD1_P2A"                 
+[119] "DSTRBCD2_P2A"                  "DSTRBCD3_P2A"                 
+[121] "DSTRBYR1_P2A"                  "DSTRBYR2_P2A"                 
+[123] "DSTRBYR3_P2A"                  "FLDTYPCD_30"                  
+[125] "FOREST_COMMUNITY_PNWRS"        "LAND_USECD_RMRS"              
+[127] "MAICF"                         "PCTBARE_RMRS"                 
+[129] "QMD_RMRS"                      "RANGETYPCD_RMRS"              
+[131] "SDIMAX_RMRS"                   "SDIPCT_RMRS"                  
+[133] "SDI_RMRS"                      "STAND_STRUCTURE_ME_NERS"      
+[135] "TREES_PRESENT_NCRS"            "TREES_PRESENT_NERS"           
+[137] "TRTCD1_P2A"                    "TRTCD2_P2A"                   
+[139] "TRTCD3_P2A"                    "TRTOPCD"                      
+[141] "TRTYR1_P2A"                    "TRTYR2_P2A"                   
+[143] "TRTYR3_P2A"                    "LAND_COVER_CLASS_CD"          
+[145] "SIEQN_REF_CD"                  "SICOND_FVS"                   
+[147] "SIBASE_FVS"                    "SISP_FVS"                     
+[149] "SIEQN_REF_CD_FVS"              "MQUADPROP_UNADJ"              
+[151] "SOILPROP_UNADJ"                "FOREST_COND_STATUS_CHANGE_CD" 
+[153] "PLOT_COMPOSITE_ID"            </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="derived-as-part-of-foresttime" class="level1">
+<h1>Derived as part of forestTIME</h1>
+<section id="tree_cns-table" class="level2">
+<h2 class="anchored" data-anchor-id="tree_cns-table"><code>tree_cns</code> table</h2>
+<p>This table links the survey-to-survey TREE_CN with the TREE_FIRST_CN, or the first CN number associated with that tree in the database.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Column descriptions for tree_cns table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Column descriptions for tree_cns table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.</li>
+<li>TREE_FIRST_CN: a persistent identifier for each tree; the first CN number associated with that tree throughout its history in the database.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for tree_cns table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for tree_cns table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "TREE_CN"       "TREE_FIRST_CN" "STATECD"       "COUNTYCD"     </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="qa_flags-table" class="level2">
+<h2 class="anchored" data-anchor-id="qa_flags-table"><code>qa_flags</code> table</h2>
+<p>This table tracks any QA flags associated with survey-to-survey records of individual trees.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Column descriptions for qa_flags table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Column descriptions for qa_flags table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.</li>
+<li>TREE_COMPOSITE_ID: the TREE_COMPOSITE_ID created as part of the tree table (see above).</li>
+<li>INVYR: INVYR</li>
+<li>STATUSCD: STATUSCD as recorded in the TREE table</li>
+<li>STATUSCD_CORR: If a tree has been recorded as dead, and then in a later census recorded as alive, the “dead” STATUSCD is changed to <code>5</code> (a code RMD made up for “zombie tree, or, probably never dead”). All other STATUSCDs are copied directly over to this column.</li>
+<li>STATUSCD_FLAG: T/F, notes whether the STATUSCD for this record is changed in STATUSCD_CORR</li>
+<li>SPCD: SPCD as recorded in the TREE table</li>
+<li>SPCD_CORR: If a tree has had multiple SPCDs recorded over time, all previous SPCDs are corrected to the <em>last</em> SPCD observed for that tree.</li>
+<li>SPCD_FLAG: T/F, notes whether the SPCD for this record is changed in SPCD_CORR</li>
+<li>CYCLE: CYCLE from TREE table</li>
+<li>CYCLE_MULTIPLE_VISITS: T/F, notes whether this tree has multiple records from this CYCLE.</li>
+<li>LAST_CYCLE_VISIT: T/F, notes whether this is the most recent visit for this tree within this cycle. If a cycle has only one visit, always TRUE; if there are multiple visits, the last visit will have TRUE.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for qa_flags table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for qa_flags table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "TREE_CN"               "TREE_COMPOSITE_ID"     "INVYR"                
+ [4] "STATUSCD"              "STATUSCD_CORR"         "STATUSCD_FLAG"        
+ [7] "SPCD"                  "SPCD_CORR"             "SPCD_FLAG"            
+[10] "CYCLE"                 "CYCLE_MULTIPLE_VISITS" "LAST_CYCLE_VISIT"     </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="tree_info_composite_id-table" class="level2">
+<h2 class="anchored" data-anchor-id="tree_info_composite_id-table"><code>tree_info_composite_id</code> table</h2>
+<p>This table summarizes information from the <code>tree</code> and <code>qa_flags</code> to get information about individual trees across the whole survey period.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Column descriptions for tree_info_composite_id table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Column descriptions for tree_info_composite_id table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>TREE_COMPOSITE_ID: Persistent composite ID.</li>
+<li>PLOT_COMPOSITE_ID: Persistent composite ID.</li>
+<li>PLOT: PLOT</li>
+<li>SUBP: SUBP</li>
+<li>STATECD: STATECD</li>
+<li>COUNTYCD: COUNTYCD</li>
+<li>SPCD_CORR: The most recent SPCD ever associated with this tree</li>
+<li>NRECORDS: The number of records for this tree in the whole database</li>
+<li>FIRSTYR: The year of the first record for this tree</li>
+<li>LASTYR: The year of the last record for this tree</li>
+<li>ANY_SPCD_FLAG: T/F, whether this tree has had any inconsistencies in SPCD over time (any records for this tree have SPCD_FLAG = TRUE in the qa_flags table).</li>
+<li>ANY_STATUSCD_FLAG: T/F, whether this tree has had any logical inconsistencies in STATUSCD over time (any records for this tree have STATUSCD_CORR = 5 and STATUSCD_FLAG = TRUE in the qa_flags table).</li>
+<li>ANY_CYCLE_VISITS_FLAG: T/F, whether this tree has had multiple visits recorded in any cycle over time (any records for this tree have CYCLE_MULTIPLE_VISITS = TRUE in qa_flags table)</li>
+<li>MULTIPLE_LOCATIONS_FLAG: T/F, whether the chain of CN + PREV_TRE_CN for this tree links to trees found in other plots/counties than this tree. If this occurs, the other records will have a different TREE_COMPOSITE_ID than the one recorded for this tree. These instances are assumed to be incorrect (that is, those other records are in fact different trees) unless there is another explanation.</li>
+<li>MULTIPLE_CNS_FLAG: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain).</li>
+<li>MULTI_OWNCD_FLAG: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+<li>MULTI_ADFORCD_FLAG: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for tree_info_composite_id table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for tree_info_composite_id table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "TREE_COMPOSITE_ID"       "PLOT_COMPOSITE_ID"      
+ [3] "PLOT"                    "SUBP"                   
+ [5] "STATECD"                 "COUNTYCD"               
+ [7] "SPCD_CORR"               "NRECORDS"               
+ [9] "FIRSTYR"                 "LASTYR"                 
+[11] "ANY_SPCD_FLAG"           "ANY_STATUSCD_FLAG"      
+[13] "ANY_CYCLE_VISITS_FLAG"   "MULTIPLE_LOCATIONS_FLAG"
+[15] "MULTIPLE_CNS_FLAG"       "MULTI_OWNCD_FLAG"       
+[17] "MULTI_ADFORCD_FLAG"     </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="all_invyrs-table" class="level2">
+<h2 class="anchored" data-anchor-id="all_invyrs-table"><code>all_invyrs</code> table</h2>
+<p>This table is just a list of all possible INVYRs from 2000 to 2024. Its only column is <code>INVYR</code>.</p>
+</section>
+<section id="tree_annualized-table" class="level2">
+<h2 class="anchored" data-anchor-id="tree_annualized-table"><code>tree_annualized</code> table</h2>
+<p>This table contains year-to-year estimates of DIA, HT, and ACTUALHT for each tree with more than one survey with non-NA values for all of these variables. Estimates are generated as linear functions from one value to the next for each variable for each tree.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Column descriptions for tree_annualized table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Column descriptions for tree_annualized table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>TREE_COMPOSITE_ID: Persistent composite ID.</li>
+<li>TREE_CN: CN from TREE table; CN for the record in the TREE table on which this estimate is based</li>
+<li>PLT_CN: PLT_CN from TREE table corresponding to the record on which this estimate is based.</li>
+<li>CONDID: CONDID from TREE table corresponding to the record on which this estimate is based.</li>
+<li>YEAR: YEAR for this estimate. If the YEAR is an INVYR in the TREE table, this record is copied from there. If the YEAR falls between INVYRs, this record is interpolated between the records from the two flanking INVYRS.</li>
+<li>DIA_est: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.</li>
+<li>HT_est: Estimated HT for this year.</li>
+<li>ACTUALHT_est: Estimated ACTUALHT for this year.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for tree_annualized table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for tree_annualized table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "TREE_COMPOSITE_ID" "TREE_CN"           "PLT_CN"           
+[4] "CONDID"            "YEAR"              "DIA_est"          
+[7] "HT_est"            "ACTUALHT_est"     </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="sapling_transitions-table" class="level2">
+<h2 class="anchored" data-anchor-id="sapling_transitions-table"><code>sapling_transitions</code> table</h2>
+<p>This table contains survey-to-survey counts and proportions of <em>saplings</em> undergoing various demographic transitions on each plot.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Column descriptions for sapling_transitions table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Column descriptions for sapling_transitions table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>PLOT_COMPOSITE_ID: Persistent composite ID.</li>
+<li>INVYR: INVYR for the survey defining the <em>end</em> of the time period considered for transition calculations.</li>
+<li>PREV_INVYR: INVYR for the survey defining the <em>beginning</em> of the time period considered for transition calculations.</li>
+<li>timespan: Difference between INVYR and PREV_INVYR</li>
+<li>live_sapling: Count of all live saplings on this plot in INVYR</li>
+<li>new_sapling: Count of live saplings on this plot in INVYR that have not been recorded before</li>
+<li>sapling_sapling: Count of live saplings on this plot in INVYR that were also saplings in PREV_INVYR</li>
+<li>sapling_tree: Count of live trees on this plot in INVYR that were saplings in PREV_INVYR</li>
+<li>sapling_dead: Count of dead trees/saplings on this plot in INVYR that were live saplings in PREV_INVYR</li>
+<li>sapling_removed: Count of removed trees/saplings in INVYR that were live saplings in PREV_INVYR</li>
+<li>sapling_not_sampled: Count of saplings that were live saplings in PREV_INVYR that are present in the database but marked not sampled (STATUSCD = 0) in INVYR</li>
+<li>sapling_missing_data: Count of live saplings in INVYR with missing DIA in INVYR</li>
+<li>sapling_vanishes_next_year: Count of live saplings in INVYR not present in the database in the next INVYR</li>
+<li>PREV_live_sapling: Count of saplings alive in PREV_INVYR</li>
+<li>sapling_vanished: Count of saplings present in PREV_INVYR that are not present in INVYR; presumed dead</li>
+<li>presumed_dead: Sum of sapling_dead and sapling_vanished</li>
+<li>sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.</li>
+<li>sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.</li>
+<li>sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.</li>
+<li>presumed_dead_prop: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).</li>
+<li>sapling_not_sampled_prop: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.</li>
+<li>sapling_missing_data_prop: Proportion of live sapligns in PREV_INVYR marked as alive, but missing DIA information, in INVYR.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Full column list for sapling_transitions table">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Full column list for sapling_transitions table
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "PLOT_COMPOSITE_ID"          "INVYR"                     
+ [3] "live_sapling"               "new_sapling"               
+ [5] "sapling_sapling"            "sapling_tree"              
+ [7] "sapling_dead"               "sapling_removed"           
+ [9] "sapling_not_sampled"        "sapling_missing_data"      
+[11] "sapling_vanishes_next_year" "PREV_live_sapling"         
+[13] "sapling_vanished"           "PREV_INVYR"                
+[15] "presumed_dead"              "timespan"                  
+[17] "sapling_sapling_prop"       "sapling_tree_prop"         
+[19] "sapling_removed_prop"       "presumed_dead_prop"        
+[21] "sapling_not_sampled_prop"   "sapling_missing_data_prop" </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

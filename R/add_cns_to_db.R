@@ -82,7 +82,7 @@ chain_by_joins <- function(tree_table) {
   
   known_trees <- known_trees |>
     left_join(tree_table) |>
-    select(TREE_CN, TREE_FIRST_CN, STATECD, COUNTYCD)
+    select(TREE_CN, TREE_FIRST_CN)
   
   known_trees
 }
