@@ -26,7 +26,7 @@ download_csv_from_datamart(states = c("MT", "AZ", "MN"),
 
 # create database tables 
 source(here::here("R", "create_all_tables.R"))
-create_all_tables(con, rawdat_dir = csv_dir, overwrite = TRUE)
+create_all_tables(con, rawdat_dir = csv_dir)
 
 # clean up
 dbDisconnect(con, shutdown = TRUE)

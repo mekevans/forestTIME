@@ -19,7 +19,7 @@ download_csv_from_datamart <- function(states, rawdat_dir, overwrite = FALSE) {
       
   }
   
-  purrr::map(states, download_state_data, rawdat_dir = rawdat_dir)
+  purrr::map(states, download_state_data, rawdat_dir = rawdat_dir, max_time = 900)
   
 }
 

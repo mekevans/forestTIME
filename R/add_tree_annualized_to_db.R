@@ -21,12 +21,15 @@ add_annual_estimates_to_db <- function(con) {
     return()
   }
   
+  if(!("all_invyrs" %in% existing_tables)) {
   all_invyrs <- data.frame(INVYR = c(2000:2024))
   
   arrow::to_duckdb(all_invyrs, con, "all_invyrs")
   dbSendStatement(con, "CREATE TABLE all_invyrs AS SELECT * FROM all_invyrs")
+  }
   
   trees <- tbl(con, "tree") |>
+    mutate(ACTUALHT = as.numeric(ACTUALHT)) |>
     left_join(tbl(con, "tree_info_composite_id")) |>
     filter(NRECORDS > 1) |>
     filter(!is.na(DIA), !is.na(HT), !is.na(ACTUALHT)) |>

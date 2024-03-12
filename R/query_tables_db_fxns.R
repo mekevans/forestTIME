@@ -1,4 +1,4 @@
-library(ducdkb)
+library(duckdb)
 library(dplyr)
 
 #' Query tree surveys
