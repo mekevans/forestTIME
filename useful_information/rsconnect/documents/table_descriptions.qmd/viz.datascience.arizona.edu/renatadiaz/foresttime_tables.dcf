@@ -1,0 +1,12 @@
+name: foresttime_tables
+title: foresttime_tables
+username: renatadiaz
+account: renatadiaz
+server: viz.datascience.arizona.edu
+hostUrl: https://viz.datascience.arizona.edu/__api__
+appId: 1037
+bundleId: 4802
+url: https://viz.datascience.arizona.edu:443/content/170e1fce-7f26-4d35-8d81-08aafc02faaf/
+version: 1
+asMultiple: FALSE
+asStatic: TRUE
