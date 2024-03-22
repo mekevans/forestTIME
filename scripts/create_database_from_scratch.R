@@ -3,10 +3,10 @@ library(DBI)
 library(dplyr)
 
 # path to where raw .csv files from DataMart are or are to be downloaded
-csv_dir <- here::here("data", "csv") 
+csv_dir <- here::here("data", "rawdat", "state") 
 
 # path to .duckdb file for database
-database_dir <- here::here("data", "db", "foresttime-tiny.duckdb")
+database_dir <- here::here("data", "db", "foresttime-to-share.duckdb")
 
 # file.remove(database_dir)
 
@@ -16,13 +16,13 @@ dbListTables(con)
 
 # download .csvs from datamart
 # if the .csvs are already present, and overwrite = FALSE, they will not be overwritten
-source(here::here("R", "download_csv_wrapper.R"))
-fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
-  filter(!(STATEFP %in% c(11, 60, 66, 69, 72, 74, 78)))
-
-download_csv_from_datamart(states = c("MT", "AZ", "MN"),
-                          rawdat_dir = csv_dir,
-                          overwrite = FALSE)
+# source(here::here("R", "download_csv_wrapper.R"))
+# fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+#   filter(!(STATEFP %in% c(11, 60, 66, 69, 72, 74, 78)))
+# 
+# download_csv_from_datamart(states = c("MT", "AZ", "MN"),
+#                           rawdat_dir = csv_dir,
+#                           overwrite = FALSE)
 
 # create database tables 
 source(here::here("R", "create_all_tables.R"))
