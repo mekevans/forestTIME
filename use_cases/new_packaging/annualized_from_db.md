@@ -26,7 +26,7 @@ source(here::here("R", "query_tables_db_fxns.R"))
 ``` r
 source(here::here("R", "query_annualized.R"))
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-tiny.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
 ```
 
 ``` r
@@ -37,7 +37,7 @@ az_nfs_annualized <- query_annualized(con,
                                         MULTI_OWNCD_FLAG == FALSE,
                                         MULTI_ADFORCD_FLAG == FALSE
                                       ),
-                                      variables = c("DIA_est", "HT_est", "YEAR", "ADFORCD", "SPCD_CORR", "SPCD_FLAG"))
+                                      variables = c("DIA_est", "HT_est", "ACTUALHT_est", "YEAR", "ADFORCD", "SPCD_CORR", "SPCD_FLAG"))
 ```
 
     Joining with `by = join_by(TREE_COMPOSITE_ID)`

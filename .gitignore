@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-data/db/*
+data/db/*duckdb
 data/arrow/*
 data/rawdat/state/*
 data/rawdat/species/*

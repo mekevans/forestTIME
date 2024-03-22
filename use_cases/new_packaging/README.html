@@ -354,11 +354,23 @@ display: none;
 
 <div id="new-workflow" class="section level1">
 <h1>New workflow</h1>
-<ol start="0" style="list-style-type: decimal">
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<ol style="list-style-type: decimal">
+<li>Fork or clone this repo.</li>
 <li>You will need the following packages installed: DBI, duckdb, arrow,
-dplyr, stringr. You can install them the usual way.</li>
-<li>If you’re setting up on a new computer, you can either get a
-foresttime database from Renata <em>or</em> run
+here, dplyr, stringr, tidyr. You can install them the usual way:
+<code>install.packages(c(&quot;DBI&quot;, &quot;duckdb&quot;, &quot;here&quot;, &quot;arrow&quot;, &quot;dplyr&quot;, &quot;stringr&quot;, &quot;tidyr&quot;))</code></li>
+<li>Open forestTIME.Rproj on your computer.</li>
+</ol>
+</div>
+<div id="getting-a-database" class="section level2">
+<h2>Getting a database</h2>
+<ol style="list-style-type: decimal">
+<li>For a <em>quick start</em>, you can download a database (whole US)
+from this link: <a href="https://arizona.box.com/s/z59u6gjm8g91ioyechs4vwqbc3krnor3" class="uri">https://arizona.box.com/s/z59u6gjm8g91ioyechs4vwqbc3krnor3</a>.
+Store it in <code>data/db/</code>.</li>
+<li>To generate a new database, you can open, modify, and
 <code>scripts/create_database_from_scratch.R</code> to set yourself up
 with a database. This will download .csvs from DataMart and create all
 the derived tables. You can change which states you download or get them
@@ -370,15 +382,24 @@ e.g. direct from the FIADB internal database. This is definitely doable
 but Renata will need to work with someone connected to such a database
 to get it sorted out.</li>
 </ol></li>
+</ol>
+</div>
+<div id="accessing-data" class="section level2">
+<h2>Accessing data</h2>
+<ol style="list-style-type: decimal">
 <li>The three .qmd/.md files in this folder contain examples of pulling
 survey timeseries, annualized timeseries, and sapling transition tables
-from this database. You might have to modify them to point to wherever
-the database is stored on your computer. You can then also play with
-them to pull data for different states/with different conditions and
-variables.</li>
-<li>See <a href="https://viz.datascience.arizona.edu/foresttime-tables/" class="uri">https://viz.datascience.arizona.edu/foresttime-tables/</a>
-for a description of the tables and columns in this database.</li>
+from this database.</li>
+<li>You can modify them to pull different subsets of data or different
+variables. For a list of the columns available to filter on/import, see:
+<a href="https://viz.datascience.arizona.edu/foresttime-tables/" class="uri">https://viz.datascience.arizona.edu/foresttime-tables/</a></li>
+<li>They are currently set up to pull from the database at the Box link
+above, stored in <code>data/db</code>. If you stored the database
+somewhere else, named it differently, or made your own, you might have
+to modify them to point to wherever the database is stored on your
+computer.</li>
 </ol>
+</div>
 </div>
 
 
