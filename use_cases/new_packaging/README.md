@@ -2,7 +2,7 @@
 
 ## Setup 
 
-1. Fork or clone this repo.
+1. Clone this repo to your computer.
 1. You will need the following packages installed: DBI, duckdb, arrow, here, dplyr, stringr, tidyr. You can install them the usual way: `install.packages(c("DBI", "duckdb", "here", "arrow", "dplyr", "stringr", "tidyr"))`
 1. Open forestTIME.Rproj on your computer.
 
