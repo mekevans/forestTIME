@@ -9,7 +9,7 @@
 ## Getting a database
 
 1. For a *quick start*, you can download a database (whole US) from this link: https://arizona.box.com/s/z59u6gjm8g91ioyechs4vwqbc3krnor3. Store it in `data/db/`. 
-1. To generate a new database, you can open, modify, and `scripts/create_database_from_scratch.R` to set yourself up with a database. This will download .csvs from DataMart and create all the derived tables. You can change which states you download or get them all (which will take a while to download!). You can choose what to name your database and where to put it.
+1. To generate a new database, you can open, modify, and run `scripts/create_database_from_scratch.R` to set yourself up with a database. This will download .csvs from DataMart and create all the derived tables. You can change which states you download or get them all (which will take a while to download!). You can choose what to name your database and where to put it.
     1. TODO: set up alternate workflow to import data from other sources, e.g. direct from the FIADB internal database. This is definitely doable but Renata will need to work with someone connected to such a database to get it sorted out.
 
 ## Accessing data
