@@ -2,7 +2,6 @@
 
 Workshopping scripts related to the FIA timeseries project.
 
-
 # Structure
 
 - data/rawdat/state
@@ -21,8 +20,13 @@ Workshopping scripts related to the FIA timeseries project.
     - ingrowth
     - whitebark_pine
     - old
+- useful_information
   - Some quarto docs containing information that it can be useful to refer to. Species codes and the columns of forestTIME tables.
     
+# How to use
 
-
-
+1. Clone this repo to your computer.
+1. Open forestTIME.Rproj in RStudio.
+1. (Once per computer) Run `scripts/00-forestTIME_setup.R`.
+1. Obtain a forestTIME database either from box or by creating it yourself. See `scripts/README.md` for options.
+1. Run query functions. You can work from the use cases in the `use_cases` directory, or freestyle based on the examples in `use_cases/new_packaging`. 
