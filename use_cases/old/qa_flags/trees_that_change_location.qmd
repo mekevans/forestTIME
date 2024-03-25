@@ -1,0 +1,46 @@
+---
+title: "Trees changing location (by CN)"
+format: gfm
+---
+
+```{r, echo = F, message = F, warning = F}
+
+library(duckdb)
+library(dplyr)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+fips <- read.csv(here::here("data", "rawdat", "fips", "fips.csv"))
+
+con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
+
+```
+
+```{r, echo = F}
+
+ents <- tbl(con, "tree_info_first_cn") |> 
+  mutate(nlocs = PLOTS + STATES + COUNTIES + UNITS + TREE_UNIQUE_IDS) |>
+  filter(nlocs > 5) |>
+  collect()
+
+```
+
+There are `r nrow(ents)` trees with PREV_TRE_CN links that would take them across plot/state/county/unit boundaries. 
+Most of the time (`r sum(ents$COUNTIES > 1)` times) they occur in multiple counties; occasionally it's plot (`r nrow(filter(ents, COUNTIES == 1, PLOTS > 1))`). It's never state, and never unit without also being county.
+They are in the following `r length(unique(ents$STATECD))` states:
+
+```{r, echo = F}
+
+ents |> group_by(STATECD) |> tally() |> left_join(fips, by = c("STATECD" = "STATEFP")) |> select(STATE_NAME, n) |> knitr::kable()
+
+```
+
+The list of trees is saved as `trees_that_change_location.csv` for further digging.
+
+```{r, echo = F, message = F, output = F}
+
+write.csv(ents, here::here("use_cases", "qa_flags", "trees_that_change_location.csv"), row.names = F)
+
+dbDisconnect(con, shutdown = TRUE)
+
+```

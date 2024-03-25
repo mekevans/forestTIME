@@ -5,15 +5,18 @@ editor: source
 ---
 
 ```{r}
-#| echo: FALSE
+#| echo: TRUE
 #| message: FALSE
 #| warning: FALSE
 
-library(duckdbfs)
+library(duckdb)
 library(dplyr)
 library(ggplot2)
 
-source(here::here("R", "query_tables.R"))
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
 
 theme_set(theme_bw())
 
@@ -28,11 +31,21 @@ STATECD = 16, 30, 56
 
 ```{r}
 
-whitebark_pine <- get_timeseries(
-  conditions = list(STATECD = list("%in%", c(16, 30, 56)),
-                    SPCD = list("==", 101)),
-  variables = c("STATUSCD", "DIA", "HT", "COND_STATUS_CD", "LAT", "LON",
-                "BALIVE", "SICOND", "SISP", "SIBASE",
+whitebark_pine  <- query_tree_surveys(
+  con = con,
+  conditions = create_conditions(STATECD %in% c(16, 30, 56),
+                                 SPCD == 101,
+                                  ANY_SPCD_FLAG == FALSE), # This filters out trees with changing SPCD over time
+  variables = c("STATUSCD", 
+                "DIA", 
+                "HT", 
+                "COND_STATUS_CD", 
+                "LAT", 
+                "LON",
+                "BALIVE", 
+                "SICOND", 
+                "SISP", 
+                "SIBASE",
                 "DSTRBCD1",
                 "DSTRBYR1",
                 "DSTRBCD2",
@@ -44,7 +57,7 @@ whitebark_pine <- get_timeseries(
                 "SLOPE",
                 "ASPECT",
                 "CONDPROP_UNADJ",
-                "RECONCILED")
+                "RECONCILECD")
 )
 
 knitr::kable(head(whitebark_pine))
@@ -60,7 +73,7 @@ knitr::kable(head(whitebark_pine))
 #| warning: FALSE
 
 whitebark_pine_measures <- whitebark_pine |> 
-  group_by(STATECD, TREE_UNIQUE_ID) |>
+  group_by(STATECD, TREE_COMPOSITE_ID) |>
   summarize(n = length(unique(INVYR))) 
 
 knitr::kable(whitebark_pine_measures |>
@@ -84,13 +97,13 @@ knitr::kable(whitebark_pine_measures |>
 whitebark_pine_repeats <- filter(whitebark_pine_measures, n > 1) |>
   left_join(whitebark_pine)
 
-ggplot(whitebark_pine_repeats, aes(INVYR, DIA, group = TREE_UNIQUE_ID)) +
+ggplot(whitebark_pine_repeats, aes(INVYR, DIA, group = TREE_COMPOSITE_ID)) +
   geom_line() +
   facet_wrap(vars(STATECD), scales = "free") +
   ggtitle("DIA")
 
 
-ggplot(whitebark_pine_repeats, aes(INVYR, HT, group = TREE_UNIQUE_ID)) +
+ggplot(whitebark_pine_repeats, aes(INVYR, HT, group = TREE_COMPOSITE_ID)) +
   geom_line() +
   facet_wrap(vars(STATECD), scales = "free") +
   ggtitle("HT")
@@ -105,4 +118,13 @@ write.csv(whitebark_pine, here::here("use_cases", "whitebark_pine", "whitebark_p
 
 ```
 
+
 The saved file is `r trunc(file.size(here::here("use_cases", "whitebark_pine", "whitebark_pine.csv")) / 1E6, 3)` MB.
+
+
+## Clean up
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+
+```

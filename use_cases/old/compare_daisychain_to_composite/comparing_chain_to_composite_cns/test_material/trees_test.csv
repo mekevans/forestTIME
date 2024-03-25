@@ -1,0 +1,12 @@
+﻿CN,PREV_TRE_CN,INVYR,TEST_SCENARIO
+1,NA,2000,straightforward_chain
+2,1,2005,straightforward_chain
+3,2,2010,straightforward_chain
+4,3,2015,straightforward_chain
+7,NA,2005,survey_skipped
+8,7,2015,survey_skipped
+9,NA,2010,no_chain
+10,NA,2015,no_chain
+12,11,2000,prev_cn_not_in_data
+13,12,2005,prev_cn_not_in_data
+14,13,2010,prev_cn_not_in_data

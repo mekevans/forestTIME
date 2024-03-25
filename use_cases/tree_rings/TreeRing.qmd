@@ -4,17 +4,6 @@ format: gfm
 editor: source
 ---
 
-
-
-# To use
-
-To use this:
-
-1. Clone this repository and open the `forestTIME.Rproj` R project.
-2. Make sure you have the `duckdb` R package installed (`install.packages("duckdb"))`.
-3. Download the file `treering.duckdb` and save it to `data/db/treering.duckdb`. [Link here (this will download 1.5 GB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
-4. Then you should be able to render this document or use the code under "Connect to database", below. 
-
 ```{r}
 
 library(duckdb)
@@ -22,6 +11,8 @@ library(dplyr)
 library(ggplot2)
 
 source(here::here("R", "query_tables_db_fxns.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
 
 theme_set(theme_bw())
 
@@ -41,18 +32,15 @@ states_kelly <-
 states_kelly <- states_kelly$STATEFP
 ```
 
-# Connect to database
+# Query database
 
 ```{r}
 
-con <- connect_to_tables(here::here("data", "db", "forestTIME-treering.duckdb"))
-
 tree_ring <-
-  query_tables_db(con = con,
-                 tree_id_method = "first_cn", # Set this to "first_cn" to identify trees by the chain of control numbers. Set it to "composite" to use the string of STATE_PLOT_etc. 
-                  conditions = create_conditions(STATECD %in% states_kelly,
+  query_tree_surveys(con = con,
+                 conditions = create_conditions(STATECD %in% states_kelly,
                                                  SPCD %in% sp_kelly,
-                                                 SPCDS == 1 # This filters out any trees that have multiple SPCDs recorded over time. 
+                                                 ANY_SPCD_FLAG == FALSE # This filters out any trees that have multiple SPCDs recorded over time. 
                   ),
                   variables = c("DIA",
                                 "STATUSCD",
@@ -82,7 +70,7 @@ dbDisconnect(con, shutdown = TRUE)
 #| warning: FALSE
 #| 
 tree_ring_measures <- tree_ring |> 
-  group_by(STATECD, TREE_FIRST_CN) |>
+  group_by(STATECD, TREE_COMPOSITE_ID) |>
   summarize(n = length(unique(INVYR))) 
 
 knitr::kable(tree_ring_measures |>
@@ -106,7 +94,7 @@ knitr::kable(tree_ring_measures |>
 #| 
 
 knitr::kable(tree_ring |> 
-  select(SPCD, TREE_FIRST_CN) |>
+  select(SPCD, TREE_COMPOSITE_ID) |>
   distinct() |>
   group_by(SPCD) |>
   tally()
@@ -124,3 +112,11 @@ write.csv(tree_ring, here::here("use_cases", "tree_rings", "tree_ring.csv"))
 ```
 
 The saved file is `r trunc(file.size(here::here("use_cases", "tree_rings", "tree_ring.csv")) / 1E6, 3)` MB.
+
+
+## Clean up
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+
+```

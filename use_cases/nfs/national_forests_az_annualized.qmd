@@ -4,64 +4,66 @@ format: gfm
 editor: source
 ---
 
-# Pulling trees
-
 ```{r}
-#| echo: FALSE
-#| message: FALSE
-#| warning: FALSE
-
-library(duckdbfs)
-library(dplyr)
 library(ggplot2)
+library(tigris)
 
 source(here::here("R", "query_tables_db_fxns.R"))
-con <- connect_to_tables(here::here("data", "db", "forestTIME-cli.duckdb"))
-
-theme_set(theme_bw())
-
+source(here::here("R", "query_annualized.R"))
 ```
 
-Here I am attempting to pull records of trees on national forests in Arizona.
+
+# Pulling records
 
 ```{r}
 
-system.time(az_nfs <- query_tables_db(
-  con = con,
-  conditions = create_conditions(STATECD == 4,
-                                 OWNCD == 11),
-  variables = c("STATUSCD", "DIA", "HT", "OWNCD", "LAT", "LON", "OWNCD", "ADFORCD")
-))
 
-az_nfs_cns <- az_nfs$CN
-
-az_nfs_qa <- tbl(con, "qa_flag_table_composite") |>
-  filter(CN %in% az_nfs_cns) |>
-  collect()
-
-az_nfs <- az_nfs |> left_join(az_nfs_qa)
-
-knitr::kable(head(az_nfs))
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
 
 ```
+
+```{r}
+
+
+az_nfs <- query_annualized(
+  con,
+  conditions = create_conditions(
+    STATECD == 4,
+    OWNCD == 11,
+    MULTI_OWNCD_FLAG == FALSE,
+    MULTI_ADFORCD_FLAG == FALSE
+  ),
+  variables = c(
+    "LAT",
+    "LON",
+    "DIA_est",
+    "HT_est",
+    "ACTUALHT_est",
+    "YEAR",
+    "OWNCD",
+    "ADFORCD",
+    "SPCD_CORR",
+    "SPCD_FLAG"
+  )
+)
+
+```
+
 # Map of trees in AZ
 
-Here is a map of where those trees are - although they may be swapped and fuzzed:
+Here is a map of where the NFS trees are - although they may be swapped and fuzzed:
 
 
 ```{r, output = F, message = F, warning= F}
 
-library(tigris)
-
 az_nfs_trees <- az_nfs |>
-  group_by(TREE_UNIQUE_ID, LAT, LON, OWNCD, ADFORCD) |>
+  group_by(TREE_COMPOSITE_ID, LAT, LON, OWNCD, ADFORCD) |>
   summarize(NYEARS = as.factor(length(unique(INVYR)))) |>
   mutate(ADFORCD = as.factor(ADFORCD))
 
 az_state <- tigris::states() |>
   filter(STATEFP == "04")
 ```
-
 
 ```{r}
 
@@ -76,32 +78,32 @@ ggplot(az_state) +
 
 # Annualized DIA and HT measurements
 
-For ADFORCD == 305 because that's near Tucson.
+For ADFORCD == 305, because that's near Tucson.
 
 ```{r}
 
-meas_for_annual <- az_nfs |> 
-  filter(ADFORCD == 305) |> 
-  filter(!is.na(DIA), !is.na(HT)) |> 
-  arrange(TREE_UNIQUE_ID, INVYR) |>
-  group_by(TREE_UNIQUE_ID) |>
-  mutate(prev_INVYR = lag(INVYR, 1, NA),
-         prev_DIA = lag(DIA, 1, NA),
-         prev_HT = lag(HT, 1, NA),
-         min_INVYR = min(INVYR),
-         max_INVYR = max(INVYR)) |>
-  ungroup() |>
-  mutate(DIA_SLOPE = (DIA - prev_DIA) / (INVYR - prev_INVYR),
-         HT_SLOPE = (HT - prev_HT) / (INVYR - prev_INVYR))
+adfor_305 <- az_nfs |>
+  filter(ADFORCD == "305") |>
+  arrange(TREE_COMPOSITE_ID, INVYR)
 
-all_annual <- expand.grid(INVYR = range(meas_for_annual$INVYR), TREE_UNIQUE_ID = unique(meas_for_annual$TREE_UNIQUE_ID)) |>
-  left_join(distinct(select(meas_for_annual, TREE_UNIQUE_ID, min_INVYR, max_INVYR))) |>
-  filter(INVYR >= min_INVYR,
-         INVYR <= max_INVYR)
-
-
+knitr::kable(head(adfor_305, 20))
 
 ```
 
+# Save data
+
+```{r}
+
+write.csv(az_nfs_trees, here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv"))
+
+```
+
+The saved file is `r trunc(file.size(here::here("use_cases", "nfs", "arizona_natl_forest_trees.csv")) / 1E6, 3)` MB.
 
 
+## Clean up
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+
+```

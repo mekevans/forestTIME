@@ -1,23 +1,12 @@
 # Extracting FIA timeseries for tree rings
 
-# To use
-
-To use this:
-
-1.  Clone this repository and open the `forestTIME.Rproj` R project.
-2.  Make sure you have the `duckdb` R package installed
-    (`install.packages("duckdb"))`.
-3.  Download the file `treering.duckdb` and save it to
-    `data/db/treering.duckdb`. [Link here (this will download 1.5
-    GB)](https://arizona.box.com/s/nlykl9rbchlk2bj9npjd8dej5iw06i8a)
-4.  Then you should be able to render this document or use the code
-    under “Connect to database”, below.
-
 ``` r
 library(duckdb)
 ```
 
     Loading required package: DBI
+
+    Warning: package 'DBI' was built under R version 4.3.2
 
 ``` r
 library(dplyr)
@@ -41,6 +30,8 @@ library(ggplot2)
 
 source(here::here("R", "query_tables_db_fxns.R"))
 
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+
 theme_set(theme_bw())
 ```
 
@@ -57,17 +48,14 @@ states_kelly <-
 states_kelly <- states_kelly$STATEFP
 ```
 
-# Connect to database
+# Query database
 
 ``` r
-con <- connect_to_tables(here::here("data", "db", "forestTIME-treering.duckdb"))
-
 tree_ring <-
-  query_tables_db(con = con,
-                 tree_id_method = "first_cn", # Set this to "first_cn" to identify trees by the chain of control numbers. Set it to "composite" to use the string of STATE_PLOT_etc. 
-                  conditions = create_conditions(STATECD %in% states_kelly,
+  query_tree_surveys(con = con,
+                 conditions = create_conditions(STATECD %in% states_kelly,
                                                  SPCD %in% sp_kelly,
-                                                 SPCDS == 1 # This filters out any trees that have multiple SPCDs recorded over time. 
+                                                 ANY_SPCD_FLAG == FALSE # This filters out any trees that have multiple SPCDs recorded over time. 
                   ),
                   variables = c("DIA",
                                 "STATUSCD",
@@ -86,10 +74,10 @@ tree_ring <-
   )
 ```
 
-    Joining with `by = join_by(CN, STATECD, COUNTYCD)`
-    Joining with `by = join_by(TREE_FIRST_CN, SPCD, PLOT, STATECD, COUNTYCD)`
-    Joining with `by = join_by(PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, UNITCD, CYCLE, SUBCYCLE, PLOT_UNIQUE_ID)`
-    Joining with `by = join_by(PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, UNITCD, CONDID, CYCLE, SUBCYCLE, PLOT_UNIQUE_ID)`
+    Joining with `by = join_by(TREE_COMPOSITE_ID, PLOT_COMPOSITE_ID, PLOT, SUBP, STATECD, COUNTYCD)`
+    Joining with `by = join_by(TREE_COMPOSITE_ID, SPCD_CORR, TREE_CN, INVYR, STATUSCD, SPCD, CYCLE)`
+    Joining with `by = join_by(PLOT_COMPOSITE_ID, PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, UNITCD, CYCLE, SUBCYCLE)`
+    Joining with `by = join_by(PLOT_COMPOSITE_ID, PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, UNITCD, CONDID, CYCLE, SUBCYCLE)`
 
 ``` r
 dbDisconnect(con, shutdown = TRUE)
@@ -107,9 +95,9 @@ dbDisconnect(con, shutdown = TRUE)
 | IL    |      17 |          2 |    1866 |
 | IL    |      17 |          3 |    2391 |
 | IL    |      17 |          4 |    2810 |
-| IN    |      18 |          1 |    9291 |
-| IN    |      18 |          2 |    5219 |
-| IN    |      18 |          3 |    3472 |
+| IN    |      18 |          1 |    9272 |
+| IN    |      18 |          2 |    5200 |
+| IN    |      18 |          3 |    3491 |
 | IN    |      18 |          4 |    6664 |
 | IA    |      19 |          1 |     760 |
 | IA    |      19 |          2 |     441 |
@@ -169,10 +157,11 @@ dbDisconnect(con, shutdown = TRUE)
 | VT    |      50 |          2 |    8250 |
 | VT    |      50 |          3 |   15083 |
 | VT    |      50 |          4 |    5256 |
-| WV    |      54 |          1 |   51288 |
-| WV    |      54 |          2 |   19145 |
-| WV    |      54 |          3 |   25345 |
-| WV    |      54 |          4 |    3121 |
+| WV    |      54 |          1 |   16664 |
+| WV    |      54 |          2 |   17273 |
+| WV    |      54 |          3 |   12427 |
+| WV    |      54 |          4 |   18283 |
+| WV    |      54 |          5 |    2326 |
 | WI    |      55 |          1 |   32899 |
 | WI    |      55 |          2 |   21481 |
 | WI    |      55 |          3 |   21359 |
@@ -182,21 +171,21 @@ dbDisconnect(con, shutdown = TRUE)
 
 | SPCD |      n |
 |-----:|-------:|
-|   12 | 185704 |
-|   97 |  42456 |
-|  129 |  60273 |
-|  261 |  51792 |
-|  316 | 242416 |
-|  318 | 167095 |
-|  400 |    217 |
-|  531 |  65226 |
-|  541 |  43071 |
-|  621 |  21666 |
-|  762 |  59385 |
-|  802 |  58012 |
-|  832 |  22017 |
-|  833 |  57297 |
-|  837 |  36437 |
+|   12 | 185698 |
+|   97 |  42148 |
+|  129 |  59620 |
+|  261 |  50777 |
+|  316 | 236668 |
+|  318 | 163230 |
+|  400 |    174 |
+|  531 |  63231 |
+|  541 |  41847 |
+|  621 |  17900 |
+|  762 |  57946 |
+|  802 |  54112 |
+|  832 |  17722 |
+|  833 |  55100 |
+|  837 |  34946 |
 
 ## Saving data to share
 
@@ -204,4 +193,14 @@ dbDisconnect(con, shutdown = TRUE)
 write.csv(tree_ring, here::here("use_cases", "tree_rings", "tree_ring.csv"))
 ```
 
-The saved file is 439 MB.
+The saved file is 442 MB.
+
+## Clean up
+
+``` r
+dbDisconnect(con, shutdown = TRUE)
+```
+
+    Warning: Connection already closed.
+
+    Warning in duckdb_shutdown(conn@driver): invalid driver object, already closed?
