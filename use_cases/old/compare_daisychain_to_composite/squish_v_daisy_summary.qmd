@@ -1,0 +1,75 @@
+---
+title: "Comparison of daisy chain and tree number"
+format: 
+  gfm: 
+    df-print: kable
+editor: source
+execute:
+  echo: false
+  output: true
+---
+
+## Context
+
+The "daisy chain" method is to link backwards in time using `PREV_TRE_CN` and `CN`. The "tree number" method is to concatenate columns `STATECD`, `UNITCD`, `COUNTYCD`, `PLOT`, `SUBP`, and `TREE` to get a unique tree number for each tree. In principle these _should_ give equivalent outcomes, but we don't know if they really always do!
+
+## States and trees affected 
+
+```{r, include = F, output =F}
+#| label: setup
+
+library(arrow)
+library(dplyr)
+library(ggplot2)
+
+state_situations <- read.csv(here::here("reports", "state_situations.csv")) |>
+  mutate(STATEFP = as.character(STATEFP)) |>
+  mutate(STATEFP = ifelse(nchar(STATEFP) == 1, paste0("0", STATEFP), STATEFP)) |>
+  select(-STATENS) |>
+  mutate(proportion_affected = round(100 * n / n_trees_overall, digits = 2))
+
+
+
+states_map <- tigris::states() |>
+  left_join(state_situations) |>
+  filter(STATE != "HI",
+         STATE != "AK")
+
+theme_set(theme_void())
+
+```
+
+### How many states are affected?
+
+```{r}
+
+knitr::kable(state_situations |> 
+  mutate(is_affected = n > 0) |>
+  group_by(is_affected) |>
+  tally())
+
+```
+
+### How many trees/state are affected?
+
+```{r}
+
+ggplot(states_map) + 
+  geom_sf(aes(fill = proportion_affected)) +
+  coord_sf(lims_method = "geometry_bbox") +
+  scale_fill_gradient(name = "% of trees affected", trans = "log") +
+  theme(legend.position = "bottom", legend.direction = "vertical")
+
+```
+
+
+### What (generally) describes the affect?
+
+```{r}
+
+
+ggplot(states_map) + 
+  geom_sf(aes(fill =description)) +
+  coord_sf(lims_method = "geometry_bbox") +
+  theme(legend.position = "bottom", legend.direction = "vertical")
+```

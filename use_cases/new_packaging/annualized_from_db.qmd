@@ -6,7 +6,6 @@ editor: source
 
 # Pulling trees
 
-
 ```{r}
 
 source(here::here("R", "query_tables_db_fxns.R"))

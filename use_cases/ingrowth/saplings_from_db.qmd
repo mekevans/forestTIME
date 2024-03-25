@@ -1,0 +1,41 @@
+---
+title: "Extract sapling transition tables"
+format: gfm
+editor: source
+---
+
+# Pulling trees
+
+
+```{r}
+
+source(here::here("R", "query_tables_db_fxns.R"))
+source(here::here("R", "query_saplings.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+
+```
+
+```{r}
+
+saplings_mn <- query_saplings(con, 
+                              conditions = create_conditions(
+                                STATECD == 27
+                              ))
+
+```
+
+```{r}
+
+knitr::kable(head(saplings_mn, 40))
+
+```
+
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```
+
+

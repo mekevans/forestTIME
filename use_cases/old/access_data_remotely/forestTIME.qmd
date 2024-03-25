@@ -1,0 +1,210 @@
+---
+title: "ForestTIME"
+format: gfm
+---
+
+```{r}
+
+library(arrow)
+library(dplyr)
+library(ggplot2)
+
+states_to_include = "27"
+raw_dir <- "data/rawdat/state"
+arrow_dir <- "data/arrow"
+
+trees <-
+  open_dataset(
+    here::here(arrow_dir, "TREE_RAW"),
+    partitioning = c("STATECD", "COUNTYCD"),
+    format = "csv",
+    hive_style = T,
+    col_types = schema(
+      CN = float64(),
+      TREE_FIRST_CN = float64()
+    )) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+cns <-
+  open_dataset(
+    here::here(arrow_dir, "TREE_CN_JOIN"),
+    partitioning = c("STATECD", "COUNTYCD"),
+    format = "csv",
+    hive_style = T,
+    col_types = schema(
+      CN = float64(),
+      TREE_FIRST_CN = float64()
+    )) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+tree_info <-  open_dataset(
+  here::here(arrow_dir, "TREE_INFO"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(TREE_FIRST_CN = float64())) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+tree_change <-  open_dataset(
+  here::here(arrow_dir, "TREE_CHANGE"),
+  partitioning = c("STATECD", "COUNTYCD"),
+  format = "csv",
+  hive_style = T,
+  col_types = schema(TREE_FIRST_CN = float64())) |>
+  filter(STATECD %in% states_to_include) |>
+  collect()
+
+
+```
+
+# Tables
+
+## TREE
+
+```{r}
+
+head(trees)
+
+```
+
+
+## CNS
+
+```{r}
+
+head(cns)
+
+```
+
+
+## TREE_INFO
+
+```{r}
+
+head(tree_info)
+
+```
+
+
+## TREE_CHANGE
+
+```{r}
+
+head(tree_change)
+
+```
+
+
+# Using TREE_FIRST_CN to track individuals
+
+```{r}
+
+individuals <- trees |> 
+  left_join(cns) |>
+  filter(PLOT %in% unique(PLOT)[1:12],
+         STATUSCD %in% c(1:2))
+
+ggplot(individuals, aes(INVYR, as.character(TREE_FIRST_CN))) + 
+  geom_point() +
+  facet_wrap(vars(PLOT), scales = "free_y", nrow = 3) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank()) +
+  ggtitle("Individuals sampled each year")
+```
+
+
+```{r}
+
+
+ggplot(individuals |> filter(PLOT == 20012), aes(INVYR, DIA, group = as.factor(TREE_FIRST_CN), color = as.factor(SPCD))) + 
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  ggtitle("CT Plot 112")
+
+
+
+```
+
+
+```{r}
+
+ggplot(tree_info, aes(NYEARS_MEASURED)) + 
+  geom_histogram(bins = max(tree_info$NYEARS_MEASURED) + 1, center = 0) +
+  theme_bw() +
+  ggtitle("Number of survey visits per tree")
+
+# why are some 0?
+
+```
+
+# Species with the most trees
+
+```{r}
+
+tree_info |>
+  group_by(SPCD) |>
+  summarize(ntrees = dplyr::n()) |>
+  ungroup() |>
+  arrange(desc(ntrees)) |>
+  head(10)
+
+```
+
+
+# Querying data stored remotely
+
+
+Create a local duckdb and set it up to connect over https:
+
+```{r}
+
+library(DBI)
+library(duckdb)
+library(dplyr)
+
+con <- dbConnect(duckdb())
+
+dbExecute(con, "INSTALL httpfs;")
+dbExecute(con, "LOAD httpfs;")
+
+```
+
+Create `cns` view in this database by connecting to remote data:
+
+```{r}
+dbExecute(con,
+          "CREATE view cns AS
+          SELECT * FROM read_csv_auto('https://raw.githubusercontent.com/diazrenata/in-the-trees/main/static_data/processed_tables/join_cns.csv')
+          ")
+
+dbListTables(con)
+
+```
+
+Query the remote data using dplyr:
+
+```{r}
+ct_cns_1 <- tbl(con, "cns") |>
+  filter(STATECD == 9)
+
+head(ct_cns_1)
+
+
+```
+
+
+Query the remote data using dbGetQuery:
+
+```{r}
+ct_cns_2 <- dbGetQuery(con, "SELECT * FROM cns WHERE STATECD == 9")
+
+head(ct_cns_2)
+
+dbDisconnect(con)
+
+```
