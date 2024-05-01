@@ -264,18 +264,7 @@ This table contains survey-to-survey counts and proportions of *saplings* underg
 * INVYR: INVYR for the survey defining the *end* of the time period considered for transition calculations.
 * PREV_INVYR: INVYR for the survey defining the *beginning* of the time period considered for transition calculations.
 * timespan: Difference between INVYR and PREV_INVYR
-* live_sapling: Count of all live saplings on this plot in INVYR
-* new_sapling: Count of live saplings on  this plot in INVYR that have not been recorded before
-* sapling_sapling: Count of live saplings on this plot in INVYR that were also saplings in PREV_INVYR
-* sapling_tree: Count of live trees on this plot in INVYR that were saplings in PREV_INVYR
-* sapling_dead: Count of dead trees/saplings on this plot in INVYR that were live saplings in PREV_INVYR
-* sapling_removed: Count of removed trees/saplings in INVYR that were live saplings in PREV_INVYR
-* sapling_not_sampled: Count of saplings that were live saplings in PREV_INVYR that are present in the database but marked not sampled (STATUSCD = 0) in INVYR
-* sapling_missing_data: Count of live saplings in INVYR with missing DIA in INVYR
-* sapling_vanishes_next_year: Count of live saplings in INVYR not present in the database in the next INVYR
 * PREV_live_sapling: Count of saplings alive in PREV_INVYR
-* sapling_vanished: Count of saplings present in PREV_INVYR that are not present in INVYR; presumed dead
-* presumed_dead: Sum of sapling_dead and sapling_vanished
 * sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.
 * sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.
 * sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.
