@@ -1,0 +1,88 @@
+---
+title: "Annualized estimates taking into account mortality"
+format: gfm
+editor: source
+---
+
+```{r, output = F, message = F, warning = F}
+library(ggplot2)
+theme_set(theme_bw())
+source(here::here("R", "query_tables_db_fxns.R"))
+source(here::here("R", "query_annualized.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+
+```
+
+```{r, output = F}
+
+az_nfs_annualized <- query_annualized(con,
+                                      conditions = create_conditions(
+                                        STATECD == 4,
+                                        OWNCD == 11,
+                                        MULTI_OWNCD_FLAG == FALSE,
+                                        MULTI_ADFORCD_FLAG == FALSE
+                                      ),
+                                      variables = c("DIA_est", "HT_est", "ACTUALHT_est", "DIA_est_mort", "HT_est_mort", "ACTUALHT_est_mort", "YEAR", "ADFORCD", "SPCD_CORR", "SPCD_FLAG", "STATUSCD", "DEATH", "DISTURBANCE", "DAMAGE"))
+
+```
+
+This plot illustrates annual estimates of tree diameter taking into account mortality. 
+For trees that die and have a MORTYR recorded, I recalculated the interpolated diameter estimates assuming they stopped changing in diameter in MORTYR.
+This is shown in the dotted lines on the graph and how they diverge from the solid lines.
+Note that some trees die and do not have MORTYR recorded, or have a MORTYR that is the same as the last INVYR. 
+For these trees, the diameter estimates do not change whether or not you take into account MORTYR.
+
+```{r, echo = F}
+
+ggplot(filter(az_nfs_annualized, PLOT_COMPOSITE_ID == "4_1_11_80552"), aes(YEAR, DIA_est_mort, group = TREE_COMPOSITE_ID, color = DEATH)) +
+  geom_line(linetype = 2) +
+  geom_line(aes(y = DIA_est)) +
+  geom_point() + 
+  scale_color_viridis_d(end = .8)
+
+
+```
+
+This plot shows how changes in diameter break down among trees that experience death, disturbance, or damage throughout their recorded lifespans. 
+
+
+```{r, echo = F, message = F}
+
+az_nfs_annualized_changes <- az_nfs_annualized |> 
+  group_by(TREE_COMPOSITE_ID, DEATH, DAMAGE, DISTURBANCE) |>
+  summarize(first_DIA = first(DIA_est, order_by = YEAR),
+            last_DIA = last(DIA_est, order_by = YEAR)) |>
+  mutate(DIA_change = last_DIA / first_DIA) |>
+  ungroup()
+
+ggplot(az_nfs_annualized_changes, aes(first_DIA, last_DIA, color = DEATH)) +
+  geom_point(alpha = .3) +
+  geom_abline(slope = 1, intercept = 0) +
+  scale_color_viridis_d(end = .8) +
+  facet_wrap(vars(DEATH)) +
+  ggtitle("DIA change vs DEATH")
+
+ggplot(az_nfs_annualized_changes, aes(first_DIA, last_DIA, color = DAMAGE)) +
+  geom_point(alpha = .3) +
+  geom_abline(slope = 1, intercept = 0) +
+  scale_color_viridis_d(end = .8) +
+  facet_wrap(vars(DAMAGE))+
+  ggtitle("DIA change vs DAMAGE")
+
+ggplot(az_nfs_annualized_changes, aes(first_DIA, last_DIA, color = DISTURBANCE)) +
+  geom_point(alpha = .3) +
+  geom_abline(slope = 1, intercept = 0) +
+  scale_color_viridis_d(end = .8) +
+  facet_wrap(vars(DISTURBANCE))+
+  ggtitle("DIA change vs DISTURBANCE")
+```
+
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```
+
+
