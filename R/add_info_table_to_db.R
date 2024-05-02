@@ -59,6 +59,21 @@ add_info_table_to_db <- function(con) {
            MULTI_OWNCD_FLAG,
            MULTI_ADFORCD_FLAG)
   
+  death_damage_disturbance <- tbl(con, "tree") |>
+    left_join(tbl(con, "cond")) |>
+    select(TREE_COMPOSITE_ID, INVYR, CONDID, STATUSCD, DSTRBCD1,
+           DSTRBCD2, DSTRBCD3, DAMSEV1, DAMSEV2) |>
+    mutate(DISTURBED = (DSTRBCD1 + DSTRBCD2 + DSTRBCD3) > 0,
+           DAMAGED = !is.na(DAMSEV1) | !is.na(DAMSEV2)) |>
+    mutate(DISTURBED = ifelse(is.na(DISTURBED),
+                              FALSE,
+                              DISTURBED)) |>
+    group_by(TREE_COMPOSITE_ID) |>
+    summarize(
+      DEATH = any(STATUSCD == 2),
+      DISTURBANCE = any(DISTURBED),
+      DAMAGE = any(DAMAGED)) 
+  
   tree_info_composite_id <- tbl(con, "tree") |>
     left_join(tbl(con, "qa_flags")) |>
     group_by(TREE_COMPOSITE_ID,
@@ -78,6 +93,7 @@ add_info_table_to_db <- function(con) {
     left_join(cns_multiple_locations) |>
     left_join(multiple_cns) |>
     left_join(multiple_owners) |>
+    left_join(death_damage_disturbance) |>
     collect()
   
   arrow::to_duckdb(tree_info_composite_id, table_name = "tree_info_composite_id", con = con)
