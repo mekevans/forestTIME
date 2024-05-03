@@ -14,7 +14,7 @@ library(duckdb)
 library(DBI)
 library(dplyr)
 
-database_dir <- here::here("data", "db", "foresttime-tiny.duckdb")
+database_dir <- here::here("data", "db", "foresttime-to-share.duckdb")
 
 con <- dbConnect(duckdb(dbdir = database_dir))
 
@@ -68,6 +68,7 @@ These columns are removed:
 * MODIFIED_BY
 * MODIFIED_DATE
 * MODIFIED_IN_INSTANCE
+* COLOCATED_CD_RMRS
 
 These columns are added:
 
@@ -203,6 +204,9 @@ This table summarizes information from the `tree` and `qa_flags` to get informat
 * MULTIPLE_CNS_FLAG: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain). 
 * MULTI_OWNCD_FLAG: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time. 
 * MULTI_ADFORCD_FLAG: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know  whether this is more likely to be an error or to reflect changes in land ownership over time. 
+* DEATH: T/F, whether this tree is ever recorded as dead (STATUSCD == 2).
+* DISTURBANCE: T/F, whether this tree ever occurs on a condition with a distrubance code.
+* DAMAGE: T/F, whether this tree ever has any DAMAGE codes recorded. 
 
 :::
 
@@ -238,6 +242,14 @@ Estimates are generated as linear functions from one value to the next for each 
 * DIA_est: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.
 * HT_est: Estimated HT for this year.
 * ACTUALHT_est: Estimated ACTUALHT for this year. 
+* DIA_est_mort: Estimated DIA taking into account MORTYR.
+* HT_est_mort: Estimated HT taking into account MORTYR.
+* ACUTALHT_est_mort: Estimated ACTUALHT taking into account MORTYR. 
+* last_MORTYR: Last (highest number) MORTYR recorded for this tree.
+* STATUSCD: STATUSCD for the record on which this estimate is based.
+* DEATH: T/F whether this tree has ever been recorded as dead.
+* DAMAGE: T/F whether this tree has ever had any damage codes recorded. 
+* DISTURBANCE: T/F whether this tree has ever been on a condition with a disturbance code.
 
 :::
 
@@ -265,12 +277,14 @@ This table contains survey-to-survey counts and proportions of *saplings* underg
 * PREV_INVYR: INVYR for the survey defining the *beginning* of the time period considered for transition calculations.
 * timespan: Difference between INVYR and PREV_INVYR
 * PREV_live_sapling: Count of saplings alive in PREV_INVYR
+* PREV_live_and_skipped: Count of saplings alive in PREV_INVYR, added to the count of saplings alive in previous INVYRS that were skipped in PREV_INVYR (but show up again this year).
 * sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.
 * sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.
 * sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.
 * presumed_dead_prop: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).
 * sapling_not_sampled_prop: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.
-* sapling_missing_data_prop: Proportion of live sapligns in PREV_INVYR marked as alive, but missing DIA information, in INVYR.
+* sapling_missing_data_prop: Proportion of live saplings in PREV_INVYR marked as alive, but missing DIA information, in INVYR.
+* sapling_skipped_prop: Proportion of live saplings in PREV_INVYR not recorded in INVYR (but recorded in subsequent INVYRS). 
 
 :::
 

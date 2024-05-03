@@ -5,7 +5,7 @@ account: renatadiaz
 server: viz.datascience.arizona.edu
 hostUrl: https://viz.datascience.arizona.edu/__api__
 appId: 1037
-bundleId: 5085
+bundleId: 5112
 url: https://viz.datascience.arizona.edu:443/foresttime-tables/
 version: 1
 asMultiple: FALSE

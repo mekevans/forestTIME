@@ -237,6 +237,7 @@ Full column list for tree table
 <li>MODIFIED_BY</li>
 <li>MODIFIED_DATE</li>
 <li>MODIFIED_IN_INSTANCE</li>
+<li>COLOCATED_CD_RMRS</li>
 </ul>
 <p>These columns are added:</p>
 <ul>
@@ -286,14 +287,13 @@ Full column list for plot table
 [47] "P2VEG_SAMPLING_LEVEL_DETAIL_CD" "INVASIVE_SAMPLING_STATUS_CD"   
 [49] "INVASIVE_SPECIMEN_RULE_CD"      "DESIGNCD_P2A"                  
 [51] "MANUAL_DB"                      "SUBPANEL"                      
-[53] "COLOCATED_CD_RMRS"              "CONDCHNGCD_RMRS"               
-[55] "FUTFORCD_RMRS"                  "MANUAL_NCRS"                   
-[57] "MANUAL_NERS"                    "MANUAL_RMRS"                   
-[59] "PAC_ISLAND_PNWRS"               "PLOT_SEASON_NERS"              
-[61] "PRECIPITATION"                  "PREV_MICROPLOT_LOC_RMRS"       
-[63] "PREV_PLOT_STATUS_CD_RMRS"       "REUSECD1"                      
-[65] "REUSECD2"                       "REUSECD3"                      
-[67] "PLOT_COMPOSITE_ID"             </code></pre>
+[53] "CONDCHNGCD_RMRS"                "FUTFORCD_RMRS"                 
+[55] "MANUAL_NCRS"                    "MANUAL_NERS"                   
+[57] "MANUAL_RMRS"                    "PAC_ISLAND_PNWRS"              
+[59] "PLOT_SEASON_NERS"               "PRECIPITATION"                 
+[61] "PREV_MICROPLOT_LOC_RMRS"        "PREV_PLOT_STATUS_CD_RMRS"      
+[63] "REUSECD1"                       "REUSECD2"                      
+[65] "REUSECD3"                       "PLOT_COMPOSITE_ID"             </code></pre>
 </div>
 </div>
 </div>
@@ -552,6 +552,9 @@ Column descriptions for tree_info_composite_id table
 <li>MULTIPLE_CNS_FLAG: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain).</li>
 <li>MULTI_OWNCD_FLAG: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
 <li>MULTI_ADFORCD_FLAG: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+<li>DEATH: T/F, whether this tree is ever recorded as dead (STATUSCD == 2).</li>
+<li>DISTURBANCE: T/F, whether this tree ever occurs on a condition with a distrubance code.</li>
+<li>DAMAGE: T/F, whether this tree ever has any DAMAGE codes recorded.</li>
 </ul>
 </div>
 </div>
@@ -578,7 +581,8 @@ Full column list for tree_info_composite_id table
 [11] "ANY_SPCD_FLAG"           "ANY_STATUSCD_FLAG"      
 [13] "ANY_CYCLE_VISITS_FLAG"   "MULTIPLE_LOCATIONS_FLAG"
 [15] "MULTIPLE_CNS_FLAG"       "MULTI_OWNCD_FLAG"       
-[17] "MULTI_ADFORCD_FLAG"     </code></pre>
+[17] "MULTI_ADFORCD_FLAG"      "DEATH"                  
+[19] "DISTURBANCE"             "DAMAGE"                 </code></pre>
 </div>
 </div>
 </div>
@@ -613,6 +617,14 @@ Column descriptions for tree_annualized table
 <li>DIA_est: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.</li>
 <li>HT_est: Estimated HT for this year.</li>
 <li>ACTUALHT_est: Estimated ACTUALHT for this year.</li>
+<li>DIA_est_mort: Estimated DIA taking into account MORTYR.</li>
+<li>HT_est_mort: Estimated HT taking into account MORTYR.</li>
+<li>ACUTALHT_est_mort: Estimated ACTUALHT taking into account MORTYR.</li>
+<li>last_MORTYR: Last (highest number) MORTYR recorded for this tree.</li>
+<li>STATUSCD: STATUSCD for the record on which this estimate is based.</li>
+<li>DEATH: T/F whether this tree has ever been recorded as dead.</li>
+<li>DAMAGE: T/F whether this tree has ever had any damage codes recorded.</li>
+<li>DISTURBANCE: T/F whether this tree has ever been on a condition with a disturbance code.</li>
 </ul>
 </div>
 </div>
@@ -631,9 +643,12 @@ Full column list for tree_annualized table
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "TREE_COMPOSITE_ID" "TREE_CN"           "PLT_CN"           
-[4] "CONDID"            "YEAR"              "DIA_est"          
-[7] "HT_est"            "ACTUALHT_est"     </code></pre>
+<pre><code> [1] "TREE_COMPOSITE_ID" "TREE_CN"           "PLT_CN"           
+ [4] "CONDID"            "YEAR"              "DIA_est"          
+ [7] "HT_est"            "ACTUALHT_est"      "DIA_est_mort"     
+[10] "HT_est_mort"       "ACTUALHT_est_mort" "last_MORTYR"      
+[13] "STATUSCD"          "DEATH"             "DAMAGE"           
+[16] "DISTURBANCE"      </code></pre>
 </div>
 </div>
 </div>
@@ -661,12 +676,14 @@ Column descriptions for sapling_transitions table
 <li>PREV_INVYR: INVYR for the survey defining the <em>beginning</em> of the time period considered for transition calculations.</li>
 <li>timespan: Difference between INVYR and PREV_INVYR</li>
 <li>PREV_live_sapling: Count of saplings alive in PREV_INVYR</li>
+<li>PREV_live_and_skipped: Count of saplings alive in PREV_INVYR, added to the count of saplings alive in previous INVYRS that were skipped in PREV_INVYR (but show up again this year).</li>
 <li>sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.</li>
 <li>sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.</li>
 <li>sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.</li>
 <li>presumed_dead_prop: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).</li>
 <li>sapling_not_sampled_prop: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.</li>
-<li>sapling_missing_data_prop: Proportion of live sapligns in PREV_INVYR marked as alive, but missing DIA information, in INVYR.</li>
+<li>sapling_missing_data_prop: Proportion of live saplings in PREV_INVYR marked as alive, but missing DIA information, in INVYR.</li>
+<li>sapling_skipped_prop: Proportion of live saplings in PREV_INVYR not recorded in INVYR (but recorded in subsequent INVYRS).</li>
 </ul>
 </div>
 </div>
@@ -685,17 +702,13 @@ Full column list for sapling_transitions table
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] "PLOT_COMPOSITE_ID"          "INVYR"                     
- [3] "live_sapling"               "new_sapling"               
- [5] "sapling_sapling"            "sapling_tree"              
- [7] "sapling_dead"               "sapling_removed"           
- [9] "sapling_not_sampled"        "sapling_missing_data"      
-[11] "sapling_vanishes_next_year" "PREV_live_sapling"         
-[13] "sapling_vanished"           "PREV_INVYR"                
-[15] "presumed_dead"              "timespan"                  
-[17] "sapling_sapling_prop"       "sapling_tree_prop"         
-[19] "sapling_removed_prop"       "presumed_dead_prop"        
-[21] "sapling_not_sampled_prop"   "sapling_missing_data_prop" </code></pre>
+<pre><code> [1] "PLOT_COMPOSITE_ID"         "INVYR"                    
+ [3] "PREV_INVYR"                "timespan"                 
+ [5] "PREV_live_sapling"         "PREV_live_and_skipped"    
+ [7] "sapling_sapling_prop"      "sapling_tree_prop"        
+ [9] "sapling_removed_prop"      "presumed_dead_prop"       
+[11] "sapling_not_sampled_prop"  "sapling_missing_data_prop"
+[13] "sapling_skipped_prop"     </code></pre>
 </div>
 </div>
 </div>
