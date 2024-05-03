@@ -3,5 +3,8 @@
 
 # Store it in `data/db/`. 
 
+library(boxr)
 
-# (This script will be updated with a direct download link when we move away from Box.)
+box_auth()
+
+box_dl("1520429085544", local_dir = here::here("data", "db"), overwrite = T)
