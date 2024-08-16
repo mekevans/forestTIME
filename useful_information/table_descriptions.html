@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Tables (currently)</title>
+<title>forestTIME table descriptions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -60,6 +60,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#tree_annualized-table" id="toc-tree_annualized-table" class="nav-link" data-scroll-target="#tree_annualized-table"><code>tree_annualized</code> table</a></li>
   <li><a href="#sapling_transitions-table" id="toc-sapling_transitions-table" class="nav-link" data-scroll-target="#sapling_transitions-table"><code>sapling_transitions</code> table</a></li>
   </ul></li>
+  <li><a href="#fiadb-citation" id="toc-fiadb-citation" class="nav-link" data-scroll-target="#fiadb-citation">FIADB citation</a></li>
   </ul>
 </nav>
 </div>
@@ -67,7 +68,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Tables (currently)</h1>
+<h1 class="title">forestTIME table descriptions</h1>
 </div>
 
 
@@ -84,11 +85,13 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p><code>forestTIME</code> contains tables that are copied nearly directly from the FIA database (via DataMart), and tables with data derived from these raw tables. The <code>forestTIME</code> tables are interoperable with the rest of the FIA database. For complete documentation of FIADB, including descriptions of FIADB columns present in <code>forestTIME</code>, see the <a href="https://research.fs.usda.gov/understory/forest-inventory-and-analysis-database-user-guide-nfi">FIADB user guide</a>.</p>
+<p>Throughout this document, columns that come directly from FIADB are in normal text color. Where applicable, column descriptions are copied (in quotes) from the FIA DB User Guide. Columns added via forestTIME are in <span style="color:orange">orange</span>.</p>
 <section id="nearly-raw-from-fiadb" class="level1">
 <h1>Nearly-raw from FIADB</h1>
 <section id="tree-table" class="level2">
 <h2 class="anchored" data-anchor-id="tree-table"><code>tree</code> table</h2>
-<p>The <code>tree</code> table contains <em>most</em> columns from the FIADB TREE table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>The FIADB <code>TREE</code> table contains tree-level records from each survey, including spatial/organizational location, species and status attributes, and measurements of height, etc. The forestTIME <code>tree</code> table contains <em>most</em> columns from the FIADB <code>TREE</code> table, filtered to records for which <code>INVYR &gt;= 2000</code>. Note that the exact columns present in the <code>tree</code> table may change as the FIA <code>TREE</code> table changes.</p>
 <p>These columns are removed:</p>
 <ul>
 <li>CREATED_BY</li>
@@ -100,12 +103,12 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>These columns are added:</p>
 <ul>
-<li><code>TREE_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each tree created by concatenating STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE</li>
-<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+<li><span style="color:orange;">TREE_COMPOSITE_ID</span>`: a unique, temporally persistent identifier for each tree created by concatenating STATECD, UNITCD, COUNTYCD, PLOT, SUBP, TREE</li>
+<li><span style="color:orange;">PLOT_COMPOSITE_ID</span>`: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
 </ul>
 <p>This column is renamed:</p>
 <ul>
-<li>CN is renamed to TREE_CN</li>
+<li>CN is renamed to TREE_CN. This renaming is done to avoid ambiguity with other CN columns from the PLOT and COND tables. <em>Throughout forestTIME, TREE_CN can be used to re-join with the CN column from the FIADB TREE table.</em></li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled" title="Full column list for tree table">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -126,36 +129,36 @@ Full column list for tree table
   [5] "STATECD"                        "UNITCD"                        
   [7] "COUNTYCD"                       "PLOT"                          
   [9] "SUBP"                           "TREE"                          
- [11] "CONDID"                         "AZIMUTH"                       
- [13] "DIST"                           "PREVCOND"                      
- [15] "STATUSCD"                       "SPCD"                          
- [17] "SPGRPCD"                        "DIA"                           
- [19] "DIAHTCD"                        "HT"                            
- [21] "HTCD"                           "ACTUALHT"                      
- [23] "TREECLCD"                       "CR"                            
- [25] "CCLCD"                          "TREEGRCD"                      
- [27] "AGENTCD"                        "CULL"                          
- [29] "DAMLOC1"                        "DAMTYP1"                       
- [31] "DAMSEV1"                        "DAMLOC2"                       
- [33] "DAMTYP2"                        "DAMSEV2"                       
- [35] "DECAYCD"                        "STOCKING"                      
- [37] "WDLDSTEM"                       "VOLCFNET"                      
- [39] "VOLCFGRS"                       "VOLCSNET"                      
- [41] "VOLCSGRS"                       "VOLBFNET"                      
- [43] "VOLBFGRS"                       "VOLCFSND"                      
- [45] "DIACHECK"                       "MORTYR"                        
- [47] "SALVCD"                         "UNCRCD"                        
- [49] "CPOSCD"                         "CLIGHTCD"                      
- [51] "CVIGORCD"                       "CDENCD"                        
- [53] "CDIEBKCD"                       "TRANSCD"                       
- [55] "TREEHISTCD"                     "BHAGE"                         
- [57] "TOTAGE"                         "CULLDEAD"                      
- [59] "CULLFORM"                       "CULLMSTOP"                     
- [61] "CULLBF"                         "CULLCF"                        
- [63] "BFSND"                          "CFSND"                         
- [65] "SAWHT"                          "BOLEHT"                        
- [67] "FORMCL"                         "HTCALC"                        
- [69] "HRDWD_CLUMP_CD"                 "SITREE"                        
+ [11] "CONDID"                         "PREVCOND"                      
+ [13] "STATUSCD"                       "SPCD"                          
+ [15] "SPGRPCD"                        "DIA"                           
+ [17] "DIAHTCD"                        "HT"                            
+ [19] "HTCD"                           "ACTUALHT"                      
+ [21] "TREECLCD"                       "CR"                            
+ [23] "CCLCD"                          "TREEGRCD"                      
+ [25] "AGENTCD"                        "CULL"                          
+ [27] "DAMLOC1"                        "DAMTYP1"                       
+ [29] "DAMSEV1"                        "DAMLOC2"                       
+ [31] "DAMTYP2"                        "DAMSEV2"                       
+ [33] "DECAYCD"                        "STOCKING"                      
+ [35] "WDLDSTEM"                       "VOLCFNET"                      
+ [37] "VOLCFGRS"                       "VOLCSNET"                      
+ [39] "VOLCSGRS"                       "VOLBFNET"                      
+ [41] "VOLBFGRS"                       "VOLCFSND"                      
+ [43] "DIACHECK"                       "MORTYR"                        
+ [45] "SALVCD"                         "UNCRCD"                        
+ [47] "CPOSCD"                         "CLIGHTCD"                      
+ [49] "CVIGORCD"                       "CDENCD"                        
+ [51] "CDIEBKCD"                       "TRANSCD"                       
+ [53] "TREEHISTCD"                     "BHAGE"                         
+ [55] "TOTAGE"                         "CULLDEAD"                      
+ [57] "CULLFORM"                       "CULLMSTOP"                     
+ [59] "CULLBF"                         "CULLCF"                        
+ [61] "BFSND"                          "CFSND"                         
+ [63] "SAWHT"                          "BOLEHT"                        
+ [65] "FORMCL"                         "HTCALC"                        
+ [67] "HRDWD_CLUMP_CD"                 "SITREE"                        
+ [69] "CREATED_DATE"                   "MODIFIED_DATE"                 
  [71] "MORTCD"                         "HTDMP"                         
  [73] "ROUGHCULL"                      "MIST_CL_CD"                    
  [75] "CULL_FLD"                       "RECONCILECD"                   
@@ -218,8 +221,9 @@ Full column list for tree table
 [189] "DRYBIO_STEM"                    "DRYBIO_STEM_BARK"              
 [191] "DRYBIO_STUMP_BARK"              "DRYBIO_BOLE_BARK"              
 [193] "DRYBIO_BRANCH"                  "DRYBIO_FOLIAGE"                
-[195] "DRYBIO_SAWLOG_BARK"             "TREE_COMPOSITE_ID"             
-[197] "PLOT_COMPOSITE_ID"             </code></pre>
+[195] "DRYBIO_SAWLOG_BARK"             "PREV_ACTUALHT_FLD"             
+[197] "PREV_HT_FLD"                    "PLOT_COMPOSITE_ID"             
+[199] "TREE_COMPOSITE_ID"             </code></pre>
 </div>
 </div>
 </div>
@@ -228,7 +232,7 @@ Full column list for tree table
 </section>
 <section id="plot-table" class="level2">
 <h2 class="anchored" data-anchor-id="plot-table"><code>plot</code> table</h2>
-<p>The <code>plot</code> table contains <em>most</em> columns from the FIADB PLOT table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>The FIA PLOT table contains information about each <em>plot</em> - spatial/administrative attributes, and changing PLOT attributes over time - in each survey period. The forestTIME <code>plot</code> table contains <em>most</em> columns from the FIADB PLOT table, restricted to records for which <code>INVYR &gt;= 2000</code>.</p>
 <p>These columns are removed:</p>
 <ul>
 <li>CREATED_BY</li>
@@ -241,11 +245,11 @@ Full column list for tree table
 </ul>
 <p>These columns are added:</p>
 <ul>
-<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+<li><span style="color:orange;">PLOT_COMPOSITE_ID</span>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
 </ul>
 <p>This column is renamed:</p>
 <ul>
-<li>CN is renamed to PLT_CN</li>
+<li>CN is renamed to PLT_CN. This is for consistency with the PLT_CN that appears in other forestTIME tables. <em>This column, renamed to CN, can be used to re-join with the CN column in the PLOT table of FIADB.</em></li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled" title="Full column list for plot table">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -276,24 +280,26 @@ Full column list for plot table
 [25] "P2PANEL"                        "P3PANEL"                       
 [27] "ECOSUBCD"                       "CONGCD"                        
 [29] "MANUAL"                         "KINDCD_NC"                     
-[31] "QA_STATUS"                      "MICROPLOT_LOC"                 
-[33] "DECLINATION"                    "EMAP_HEX"                      
-[35] "SAMP_METHOD_CD"                 "SUBP_EXAMINE_CD"               
-[37] "MACRO_BREAKPOINT_DIA"           "INTENSITY"                     
-[39] "CYCLE"                          "SUBCYCLE"                      
-[41] "ECO_UNIT_PNW"                   "TOPO_POSITION_PNW"             
-[43] "NF_SAMPLING_STATUS_CD"          "NF_PLOT_STATUS_CD"             
-[45] "NF_PLOT_NONSAMPLE_REASN_CD"     "P2VEG_SAMPLING_STATUS_CD"      
-[47] "P2VEG_SAMPLING_LEVEL_DETAIL_CD" "INVASIVE_SAMPLING_STATUS_CD"   
-[49] "INVASIVE_SPECIMEN_RULE_CD"      "DESIGNCD_P2A"                  
-[51] "MANUAL_DB"                      "SUBPANEL"                      
-[53] "CONDCHNGCD_RMRS"                "FUTFORCD_RMRS"                 
-[55] "MANUAL_NCRS"                    "MANUAL_NERS"                   
-[57] "MANUAL_RMRS"                    "PAC_ISLAND_PNWRS"              
-[59] "PLOT_SEASON_NERS"               "PRECIPITATION"                 
-[61] "PREV_MICROPLOT_LOC_RMRS"        "PREV_PLOT_STATUS_CD_RMRS"      
-[63] "REUSECD1"                       "REUSECD2"                      
-[65] "REUSECD3"                       "PLOT_COMPOSITE_ID"             </code></pre>
+[31] "QA_STATUS"                      "CREATED_DATE"                  
+[33] "MODIFIED_DATE"                  "MICROPLOT_LOC"                 
+[35] "DECLINATION"                    "EMAP_HEX"                      
+[37] "SAMP_METHOD_CD"                 "SUBP_EXAMINE_CD"               
+[39] "MACRO_BREAKPOINT_DIA"           "INTENSITY"                     
+[41] "CYCLE"                          "SUBCYCLE"                      
+[43] "ECO_UNIT_PNW"                   "TOPO_POSITION_PNW"             
+[45] "NF_SAMPLING_STATUS_CD"          "NF_PLOT_STATUS_CD"             
+[47] "NF_PLOT_NONSAMPLE_REASN_CD"     "P2VEG_SAMPLING_STATUS_CD"      
+[49] "P2VEG_SAMPLING_LEVEL_DETAIL_CD" "INVASIVE_SAMPLING_STATUS_CD"   
+[51] "INVASIVE_SPECIMEN_RULE_CD"      "DESIGNCD_P2A"                  
+[53] "MANUAL_DB"                      "SUBPANEL"                      
+[55] "CONDCHNGCD_RMRS"                "FUTFORCD_RMRS"                 
+[57] "MANUAL_NCRS"                    "MANUAL_NERS"                   
+[59] "MANUAL_RMRS"                    "PAC_ISLAND_PNWRS"              
+[61] "PLOT_SEASON_NERS"               "PRECIPITATION"                 
+[63] "PREV_MICROPLOT_LOC_RMRS"        "PREV_PLOT_STATUS_CD_RMRS"      
+[65] "REUSECD1"                       "REUSECD2"                      
+[67] "REUSECD3"                       "GRND_LYR_SAMPLING_STATUS_CD"   
+[69] "GRND_LYR_SAMPLING_METHOD_CD"    "PLOT_COMPOSITE_ID"             </code></pre>
 </div>
 </div>
 </div>
@@ -302,7 +308,7 @@ Full column list for plot table
 </section>
 <section id="cond-table" class="level2">
 <h2 class="anchored" data-anchor-id="cond-table"><code>cond</code> table</h2>
-<p>The <code>cond</code> table contains <em>most</em> columns from the FIADB COND table, and all records for which <code>INVYR &gt;= 2000</code>.</p>
+<p>The FIADB COND table contains information about “conditions” associated with plots in each survey period. There can be multiple conditions per plot per survey. The forestTIME <code>cond</code> table contains <em>most</em> columns from the FIADB COND table, filtered to records for which <code>INVYR &gt;= 2000</code>.</p>
 <p>These columns are removed:</p>
 <ul>
 <li>CREATED_BY</li>
@@ -314,11 +320,11 @@ Full column list for plot table
 </ul>
 <p>These columns are added:</p>
 <ul>
-<li><code>PLOT_COMPOSITE_ID</code>: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
+<li><span style="color:orange;">PLOT_COMPOSITE_ID</span>`: a unique, temporally persistent identifier for each plot created by concatenating STATECD, UNITCD, COUNTYCD, PLOT</li>
 </ul>
 <p>This column is renamed:</p>
 <ul>
-<li>CN is renamed to COND_CN</li>
+<li>CN is renamed to COND_CN, to avoid ambiguity with other CN columns within forestTIME. This CN column can be used to re-join with the COND table in FIADB.</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled" title="Full column list for cond table">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -369,48 +375,49 @@ Full column list for cond table
  [65] "SITETREE_TREE"                 "SITECL_METHOD"                
  [67] "CARBON_DOWN_DEAD"              "CARBON_LITTER"                
  [69] "CARBON_SOIL_ORG"               "CARBON_UNDERSTORY_AG"         
- [71] "CARBON_UNDERSTORY_BG"          "CYCLE"                        
- [73] "SUBCYCLE"                      "SOIL_ROOTING_DEPTH_PNW"       
- [75] "GROUND_LAND_CLASS_PNW"         "PLANT_STOCKABILITY_FACTOR_PNW"
- [77] "STND_COND_CD_PNWRS"            "STND_STRUC_CD_PNWRS"          
- [79] "STUMP_CD_PNWRS"                "FIRE_SRS"                     
- [81] "GRAZING_SRS"                   "HARVEST_TYPE1_SRS"            
- [83] "HARVEST_TYPE2_SRS"             "HARVEST_TYPE3_SRS"            
- [85] "LAND_USE_SRS"                  "OPERABILITY_SRS"              
- [87] "STAND_STRUCTURE_SRS"           "NF_COND_STATUS_CD"            
- [89] "NF_COND_NONSAMPLE_REASN_CD"    "CANOPY_CVR_SAMPLE_METHOD_CD"  
- [91] "LIVE_CANOPY_CVR_PCT"           "LIVE_MISSING_CANOPY_CVR_PCT"  
- [93] "NBR_LIVE_STEMS"                "OWNSUBCD"                     
- [95] "INDUSTRIALCD_FIADB"            "RESERVCD_5"                   
- [97] "ADMIN_WITHDRAWN_CD"            "CHAINING_CD"                  
- [99] "LAND_COVER_CLASS_CD_RET"       "AFFORESTATION_CD"             
-[101] "PREV_AFFORESTATION_CD"         "DWM_FUELBED_TYPCD"            
-[103] "NVCS_PRIMARY_CLASS"            "NVCS_LEVEL_1_CD"              
-[105] "NVCS_LEVEL_2_CD"               "NVCS_LEVEL_3_CD"              
-[107] "NVCS_LEVEL_4_CD"               "NVCS_LEVEL_5_CD"              
-[109] "NVCS_LEVEL_6_CD"               "NVCS_LEVEL_7_CD"              
-[111] "NVCS_LEVEL_8_CD"               "AGE_BASIS_CD_PNWRS"           
-[113] "COND_STATUS_CHNG_CD_RMRS"      "CRCOVPCT_RMRS"                
-[115] "DOMINANT_SPECIES1_PNWRS"       "DOMINANT_SPECIES2_PNWRS"      
-[117] "DOMINANT_SPECIES3_PNWRS"       "DSTRBCD1_P2A"                 
-[119] "DSTRBCD2_P2A"                  "DSTRBCD3_P2A"                 
-[121] "DSTRBYR1_P2A"                  "DSTRBYR2_P2A"                 
-[123] "DSTRBYR3_P2A"                  "FLDTYPCD_30"                  
-[125] "FOREST_COMMUNITY_PNWRS"        "LAND_USECD_RMRS"              
-[127] "MAICF"                         "PCTBARE_RMRS"                 
-[129] "QMD_RMRS"                      "RANGETYPCD_RMRS"              
-[131] "SDIMAX_RMRS"                   "SDIPCT_RMRS"                  
-[133] "SDI_RMRS"                      "STAND_STRUCTURE_ME_NERS"      
-[135] "TREES_PRESENT_NCRS"            "TREES_PRESENT_NERS"           
-[137] "TRTCD1_P2A"                    "TRTCD2_P2A"                   
-[139] "TRTCD3_P2A"                    "TRTOPCD"                      
-[141] "TRTYR1_P2A"                    "TRTYR2_P2A"                   
-[143] "TRTYR3_P2A"                    "LAND_COVER_CLASS_CD"          
-[145] "SIEQN_REF_CD"                  "SICOND_FVS"                   
-[147] "SIBASE_FVS"                    "SISP_FVS"                     
-[149] "SIEQN_REF_CD_FVS"              "MQUADPROP_UNADJ"              
-[151] "SOILPROP_UNADJ"                "FOREST_COND_STATUS_CHANGE_CD" 
-[153] "PLOT_COMPOSITE_ID"            </code></pre>
+ [71] "CARBON_UNDERSTORY_BG"          "CREATED_DATE"                 
+ [73] "MODIFIED_DATE"                 "CYCLE"                        
+ [75] "SUBCYCLE"                      "SOIL_ROOTING_DEPTH_PNW"       
+ [77] "GROUND_LAND_CLASS_PNW"         "PLANT_STOCKABILITY_FACTOR_PNW"
+ [79] "STND_COND_CD_PNWRS"            "STND_STRUC_CD_PNWRS"          
+ [81] "STUMP_CD_PNWRS"                "FIRE_SRS"                     
+ [83] "GRAZING_SRS"                   "HARVEST_TYPE1_SRS"            
+ [85] "HARVEST_TYPE2_SRS"             "HARVEST_TYPE3_SRS"            
+ [87] "LAND_USE_SRS"                  "OPERABILITY_SRS"              
+ [89] "STAND_STRUCTURE_SRS"           "NF_COND_STATUS_CD"            
+ [91] "NF_COND_NONSAMPLE_REASN_CD"    "CANOPY_CVR_SAMPLE_METHOD_CD"  
+ [93] "LIVE_CANOPY_CVR_PCT"           "LIVE_MISSING_CANOPY_CVR_PCT"  
+ [95] "NBR_LIVE_STEMS"                "OWNSUBCD"                     
+ [97] "INDUSTRIALCD_FIADB"            "RESERVCD_5"                   
+ [99] "ADMIN_WITHDRAWN_CD"            "CHAINING_CD"                  
+[101] "LAND_COVER_CLASS_CD_RET"       "AFFORESTATION_CD"             
+[103] "PREV_AFFORESTATION_CD"         "DWM_FUELBED_TYPCD"            
+[105] "NVCS_PRIMARY_CLASS"            "NVCS_LEVEL_1_CD"              
+[107] "NVCS_LEVEL_2_CD"               "NVCS_LEVEL_3_CD"              
+[109] "NVCS_LEVEL_4_CD"               "NVCS_LEVEL_5_CD"              
+[111] "NVCS_LEVEL_6_CD"               "NVCS_LEVEL_7_CD"              
+[113] "NVCS_LEVEL_8_CD"               "AGE_BASIS_CD_PNWRS"           
+[115] "COND_STATUS_CHNG_CD_RMRS"      "CRCOVPCT_RMRS"                
+[117] "DOMINANT_SPECIES1_PNWRS"       "DOMINANT_SPECIES2_PNWRS"      
+[119] "DOMINANT_SPECIES3_PNWRS"       "DSTRBCD1_P2A"                 
+[121] "DSTRBCD2_P2A"                  "DSTRBCD3_P2A"                 
+[123] "DSTRBYR1_P2A"                  "DSTRBYR2_P2A"                 
+[125] "DSTRBYR3_P2A"                  "FLDTYPCD_30"                  
+[127] "FOREST_COMMUNITY_PNWRS"        "LAND_USECD_RMRS"              
+[129] "MAICF"                         "PCTBARE_RMRS"                 
+[131] "QMD_RMRS"                      "RANGETYPCD_RMRS"              
+[133] "SDIMAX_RMRS"                   "SDIPCT_RMRS"                  
+[135] "SDI_RMRS"                      "STAND_STRUCTURE_ME_NERS"      
+[137] "TREES_PRESENT_NCRS"            "TREES_PRESENT_NERS"           
+[139] "TRTCD1_P2A"                    "TRTCD2_P2A"                   
+[141] "TRTCD3_P2A"                    "TRTOPCD"                      
+[143] "TRTYR1_P2A"                    "TRTYR2_P2A"                   
+[145] "TRTYR3_P2A"                    "LAND_COVER_CLASS_CD"          
+[147] "SIEQN_REF_CD"                  "SICOND_FVS"                   
+[149] "SIBASE_FVS"                    "SISP_FVS"                     
+[151] "SIEQN_REF_CD_FVS"              "MQUADPROP_UNADJ"              
+[153] "SOILPROP_UNADJ"                "FOREST_COND_STATUS_CHANGE_CD" 
+[155] "PLOT_COMPOSITE_ID"            </code></pre>
 </div>
 </div>
 </div>
@@ -437,7 +444,7 @@ Column descriptions for tree_cns table
 <div class="callout-body-container callout-body">
 <ul>
 <li>TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.</li>
-<li>TREE_FIRST_CN: a persistent identifier for each tree; the first CN number associated with that tree throughout its history in the database.</li>
+<li><span style="color:orange;">TREE_FIRST_CN</span>: a persistent identifier for each tree; the first CN number associated with that tree throughout its history in the database.</li>
 </ul>
 </div>
 </div>
@@ -480,17 +487,18 @@ Column descriptions for qa_flags table
 <div class="callout-body-container callout-body">
 <ul>
 <li>TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.</li>
-<li>TREE_COMPOSITE_ID: the TREE_COMPOSITE_ID created as part of the tree table (see above).</li>
-<li>INVYR: INVYR</li>
-<li>STATUSCD: STATUSCD as recorded in the TREE table</li>
-<li>STATUSCD_CORR: If a tree has been recorded as dead, and then in a later census recorded as alive, the “dead” STATUSCD is changed to <code>5</code> (a code RMD made up for “zombie tree, or, probably never dead”). All other STATUSCDs are copied directly over to this column.</li>
-<li>STATUSCD_FLAG: T/F, notes whether the STATUSCD for this record is changed in STATUSCD_CORR</li>
-<li>SPCD: SPCD as recorded in the TREE table</li>
-<li>SPCD_CORR: If a tree has had multiple SPCDs recorded over time, all previous SPCDs are corrected to the <em>last</em> SPCD observed for that tree.</li>
-<li>SPCD_FLAG: T/F, notes whether the SPCD for this record is changed in SPCD_CORR</li>
-<li>CYCLE: CYCLE from TREE table</li>
-<li>CYCLE_MULTIPLE_VISITS: T/F, notes whether this tree has multiple records from this CYCLE.</li>
-<li>LAST_CYCLE_VISIT: T/F, notes whether this is the most recent visit for this tree within this cycle. If a cycle has only one visit, always TRUE; if there are multiple visits, the last visit will have TRUE.</li>
+<li><span style="color:orange;">TREE_COMPOSITE_ID</span>: the TREE_COMPOSITE_ID created as part of the tree table (see above).</li>
+<li>INVYR: Inventory year; per FIADB, “The year that best represents when the inventory data were collected. […] a group of plots is selected each year for sampling […] based on a panel system. INVYR is the year in which the majority of plots in that group were collected.”</li>
+<li>STATUSCD: STATUSCD as recorded in the TREE table. “A code indicating whether the sample tree is live, cut, or dead at the time of measurement.” 1 = live tree; 2 = dead tree; 3 = removed/cut tree, 0 = no status as tree is not sampled.</li>
+<li><span style="color:orange;">STATUSCD_CORR</span>: If a tree has been recorded as dead, and then in a later census recorded as alive, the “dead” STATUSCD is changed to <code>5</code> (a code RMD made up for “zombie tree, or, probably never dead”). All other STATUSCDs are copied directly over to this column.</li>
+<li><span style="color:orange;">STATUSCD_FLAG</span>: T/F, notes whether the STATUSCD for this record is changed in STATUSCD_CORR</li>
+<li>SPCD: Species code as recorded in the TREE table; species codes are defined in appendix F of the FIADB User Guide.</li>
+<li><span style="color:orange;">SPCD_CORR</span>: If a tree has had multiple SPCDs recorded over time, all previous SPCDs are corrected to the <em>last</em> SPCD observed for that tree.</li>
+<li><span style="color:orange;">SPCD_FLAG</span>: T/F, notes whether the SPCD for this record is changed in SPCD_CORR</li>
+<li>CYCLE: Inventory cycle number. “A cycle number assigned to a set of plots, measured over a particular period of time from which a State estimate using all possible plots is obtained”.<br>
+</li>
+<li><span style="color:orange;">CYCLE_MULTIPLE_VISITS</span>: T/F, notes whether this tree has multiple records from this CYCLE.</li>
+<li><span style="color:orange;">LAST_CYCLE_VISIT</span>: T/F, notes whether this is the most recent visit for this tree within this cycle. If a cycle has only one visit, always TRUE; if there are multiple visits, the last visit will have TRUE.</li>
 </ul>
 </div>
 </div>
@@ -535,26 +543,26 @@ Column descriptions for tree_info_composite_id table
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li>TREE_COMPOSITE_ID: Persistent composite ID.</li>
-<li>PLOT_COMPOSITE_ID: Persistent composite ID.</li>
-<li>PLOT: PLOT</li>
-<li>SUBP: SUBP</li>
-<li>STATECD: STATECD</li>
-<li>COUNTYCD: COUNTYCD</li>
-<li>SPCD_CORR: The most recent SPCD ever associated with this tree</li>
-<li>NRECORDS: The number of records for this tree in the whole database</li>
-<li>FIRSTYR: The year of the first record for this tree</li>
-<li>LASTYR: The year of the last record for this tree</li>
-<li>ANY_SPCD_FLAG: T/F, whether this tree has had any inconsistencies in SPCD over time (any records for this tree have SPCD_FLAG = TRUE in the qa_flags table).</li>
-<li>ANY_STATUSCD_FLAG: T/F, whether this tree has had any logical inconsistencies in STATUSCD over time (any records for this tree have STATUSCD_CORR = 5 and STATUSCD_FLAG = TRUE in the qa_flags table).</li>
-<li>ANY_CYCLE_VISITS_FLAG: T/F, whether this tree has had multiple visits recorded in any cycle over time (any records for this tree have CYCLE_MULTIPLE_VISITS = TRUE in qa_flags table)</li>
-<li>MULTIPLE_LOCATIONS_FLAG: T/F, whether the chain of CN + PREV_TRE_CN for this tree links to trees found in other plots/counties than this tree. If this occurs, the other records will have a different TREE_COMPOSITE_ID than the one recorded for this tree. These instances are assumed to be incorrect (that is, those other records are in fact different trees) unless there is another explanation.</li>
-<li>MULTIPLE_CNS_FLAG: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain).</li>
-<li>MULTI_OWNCD_FLAG: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
-<li>MULTI_ADFORCD_FLAG: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
-<li>DEATH: T/F, whether this tree is ever recorded as dead (STATUSCD == 2).</li>
-<li>DISTURBANCE: T/F, whether this tree ever occurs on a condition with a distrubance code.</li>
-<li>DAMAGE: T/F, whether this tree ever has any DAMAGE codes recorded.</li>
+<li><span style="color:orange;">TREE_COMPOSITE_ID</span>: Persistent composite ID.</li>
+<li><span style="color:orange;">PLOT_COMPOSITE_ID</span>: Persistent composite ID.</li>
+<li>PLOT: PLOT number (<em>not</em> CN).</li>
+<li>SUBP: Subplot number.</li>
+<li>STATECD: State FIPS code</li>
+<li>COUNTYCD: County code.</li>
+<li><span style="color:orange;">SPCD_CORR</span>: The most recent SPCD ever associated with this tree</li>
+<li><span style="color:orange;">NRECORDS</span>: The number of records for this tree in the whole database</li>
+<li><span style="color:orange;">FIRSTYR</span>: The year of the first record for this tree</li>
+<li><span style="color:orange;">LASTYR</span>: The year of the last record for this tree</li>
+<li><span style="color:orange;">ANY_SPCD_FLAG</span>: T/F, whether this tree has had any inconsistencies in SPCD over time (any records for this tree have SPCD_FLAG = TRUE in the qa_flags table).</li>
+<li><span style="color:orange;">ANY_STATUSCD_FLAG</span>: T/F, whether this tree has had any logical inconsistencies in STATUSCD over time (any records for this tree have STATUSCD_CORR = 5 and STATUSCD_FLAG = TRUE in the qa_flags table).</li>
+<li><span style="color:orange;">ANY_CYCLE_VISITS_FLAG</span>: T/F, whether this tree has had multiple visits recorded in any cycle over time (any records for this tree have CYCLE_MULTIPLE_VISITS = TRUE in qa_flags table)</li>
+<li><span style="color:orange;">MULTIPLE_LOCATIONS_FLAG</span>: T/F, whether the chain of CN + PREV_TRE_CN for this tree links to trees found in other plots/counties than this tree. If this occurs, the other records will have a different TREE_COMPOSITE_ID than the one recorded for this tree. These instances are assumed to be incorrect (that is, those other records are in fact different trees) unless there is another explanation.</li>
+<li><span style="color:orange;">MULTIPLE_CNS_FLAG</span>: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain).</li>
+<li><span style="color:orange;">MULTI_OWNCD_FLAG</span>: T/F, whether this tree has multiple values recorded over time for OWNCD. OWNCD == 12 can be used to extract plots in national forests. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+<li><span style="color:orange;">MULTI_ADFORCD_FLAG</span>: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+<li><span style="color:orange;">DEATH</span>: T/F, whether this tree is ever recorded as dead (STATUSCD == 2).</li>
+<li><span style="color:orange;">DISTURBANCE</span>: T/F, whether this tree ever occurs on a condition with a distrubance code.</li>
+<li><span style="color:orange;">DAMAGE</span>: T/F, whether this tree ever has any DAMAGE codes recorded.</li>
 </ul>
 </div>
 </div>
@@ -609,22 +617,22 @@ Column descriptions for tree_annualized table
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li>TREE_COMPOSITE_ID: Persistent composite ID.</li>
+<li><span style="color:orange;">TREE_COMPOSITE_ID</span>: Persistent composite ID.</li>
 <li>TREE_CN: CN from TREE table; CN for the record in the TREE table on which this estimate is based</li>
 <li>PLT_CN: PLT_CN from TREE table corresponding to the record on which this estimate is based.</li>
-<li>CONDID: CONDID from TREE table corresponding to the record on which this estimate is based.</li>
+<li>CONDID: CONDID from TREE table corresponding to the record on which this estimate is based. The CONDID is an identifying number for the condition where a tree is located, which can be used to join to the COND table.</li>
 <li>YEAR: YEAR for this estimate. If the YEAR is an INVYR in the TREE table, this record is copied from there. If the YEAR falls between INVYRs, this record is interpolated between the records from the two flanking INVYRS.</li>
-<li>DIA_est: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.</li>
-<li>HT_est: Estimated HT for this year.</li>
-<li>ACTUALHT_est: Estimated ACTUALHT for this year.</li>
-<li>DIA_est_mort: Estimated DIA taking into account MORTYR.</li>
-<li>HT_est_mort: Estimated HT taking into account MORTYR.</li>
-<li>ACUTALHT_est_mort: Estimated ACTUALHT taking into account MORTYR.</li>
-<li>last_MORTYR: Last (highest number) MORTYR recorded for this tree.</li>
+<li><span style="color:orange;">DIA_est</span>: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.</li>
+<li><span style="color:orange;">HT_est</span>: Estimated HT for this year.</li>
+<li><span style="color:orange;">ACTUALHT_est</span>: Estimated ACTUALHT for this year.</li>
+<li><span style="color:orange;">DIA_est_mort</span>: Estimated DIA taking into account MORTYR.</li>
+<li><span style="color:orange;">HT_est_mort</span>: Estimated HT taking into account MORTYR.</li>
+<li><span style="color:orange;">ACTUALHT_est_mort</span>: Estimated ACTUALHT taking into account MORTYR.</li>
+<li><span style="color:orange;">last_MORTYR</span>: Last (highest number) MORTYR recorded for this tree. MORTYR is the “estimated year in which a remeasured tree died or was cut”.</li>
 <li>STATUSCD: STATUSCD for the record on which this estimate is based.</li>
-<li>DEATH: T/F whether this tree has ever been recorded as dead.</li>
-<li>DAMAGE: T/F whether this tree has ever had any damage codes recorded.</li>
-<li>DISTURBANCE: T/F whether this tree has ever been on a condition with a disturbance code.</li>
+<li><span style="color:orange;">DEATH</span>: T/F whether this tree has ever been recorded as dead.</li>
+<li><span style="color:orange;">DAMAGE</span>: T/F whether this tree has ever had any damage codes recorded.</li>
+<li><span style="color:orange;">DISTURBANCE</span>: T/F whether this tree has ever been on a condition with a disturbance code.</li>
 </ul>
 </div>
 </div>
@@ -671,19 +679,19 @@ Column descriptions for sapling_transitions table
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li>PLOT_COMPOSITE_ID: Persistent composite ID.</li>
+<li><span style="color:orange;">PLOT_COMPOSITE_ID</span>: Persistent composite ID.</li>
 <li>INVYR: INVYR for the survey defining the <em>end</em> of the time period considered for transition calculations.</li>
-<li>PREV_INVYR: INVYR for the survey defining the <em>beginning</em> of the time period considered for transition calculations.</li>
-<li>timespan: Difference between INVYR and PREV_INVYR</li>
-<li>PREV_live_sapling: Count of saplings alive in PREV_INVYR</li>
-<li>PREV_live_and_skipped: Count of saplings alive in PREV_INVYR, added to the count of saplings alive in previous INVYRS that were skipped in PREV_INVYR (but show up again this year).</li>
-<li>sapling_sapling_prop: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.</li>
-<li>sapling_tree_prop: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.</li>
-<li>sapling_removed_prop: Proportion of live saplings in PREV_INVYR that became removed in INVYR.</li>
-<li>presumed_dead_prop: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).</li>
-<li>sapling_not_sampled_prop: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.</li>
-<li>sapling_missing_data_prop: Proportion of live saplings in PREV_INVYR marked as alive, but missing DIA information, in INVYR.</li>
-<li>sapling_skipped_prop: Proportion of live saplings in PREV_INVYR not recorded in INVYR (but recorded in subsequent INVYRS).</li>
+<li><span style="color:orange;">PREV_INVYR</span>: INVYR for the survey defining the <em>beginning</em> of the time period considered for transition calculations.</li>
+<li><span style="color:orange;">timespan</span>: Difference between INVYR and PREV_INVYR</li>
+<li><span style="color:orange;">PREV_live_sapling</span>: Count of saplings alive in PREV_INVYR</li>
+<li><span style="color:orange;">PREV_live_and_skipped</span>: Count of saplings alive in PREV_INVYR, added to the count of saplings alive in previous INVYRS that were skipped in PREV_INVYR (but show up again this year).</li>
+<li><span style="color:orange;">sapling_sapling_prop</span>: Proportion of live saplings in PREV_INVYR that remained live saplings in INVYR.</li>
+<li><span style="color:orange;">sapling_tree_prop</span>: Proportion of live saplings in PREV_INVYR that became live trees in INVYR.</li>
+<li><span style="color:orange;">sapling_removed_prop</span>: Proportion of live saplings in PREV_INVYR that became removed in INVYR.</li>
+<li><span style="color:orange;">presumed_dead_prop</span>: Proportion of live saplings in PREV_INVYR presumed to have died by INVYR (either marked as dead or vanished from database).</li>
+<li><span style="color:orange;">sapling_not_sampled_prop</span>: Proportion of live saplings in PREV_INVYR marked not sampled (STATUSCD = 0) in INVYR.</li>
+<li><span style="color:orange;">sapling_missing_data_prop</span>: Proportion of live saplings in PREV_INVYR marked as alive, but missing DIA information, in INVYR.</li>
+<li><span style="color:orange;">sapling_skipped_prop</span>: Proportion of live saplings in PREV_INVYR not recorded in INVYR (but recorded in subsequent INVYRS).</li>
 </ul>
 </div>
 </div>
@@ -715,6 +723,10 @@ Full column list for sapling_transitions table
 </div>
 </div>
 </section>
+</section>
+<section id="fiadb-citation" class="level1">
+<h1>FIADB citation</h1>
+<p>Forest Inventory and Analysis Database, June 28, 2024. U.S. Department of Agriculture, Forest Service, Northern Research Station. St.&nbsp;Paul, MN. [Available only on internet: https://apps.fs.usda.gov/fia/datamart/datamart.html]</p>
 </section>
 
 </main>
