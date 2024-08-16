@@ -132,8 +132,10 @@ The saved file is `r trunc(file.size(here::here("use_cases", "whitebark_pine", "
 #filter out dead trees in new df
 dead_trees <- whitebark_pine_repeats %>%
   group_by(TREE_COMPOSITE_ID) %>%
-  filter(any(STATUSCD == 2) & any(STATUSCD == 1)) %>%
+  filter(all(any(STATUSCD == 2), any(STATUSCD == 1))) %>%
   ungroup()
+
+length(unique(dead_trees$TREE_COMPOSITE_ID)) # 1904 individuals 
 
 #get the DIA values when trees were alive so we can plot death as a function of the state variable (size)
 alive_dia <- dead_trees %>%
@@ -152,12 +154,28 @@ fully_survived_trees <- whitebark_pine_repeats |>
   filter(all(STATUSCD == 1)) |>
   ungroup()
 
-length(unique(alive_dia$TREE_COMPOSITE_ID)) # 1,904 trees died
-length(unique(survived_trees$TREE_COMPOSITE_ID)) # 4,960 trees survived
+#length(unique(alive_dia$TREE_COMPOSITE_ID)) # 1,904 trees died
+#length(unique(survived_trees$TREE_COMPOSITE_ID)) # 4,960 trees survived
 length(unique(fully_survived_trees$TREE_COMPOSITE_ID)) # 2767 trees are alive in all years surveyed. 
 
+tree_total_fates <- whitebark_pine_repeats |>
+  group_by(TREE_COMPOSITE_ID) |>
+  mutate(NYEARS = length(unique(INVYR))) |>
+  filter(NYEARS > 1) |>
+  mutate(FIRST_INVYR = min(INVYR),
+         lagged_status_code = lag(STATUSCD, order_by = INVYR, default = -999),
+         lagged_INVYR = lag(STATUSCD, order_by = INVYR, default = -1989)) |>
+  filter(INVYR != FIRST_INVYR) |>
+  ungroup() |>
+  group_by(INVYR, lagged_INVYR, STATUSCD,lagged_status_code) |>
+  tally()
+
+
+# The other way #### 
+
 mort_trees <- whitebark_pine_repeats %>% 
-  filter(STATUSCD == 2 & PREV_STATUS_CD == 1) %>%
+  filter(STATUSCD == 2) |>
+  filter(PREV_STATUS_CD == 1) %>%
   relocate(STATUSCD, PREV_STATUS_CD, MEASYEAR, .after = 3) %>%
   distinct() #1869 dead trees
 
@@ -165,8 +183,8 @@ surv_trees <- whitebark_pine_repeats %>%
   filter(STATUSCD == 1 & PREV_STATUS_CD == 1) %>%
   distinct()
 
-length(unique(surv_trees$TREE_COMPOSITE_ID)) #2761 trees survived
-length(unique(mort_trees$TREE_COMPOSITE_ID)) #1869 trees died
+length(unique(surv_trees$TREE_COMPOSITE_ID)) #2761 trees survived vs 2767 - 6 total off
+length(unique(mort_trees$TREE_COMPOSITE_ID)) #1869 trees died vs 1904 - 35 total off 
 
 ```
 
@@ -191,12 +209,14 @@ There are 230 rows where the PREV_STATUS_CD doesn't match the lagged statuscd.
 ```{r}
 
 mismatch <- whitebark_pine_repeats_lags |>
-  filter(is.na(PREV_matches_LAG)) |>
+  filter(is.na(PREV_matches_LAG) | !PREV_matches_LAG) |>
   select(TREE_COMPOSITE_ID, INVYR, STATUSCD, PREV_STATUS_CD, LAGGED_STATUSCD) 
 
 sum(unique(dead_trees$TREE_COMPOSITE_ID) %in% mismatch$TREE_COMPOSITE_ID)
 
 sum(unique(fully_survived_trees$TREE_COMPOSITE_ID) %in% mismatch$TREE_COMPOSITE_ID)
+
+
 
 ```
 
