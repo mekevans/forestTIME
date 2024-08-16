@@ -1,5 +1,5 @@
 ---
-title: "Tables (currently)"
+title: "forestTIME table descriptions"
 format: 
   html:
     toc: true
@@ -21,11 +21,17 @@ con <- dbConnect(duckdb(dbdir = database_dir))
 dbListTables(con)
 ```
 
+`forestTIME` contains tables that are copied nearly directly from the FIA database (via DataMart), and tables with data derived from these raw tables. 
+The `forestTIME` tables are interoperable with the rest of the FIA database. 
+For complete documentation of FIADB, including descriptions of FIADB columns present in `forestTIME`, see the [FIADB user guide](https://research.fs.usda.gov/understory/forest-inventory-and-analysis-database-user-guide-nfi).
+
 # Nearly-raw from FIADB
 
 ## `tree` table
 
-The `tree` table contains *most* columns from the FIADB TREE table, and all records for which `INVYR >= 2000`. 
+The FIADB `TREE` table contains tree-level records from each survey, including spatial/organizational location, species and status attributes, and measurements of height, etc. 
+The forestTIME `tree` table contains *most* columns from the FIADB `TREE` table, filtered records for which `INVYR >= 2000`. 
+Note that the exact columns present in the `tree` table may change as the FIA `TREE` table changes. 
 
 These columns are removed:
 
@@ -305,3 +311,7 @@ colnames(tbl(con, "sapling_transitions"))
 dbDisconnect(con, shutdown = TRUE)
 
 ```
+
+# FIADB citation
+
+Forest Inventory and Analysis Database, June 28, 2024. U.S. Department of Agriculture, Forest Service, Northern Research Station. St. Paul, MN. [Available only on internet: https://apps.fs.usda.gov/fia/datamart/datamart.html]
