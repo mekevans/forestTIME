@@ -167,7 +167,7 @@ tree_total_fates <- whitebark_pine_repeats |>
          lagged_INVYR = lag(STATUSCD, order_by = INVYR, default = -1989)) |>
   filter(INVYR != FIRST_INVYR) |>
   ungroup() |>
-  group_by(INVYR, lagged_INVYR, STATUSCD,lagged_status_code) |>
+  group_by(INVYR, lagged_INVYR, STATUSCD,lagged_status_code) |> # remove INVYR and lagged_INVYR to get tallies over all timesteps
   tally()
 
 
