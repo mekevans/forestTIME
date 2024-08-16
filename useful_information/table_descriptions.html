@@ -86,7 +86,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p><code>forestTIME</code> contains tables that are copied nearly directly from the FIA database (via DataMart), and tables with data derived from these raw tables. The <code>forestTIME</code> tables are interoperable with the rest of the FIA database. For complete documentation of FIADB, including descriptions of FIADB columns present in <code>forestTIME</code>, see the <a href="https://research.fs.usda.gov/understory/forest-inventory-and-analysis-database-user-guide-nfi">FIADB user guide</a>.</p>
-<p>Throughout this document, columns that come directly from FIADB are in normal text color. Columns added via forestTIME are in <span style="color:orange">orange</span>.</p>
+<p>Throughout this document, columns that come directly from FIADB are in normal text color. Where applicable, column descriptions are copied (in quotes) from the FIA DB User Guide. Columns added via forestTIME are in <span style="color:orange">orange</span>.</p>
 <section id="nearly-raw-from-fiadb" class="level1">
 <h1>Nearly-raw from FIADB</h1>
 <section id="tree-table" class="level2">
@@ -488,14 +488,15 @@ Column descriptions for qa_flags table
 <ul>
 <li>TREE_CN: transient, survey-to-survey CN number. TREE_CN from tree table, or CN from FIADB TREE table.</li>
 <li><span style="color:orange;">TREE_COMPOSITE_ID</span>: the TREE_COMPOSITE_ID created as part of the tree table (see above).</li>
-<li>INVYR: INVYR</li>
-<li>STATUSCD: STATUSCD as recorded in the TREE table</li>
+<li>INVYR: Inventory year; per FIADB, “The year that best represents when the inventory data were collected. […] a group of plots is selected each year for sampling […] based on a panel system. INVYR is the year in which the majority of plots in that group were collected.”</li>
+<li>STATUSCD: STATUSCD as recorded in the TREE table. “A code indicating whether the sample tree is live, cut, or dead at the time of measurement.” 1 = live tree; 2 = dead tree; 3 = removed/cut tree, 0 = no status as tree is not sampled.</li>
 <li><span style="color:orange;">STATUSCD_CORR</span>: If a tree has been recorded as dead, and then in a later census recorded as alive, the “dead” STATUSCD is changed to <code>5</code> (a code RMD made up for “zombie tree, or, probably never dead”). All other STATUSCDs are copied directly over to this column.</li>
 <li><span style="color:orange;">STATUSCD_FLAG</span>: T/F, notes whether the STATUSCD for this record is changed in STATUSCD_CORR</li>
-<li>SPCD: SPCD as recorded in the TREE table</li>
+<li>SPCD: Species code as recorded in the TREE table; species codes are defined in appendix F of the FIADB User Guide.</li>
 <li><span style="color:orange;">SPCD_CORR</span>: If a tree has had multiple SPCDs recorded over time, all previous SPCDs are corrected to the <em>last</em> SPCD observed for that tree.</li>
 <li><span style="color:orange;">SPCD_FLAG</span>: T/F, notes whether the SPCD for this record is changed in SPCD_CORR</li>
-<li>CYCLE: CYCLE from TREE table</li>
+<li>CYCLE: Inventory cycle number. “A cycle number assigned to a set of plots, measured over a particular period of time from which a State estimate using all possible plots is obtained”.<br>
+</li>
 <li><span style="color:orange;">CYCLE_MULTIPLE_VISITS</span>: T/F, notes whether this tree has multiple records from this CYCLE.</li>
 <li><span style="color:orange;">LAST_CYCLE_VISIT</span>: T/F, notes whether this is the most recent visit for this tree within this cycle. If a cycle has only one visit, always TRUE; if there are multiple visits, the last visit will have TRUE.</li>
 </ul>
@@ -544,10 +545,10 @@ Column descriptions for tree_info_composite_id table
 <ul>
 <li><span style="color:orange;">TREE_COMPOSITE_ID</span>: Persistent composite ID.</li>
 <li><span style="color:orange;">PLOT_COMPOSITE_ID</span>: Persistent composite ID.</li>
-<li>PLOT: PLOT</li>
-<li>SUBP: SUBP</li>
-<li>STATECD: STATECD</li>
-<li>COUNTYCD: COUNTYCD</li>
+<li>PLOT: PLOT number (<em>not</em> CN).</li>
+<li>SUBP: Subplot number.</li>
+<li>STATECD: State FIPS code</li>
+<li>COUNTYCD: County code.</li>
 <li><span style="color:orange;">SPCD_CORR</span>: The most recent SPCD ever associated with this tree</li>
 <li><span style="color:orange;">NRECORDS</span>: The number of records for this tree in the whole database</li>
 <li><span style="color:orange;">FIRSTYR</span>: The year of the first record for this tree</li>
@@ -557,7 +558,7 @@ Column descriptions for tree_info_composite_id table
 <li><span style="color:orange;">ANY_CYCLE_VISITS_FLAG</span>: T/F, whether this tree has had multiple visits recorded in any cycle over time (any records for this tree have CYCLE_MULTIPLE_VISITS = TRUE in qa_flags table)</li>
 <li><span style="color:orange;">MULTIPLE_LOCATIONS_FLAG</span>: T/F, whether the chain of CN + PREV_TRE_CN for this tree links to trees found in other plots/counties than this tree. If this occurs, the other records will have a different TREE_COMPOSITE_ID than the one recorded for this tree. These instances are assumed to be incorrect (that is, those other records are in fact different trees) unless there is another explanation.</li>
 <li><span style="color:orange;">MULTIPLE_CNS_FLAG</span>: T/F, whether there are multiple TREE_FIRST_CNs associated with this TREE_COMPOSITE_ID. This occurs if this TREE_COMPOSITE_ID links trees that are not linked to each other by an unbroken chain of CN + PREV_TRE_CN. This can occur if there are multiple visits within a cycle, or if any surveys in the chain are missing the PREV_TRE_CN (thereby breaking the chain).</li>
-<li><span style="color:orange;">MULTI_OWNCD_FLAG</span>: T/F, whether this tree has multiple values recorded over time for OWNCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
+<li><span style="color:orange;">MULTI_OWNCD_FLAG</span>: T/F, whether this tree has multiple values recorded over time for OWNCD. OWNCD == 12 can be used to extract plots in national forests. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
 <li><span style="color:orange;">MULTI_ADFORCD_FLAG</span>: T/F, whether this tree has multiple values recorded over time for ADFORCD. RMD does not know whether this is more likely to be an error or to reflect changes in land ownership over time.</li>
 <li><span style="color:orange;">DEATH</span>: T/F, whether this tree is ever recorded as dead (STATUSCD == 2).</li>
 <li><span style="color:orange;">DISTURBANCE</span>: T/F, whether this tree ever occurs on a condition with a distrubance code.</li>
@@ -619,7 +620,7 @@ Column descriptions for tree_annualized table
 <li><span style="color:orange;">TREE_COMPOSITE_ID</span>: Persistent composite ID.</li>
 <li>TREE_CN: CN from TREE table; CN for the record in the TREE table on which this estimate is based</li>
 <li>PLT_CN: PLT_CN from TREE table corresponding to the record on which this estimate is based.</li>
-<li>CONDID: CONDID from TREE table corresponding to the record on which this estimate is based.</li>
+<li>CONDID: CONDID from TREE table corresponding to the record on which this estimate is based. The CONDID is an identifying number for the condition where a tree is located, which can be used to join to the COND table.</li>
 <li>YEAR: YEAR for this estimate. If the YEAR is an INVYR in the TREE table, this record is copied from there. If the YEAR falls between INVYRs, this record is interpolated between the records from the two flanking INVYRS.</li>
 <li><span style="color:orange;">DIA_est</span>: Estimated DIA for this year. If this YEAR is an INVYR, this is copied from the DIA record for this INVYR in the TREE table. Otherwise, it is interpolated.</li>
 <li><span style="color:orange;">HT_est</span>: Estimated HT for this year.</li>
@@ -627,7 +628,7 @@ Column descriptions for tree_annualized table
 <li><span style="color:orange;">DIA_est_mort</span>: Estimated DIA taking into account MORTYR.</li>
 <li><span style="color:orange;">HT_est_mort</span>: Estimated HT taking into account MORTYR.</li>
 <li><span style="color:orange;">ACTUALHT_est_mort</span>: Estimated ACTUALHT taking into account MORTYR.</li>
-<li><span style="color:orange;">last_MORTYR</span>: Last (highest number) MORTYR recorded for this tree.</li>
+<li><span style="color:orange;">last_MORTYR</span>: Last (highest number) MORTYR recorded for this tree. MORTYR is the “estimated year in which a remeasured tree died or was cut”.</li>
 <li>STATUSCD: STATUSCD for the record on which this estimate is based.</li>
 <li><span style="color:orange;">DEATH</span>: T/F whether this tree has ever been recorded as dead.</li>
 <li><span style="color:orange;">DAMAGE</span>: T/F whether this tree has ever had any damage codes recorded.</li>
