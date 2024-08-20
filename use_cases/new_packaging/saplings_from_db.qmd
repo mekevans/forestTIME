@@ -12,7 +12,7 @@ editor: source
 source(here::here("R", "query_tables_db_fxns.R"))
 source(here::here("R", "query_saplings.R"))
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 
 ```
 

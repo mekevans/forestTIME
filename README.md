@@ -1,32 +1,21 @@
 # forestTIME 
 
-Workshopping scripts related to the FIA timeseries project.
-
-# Structure
-
-- data/rawdat/state
-  - Contains data files downloaded from FIADB/DataMart. Not in git.
-- data/db
-  - Directory for storing database (as a duckdb file)
-- R/
-  - Contains functions called by scripts and examples.
-- scripts/
-  - Contains scripts for setting up the database.
-- use_cases/
-  - Contains .qmd documents and occasional helper functions executing various tasks. These documents call functions in R/.
-  - Contents:
-    - tree_ring
-    - nfs
-    - ingrowth
-    - whitebark_pine
-    - old
-- useful_information
-  - Some quarto docs containing information that it can be useful to refer to. Species codes and the columns of forestTIME tables.
-    
-# How to use
+## Setup 
 
 1. Clone this repo to your computer.
-1. Open forestTIME.Rproj in RStudio.
-1. (Once per computer) Run `scripts/00-forestTIME_setup.R`.
-1. Obtain a forestTIME database either from box or by creating it yourself. See `scripts/README.md` for options.
-1. Run query functions. You can work from the use cases in the `use_cases` directory, or freestyle based on the examples in `use_cases/new_packaging`. 
+1. You will need the following packages installed: DBI, duckdb, arrow, here, dplyr, stringr, tidyr. You can install them the usual way: `install.packages(c("DBI", "duckdb", "here", "arrow", "dplyr", "stringr", "tidyr"))`
+1. Open forestTIME.Rproj on your computer.
+
+## Getting a database
+
+1. Download a database (whole US) from this link: https://arizona.box.com/s/z59u6gjm8g91ioyechs4vwqbc3krnor3. Store it in `data/db/`. 
+
+## Accessing data
+
+1. The three .qmd/.md files in `use_cases/new_packaging` contain examples of pulling survey timeseries, annualized timeseries, and sapling transition tables from this database. 
+1. You can modify them to pull different subsets of data or different variables. For a list of the columns available to filter on/import, see: https://viz.datascience.arizona.edu/foresttime-tables/ 
+1. They are currently set up to pull from the database at the Box link above, stored in `data/db`. If you stored the database somewhere else, named it differently, or made your own, you might have to modify them to point to wherever the database is stored on your computer. 
+
+## Generating your own database
+
+To *generate* the database, use the scripts in `diazrenata/automatic-trees`. 
