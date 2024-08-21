@@ -16,7 +16,7 @@ library(ggplot2)
 
 source(here::here("R", "query_tables_db_fxns.R"))
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 
 theme_set(theme_bw())
 

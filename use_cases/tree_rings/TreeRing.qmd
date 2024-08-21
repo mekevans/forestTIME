@@ -12,7 +12,7 @@ library(ggplot2)
 
 source(here::here("R", "query_tables_db_fxns.R"))
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 
 theme_set(theme_bw())
 
@@ -25,7 +25,7 @@ theme_set(theme_bw())
 sp_kelly <-
   c(316, 318, 832, 833, 802, 621, 531, 400, 129, 97, 762, 261, 837, 541, 12)
 states_kelly <-
-  read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  read.csv(here::here("useful_information", "fips.csv")) |>
   filter(STATE %in% c(
     "OH", "PA", "MD", "MA", "NJ", "VT", "NH", "RI", "ME", "CT", "WV", "NY", "IN", "IA", "IL", "MI", "MO", "WI", "MN"
   ))
@@ -78,7 +78,7 @@ knitr::kable(tree_ring_measures |>
                tally() |>
                rename(n_measures = n,
                       n_trees = nn) |>
-  left_join(read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |> select(STATEFP, STATE), by = c("STATECD" = "STATEFP")) |>
+  left_join(read.csv(here::here("useful_information", "fips.csv")) |> select(STATEFP, STATE), by = c("STATECD" = "STATEFP")) |>
   select(STATE, STATECD, n_measures, n_trees))
 
 

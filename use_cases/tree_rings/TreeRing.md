@@ -1,18 +1,15 @@
 # Extracting FIA timeseries for tree rings
 
+
 ``` r
 library(duckdb)
 ```
 
     Loading required package: DBI
 
-    Warning: package 'DBI' was built under R version 4.3.2
-
 ``` r
 library(dplyr)
 ```
-
-    Warning: package 'dplyr' was built under R version 4.3.2
 
 
     Attaching package: 'dplyr'
@@ -30,7 +27,7 @@ library(ggplot2)
 
 source(here::here("R", "query_tables_db_fxns.R"))
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 
 theme_set(theme_bw())
 ```
@@ -41,7 +38,7 @@ theme_set(theme_bw())
 sp_kelly <-
   c(316, 318, 832, 833, 802, 621, 531, 400, 129, 97, 762, 261, 837, 541, 12)
 states_kelly <-
-  read.csv(here::here("data", "rawdat", "fips", "fips.csv")) |>
+  read.csv(here::here("useful_information", "fips.csv")) |>
   filter(STATE %in% c(
     "OH", "PA", "MD", "MA", "NJ", "VT", "NH", "RI", "ME", "CT", "WV", "NY", "IN", "IA", "IL", "MI", "MO", "WI", "MN"
   ))
@@ -91,31 +88,32 @@ dbDisconnect(con, shutdown = TRUE)
 | CT    |       9 |          2 |    1650 |
 | CT    |       9 |          3 |    3780 |
 | CT    |       9 |          4 |    1571 |
-| IL    |      17 |          1 |    1205 |
-| IL    |      17 |          2 |    1866 |
-| IL    |      17 |          3 |    2391 |
-| IL    |      17 |          4 |    2810 |
+| IL    |      17 |          1 |    1156 |
+| IL    |      17 |          2 |    1962 |
+| IL    |      17 |          3 |    1878 |
+| IL    |      17 |          4 |    3389 |
 | IN    |      18 |          1 |    9272 |
 | IN    |      18 |          2 |    5200 |
 | IN    |      18 |          3 |    3491 |
 | IN    |      18 |          4 |    6664 |
-| IA    |      19 |          1 |     760 |
-| IA    |      19 |          2 |     441 |
-| IA    |      19 |          3 |     445 |
-| IA    |      19 |          4 |    1078 |
-| ME    |      23 |          1 |   20424 |
-| ME    |      23 |          2 |   35576 |
-| ME    |      23 |          3 |   30060 |
-| ME    |      23 |          4 |   50098 |
-| ME    |      23 |          5 |   21564 |
+| IA    |      19 |          1 |     767 |
+| IA    |      19 |          2 |     406 |
+| IA    |      19 |          3 |     435 |
+| IA    |      19 |          4 |    1045 |
+| IA    |      19 |          5 |      90 |
+| ME    |      23 |          1 |   20142 |
+| ME    |      23 |          2 |   35433 |
+| ME    |      23 |          3 |   30880 |
+| ME    |      23 |          4 |   41551 |
+| ME    |      23 |          5 |   32835 |
 | MD    |      24 |          1 |    2026 |
 | MD    |      24 |          2 |    2191 |
 | MD    |      24 |          3 |    3878 |
 | MD    |      24 |          4 |     504 |
-| MA    |      25 |          1 |    2514 |
-| MA    |      25 |          2 |    3804 |
-| MA    |      25 |          3 |    9595 |
-| MA    |      25 |          4 |    2165 |
+| MA    |      25 |          1 |    2653 |
+| MA    |      25 |          2 |    3868 |
+| MA    |      25 |          3 |    8244 |
+| MA    |      25 |          4 |    3613 |
 | MI    |      26 |          1 |   77496 |
 | MI    |      26 |          2 |   78643 |
 | MI    |      26 |          3 |   16054 |
@@ -129,34 +127,34 @@ dbDisconnect(con, shutdown = TRUE)
 | MO    |      29 |          2 |    7366 |
 | MO    |      29 |          3 |    6498 |
 | MO    |      29 |          4 |   17434 |
-| NH    |      33 |          1 |   10964 |
-| NH    |      33 |          2 |   16828 |
-| NH    |      33 |          3 |   16146 |
+| NH    |      33 |          1 |   10839 |
+| NH    |      33 |          2 |   16535 |
+| NH    |      33 |          3 |   16896 |
 | NH    |      33 |          4 |    7625 |
-| NJ    |      34 |          1 |    3753 |
-| NJ    |      34 |          2 |    2172 |
-| NJ    |      34 |          3 |    2418 |
-| NJ    |      34 |          4 |    1154 |
-| NY    |      36 |          1 |   19249 |
-| NY    |      36 |          2 |   23506 |
-| NY    |      36 |          3 |   53878 |
-| NY    |      36 |          4 |   11061 |
-| OH    |      39 |          1 |    4039 |
-| OH    |      39 |          2 |    7812 |
-| OH    |      39 |          3 |   11649 |
-| OH    |      39 |          4 |    6828 |
+| NJ    |      34 |          1 |    2892 |
+| NJ    |      34 |          2 |    3086 |
+| NJ    |      34 |          3 |    1930 |
+| NJ    |      34 |          4 |    1732 |
+| NY    |      36 |          1 |   19226 |
+| NY    |      36 |          2 |   23661 |
+| NY    |      36 |          3 |   47015 |
+| NY    |      36 |          4 |   19104 |
+| OH    |      39 |          1 |    3841 |
+| OH    |      39 |          2 |    8296 |
+| OH    |      39 |          3 |    9954 |
+| OH    |      39 |          4 |    8783 |
 | PA    |      42 |          1 |   10176 |
 | PA    |      42 |          2 |   23611 |
 | PA    |      42 |          3 |   15987 |
 | PA    |      42 |          4 |   38709 |
-| RI    |      44 |          1 |     658 |
-| RI    |      44 |          2 |     984 |
-| RI    |      44 |          3 |    1222 |
-| RI    |      44 |          4 |     752 |
-| VT    |      50 |          1 |    8052 |
-| VT    |      50 |          2 |    8250 |
-| VT    |      50 |          3 |   15083 |
-| VT    |      50 |          4 |    5256 |
+| RI    |      44 |          1 |     636 |
+| RI    |      44 |          2 |    1035 |
+| RI    |      44 |          3 |    1053 |
+| RI    |      44 |          4 |     969 |
+| VT    |      50 |          1 |    7202 |
+| VT    |      50 |          2 |    9296 |
+| VT    |      50 |          3 |   12943 |
+| VT    |      50 |          4 |    7690 |
 | WV    |      54 |          1 |   16664 |
 | WV    |      54 |          2 |   17273 |
 | WV    |      54 |          3 |   12427 |
@@ -171,21 +169,21 @@ dbDisconnect(con, shutdown = TRUE)
 
 | SPCD |      n |
 |-----:|-------:|
-|   12 | 185698 |
-|   97 |  42148 |
-|  129 |  59620 |
-|  261 |  50777 |
-|  316 | 236668 |
-|  318 | 163230 |
+|   12 | 187392 |
+|   97 |  42861 |
+|  129 |  59889 |
+|  261 |  51061 |
+|  316 | 237842 |
+|  318 | 163800 |
 |  400 |    174 |
-|  531 |  63231 |
-|  541 |  41847 |
-|  621 |  17900 |
-|  762 |  57946 |
-|  802 |  54112 |
-|  832 |  17722 |
-|  833 |  55100 |
-|  837 |  34946 |
+|  531 |  64082 |
+|  541 |  42169 |
+|  621 |  18001 |
+|  762 |  58163 |
+|  802 |  54163 |
+|  832 |  17741 |
+|  833 |  55248 |
+|  837 |  34984 |
 
 ## Saving data to share
 
@@ -193,7 +191,7 @@ dbDisconnect(con, shutdown = TRUE)
 write.csv(tree_ring, here::here("use_cases", "tree_rings", "tree_ring.csv"))
 ```
 
-The saved file is 442 MB.
+The saved file is 450 MB.
 
 ## Clean up
 
@@ -202,5 +200,3 @@ dbDisconnect(con, shutdown = TRUE)
 ```
 
     Warning: Connection already closed.
-
-    Warning in duckdb_shutdown(conn@driver): invalid driver object, already closed?
