@@ -1,11 +1,11 @@
 name: foresttime_tables
-title: foresttime_tables
+title: table_descriptions
 username: renatadiaz
 account: renatadiaz
 server: viz.datascience.arizona.edu
 hostUrl: https://viz.datascience.arizona.edu/__api__
 appId: 1037
-bundleId: 5112
+bundleId: 5631
 url: https://viz.datascience.arizona.edu:443/foresttime-tables/
 version: 1
 asMultiple: FALSE

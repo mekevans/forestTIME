@@ -1,9 +1,12 @@
 # Extract trees from national forests
 
+
 ``` r
 library(ggplot2)
 library(tigris)
 ```
+
+    Warning: package 'tigris' was built under R version 4.4.1
 
     To enable caching of data, set `options(tigris_use_cache = TRUE)`
     in your R script or .Rprofile.
@@ -13,10 +16,6 @@ source(here::here("R", "query_tables_db_fxns.R"))
 ```
 
     Loading required package: DBI
-
-    Warning: package 'DBI' was built under R version 4.3.2
-
-    Warning: package 'dplyr' was built under R version 4.3.2
 
 
     Attaching package: 'dplyr'
@@ -36,7 +35,7 @@ source(here::here("R", "query_annualized.R"))
 # Pulling records
 
 ``` r
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 ```
 
 ``` r
@@ -63,8 +62,8 @@ az_nfs <- query_annualized(
 )
 ```
 
-    Joining with `by = join_by(TREE_COMPOSITE_ID)`
-    Joining with `by = join_by(TREE_COMPOSITE_ID, SPCD_CORR, TREE_CN)`
+    Joining with `by = join_by(TREE_COMPOSITE_ID, DEATH, DISTURBANCE, DAMAGE)`
+    Joining with `by = join_by(TREE_COMPOSITE_ID, SPCD_CORR, TREE_CN, STATUSCD)`
     Joining with `by = join_by(PLOT_COMPOSITE_ID, PLOT, STATECD, COUNTYCD, PLT_CN, INVYR, CYCLE)`
     Joining with `by = join_by(PLOT_COMPOSITE_ID, PLOT, STATECD, COUNTYCD, PLT_CN, CONDID, INVYR, CYCLE, UNITCD, SUBCYCLE)`
 

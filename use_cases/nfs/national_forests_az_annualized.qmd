@@ -18,7 +18,7 @@ source(here::here("R", "query_annualized.R"))
 ```{r}
 
 
-con <- connect_to_tables(here::here("data", "db", "foresttime-to-share.duckdb"))
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
 
 ```
 

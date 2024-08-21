@@ -8,7 +8,8 @@
 
 ## Getting a database
 
-1. Download a database (whole US) from this link: https://arizona.box.com/s/z59u6gjm8g91ioyechs4vwqbc3krnor3. Store it in `data/db/`. 
+1. Download a database (whole US) from this link: https://arizona.box.com/s/usl7pcprwdytbit926ceb3t6lxsldndz. 
+Store it in `data/db/`. 
 
 ## Accessing data
 
