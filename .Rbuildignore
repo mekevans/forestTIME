@@ -1,0 +1,8 @@
+^useful_information/*$
+^use_cases/*$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^data/*$
+^.*\.Rproj$
+^\.Rproj\.user$
