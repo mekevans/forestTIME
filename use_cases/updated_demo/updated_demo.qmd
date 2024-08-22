@@ -1,0 +1,77 @@
+---
+title: "Extracting FIA timeseries"
+format: gfm
+editor: source
+---
+
+```{r}
+
+library(ggplot2)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
+
+```
+
+
+## Examples
+
+Extract red maples in county 65:
+
+```{r}
+
+ts <- query_tree_surveys(
+  con = con,
+  conditions = create_conditions(
+    STATECD == 27,
+    COUNTYCD == 65,
+    SPCD == 316,
+    ANY_SPCD_FLAG == FALSE
+  ),
+  variables = c("MEASYEAR", "DIA", "HT", "CONDID")
+)
+
+knitr::kable(head(ts))
+
+```
+
+Extract those same measurements for plot 27_3_65_20042, for a few species:
+
+
+```{r}
+
+ts2 <- query_tree_surveys(
+  con = con,
+  conditions = create_conditions(
+    STATECD == 27,
+    COUNTYCD == 65,
+    PLOT_COMPOSITE_ID == "27_3_65_20042",
+    SPCD %in% c(316, 701, 833, 375),
+    ANY_SPCD_FLAG == FALSE
+  ),
+  variables = c("MEASYEAR", "DIA", "HT", "CONDID")
+)
+
+knitr::kable(head(ts2))
+
+```
+
+Plotting the results:
+
+```{r}
+
+ggplot(ts2, aes(MEASYEAR, DIA, group = TREE_COMPOSITE_ID, color = as.factor(SPCD))) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  scale_color_viridis_d("SPCD", end = .8) +
+  facet_wrap(vars(SPCD), scales = "free")
+```
+
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```

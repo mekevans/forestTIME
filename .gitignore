@@ -13,3 +13,4 @@ foresttime/*
 *.wal
 use_cases/tree_rings/tree_ring.csv
 *trees_annual_measures.RDS
+*.DS_Store
