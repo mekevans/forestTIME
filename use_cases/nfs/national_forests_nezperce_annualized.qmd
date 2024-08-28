@@ -1,0 +1,126 @@
+---
+title: "Extract trees from national forests"
+format: gfm
+editor: source
+---
+
+```{r}
+library(ggplot2)
+library(tigris)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+source(here::here("R", "query_annualized.R"))
+```
+
+
+# Pulling records
+
+```{r}
+
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet-carbon.duckdb"))
+
+```
+
+```{r}
+
+
+nezperce_nfs <- query_annualized(
+  con,
+  conditions = create_conditions(
+    ADFORCD == 117,
+    MULTI_OWNCD_FLAG == FALSE,
+    MULTI_ADFORCD_FLAG == FALSE
+  ),
+  variables = c(
+    "LAT",
+    "LON",
+    "DIA_est",
+    "HT_est",
+    "ACTUALHT_est",
+    "CARBON_AG_est",
+    "CARBON_BG_est",
+    "STATUSCD",
+    "YEAR",
+    "OWNCD",
+    "ADFORCD",
+    "SPCD_CORR",
+    "SPCD_FLAG"
+  )
+)
+
+```
+
+# Map of trees in Nez Perce
+
+Here is a map of where the NFS trees are - although they may be swapped and fuzzed:
+
+
+```{r, output = F, message = F, warning= F}
+
+np_nfs_trees <- nezperce_nfs |>
+  group_by(TREE_COMPOSITE_ID, LAT, LON, OWNCD, ADFORCD, SPCD_CORR) |>
+  summarize(NYEARS = as.factor(length(unique(INVYR))),
+            DIES = any(STATUSCD == 2)) |>
+  mutate(ADFORCD = as.factor(ADFORCD),
+         SPCD_CORR = as.factor(SPCD_CORR))
+
+np_state <- tigris::states() |>
+  filter(STATEFP == "16")
+```
+
+```{r}
+
+ggplot(np_state) +
+  geom_sf() +
+  geom_jitter(data = np_nfs_trees, aes(LON, LAT, color = DIES)) +
+  ggtitle("Trees in Nez Perce NF") +
+  theme_bw()
+
+```
+
+# Annualized measurements - whitebark pine
+
+```{r}
+
+ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, DIA_est, group = TREE_COMPOSITE_ID)) +
+  geom_point(aes(color = STATUSCD)) +
+  geom_line() +
+  theme(legend.position = "bottom") +
+  ggtitle("DIA estimates for individual whitebark pine trees")
+
+```
+
+```{r}
+
+ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, CARBON_AG_est, group = TREE_COMPOSITE_ID)) +
+  geom_point(aes(color = STATUSCD)) +
+  geom_line() +
+  theme(legend.position = "bottom") +
+  ggtitle("CARBON_AG estimates for individual whitebark pine trees")
+
+```
+
+
+# Total carbon estimates
+
+```{r}
+
+nezperce_carbon <- nezperce_nfs |>
+  group_by(YEAR, SPCD_CORR) |>
+  summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
+  ungroup() |>
+  mutate(SPCD_CORR = as.factor(SPCD_CORR))
+
+ggplot(nezperce_carbon |> filter(YEAR >= 2010), aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") +
+  theme(legend.position = "bottom")
+
+```
+
+## Clean up
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+
+```
