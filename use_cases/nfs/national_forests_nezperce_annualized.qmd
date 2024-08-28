@@ -93,11 +93,13 @@ ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(S
 
 ```{r}
 
-ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, CARBON_AG_est, group = TREE_COMPOSITE_ID)) +
+ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |>
+         mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, CARBON_AG_est, group = TREE_COMPOSITE_ID)) +
   geom_point(aes(color = STATUSCD)) +
   geom_line() +
   theme(legend.position = "bottom") +
   ggtitle("CARBON_AG estimates for individual whitebark pine trees")
+
 
 ```
 
@@ -106,18 +108,53 @@ ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(S
 
 ```{r}
 
-nezperce_carbon <- nezperce_nfs |>
-  group_by(YEAR, SPCD_CORR) |>
+nezperce_plot_species_carbon <- nezperce_nfs |>
+  group_by(YEAR, PLOT_COMPOSITE_ID, SPCD_CORR) |>
   summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
   ungroup() |>
   mutate(SPCD_CORR = as.factor(SPCD_CORR))
 
-ggplot(nezperce_carbon |> filter(YEAR >= 2010), aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
+ggplot(nezperce_plot_species_carbon |> filter(PLOT_COMPOSITE_ID == "16_1_49_88115"), aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") + 
+  theme(legend.position = "bottom")   +
+  ggtitle("Total carbon for plot #16_1_49_88115")
+
+nezperce_carbon <- nezperce_nfs |>
+  group_by(YEAR) |> 
+  mutate(PLOTS_IN_SAMPLE = length(unique(PLOT_COMPOSITE_ID))) |>
+  ungroup() |>
+  group_by(YEAR, SPCD_CORR, PLOTS_IN_SAMPLE) |>
+  summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
+  ungroup() |>
+  mutate(SPCD_CORR = as.factor(SPCD_CORR),
+         TOTAL_CARBON_AG_ADJ = TOTAL_CARBON_AG / PLOTS_IN_SAMPLE)
+
+
+
+ggplot(nezperce_carbon, aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
   geom_col(position = "stack") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  ggtitle("TOTAL_CARBON_AG by species - raw")
+
+
+ggplot(nezperce_carbon, aes(YEAR, TOTAL_CARBON_AG_ADJ, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") +
+  theme(legend.position = "bottom") +
+  ggtitle("TOTAL_CARBON_AG by species - adjusted")
 
 ```
 
+```{r, fig.dim = c(5,10)}
+
+nezperce_plot_carbon <- nezperce_nfs |>
+  group_by(YEAR, PLOT_COMPOSITE_ID) |>
+  summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
+  ungroup() 
+
+ggplot(nezperce_plot_carbon, aes(YEAR, TOTAL_CARBON_AG, group = PLOT_COMPOSITE_ID)) +
+  geom_line()
+
+```
 ## Clean up
 
 ```{r}

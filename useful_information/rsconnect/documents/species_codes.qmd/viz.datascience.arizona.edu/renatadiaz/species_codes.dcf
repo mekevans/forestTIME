@@ -1,0 +1,12 @@
+name: species_codes
+title: species_codes
+username: renatadiaz
+account: renatadiaz
+server: viz.datascience.arizona.edu
+hostUrl: https://viz.datascience.arizona.edu/__api__
+appId: 1100
+bundleId: 5641
+url: https://viz.datascience.arizona.edu:443/content/1b2a3ccd-d913-4875-a83b-5c687b165d64/
+version: 1
+asMultiple: FALSE
+asStatic: TRUE

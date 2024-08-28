@@ -109,7 +109,8 @@ ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(S
 ![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-6-1.png)
 
 ``` r
-ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, CARBON_AG_est, group = TREE_COMPOSITE_ID)) +
+ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |>
+         mutate(STATUSCD = as.factor(STATUSCD)), aes(YEAR, CARBON_AG_est, group = TREE_COMPOSITE_ID)) +
   geom_point(aes(color = STATUSCD)) +
   geom_line() +
   theme(legend.position = "bottom") +
@@ -121,23 +122,74 @@ ggplot(nezperce_nfs |> filter(SPCD_CORR == 101) |> mutate(STATUSCD = as.factor(S
 # Total carbon estimates
 
 ``` r
-nezperce_carbon <- nezperce_nfs |>
-  group_by(YEAR, SPCD_CORR) |>
+nezperce_plot_species_carbon <- nezperce_nfs |>
+  group_by(YEAR, PLOT_COMPOSITE_ID, SPCD_CORR) |>
   summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
   ungroup() |>
   mutate(SPCD_CORR = as.factor(SPCD_CORR))
+```
+
+    `summarise()` has grouped output by 'YEAR', 'PLOT_COMPOSITE_ID'. You can
+    override using the `.groups` argument.
+
+``` r
+ggplot(nezperce_plot_species_carbon |> filter(PLOT_COMPOSITE_ID == "16_1_49_88115"), aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") + 
+  theme(legend.position = "bottom")   +
+  ggtitle("Total carbon for plot #16_1_49_88115")
+```
+
+![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-8-1.png)
+
+``` r
+nezperce_carbon <- nezperce_nfs |>
+  group_by(YEAR) |> 
+  mutate(PLOTS_IN_SAMPLE = length(unique(PLOT_COMPOSITE_ID))) |>
+  ungroup() |>
+  group_by(YEAR, SPCD_CORR, PLOTS_IN_SAMPLE) |>
+  summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
+  ungroup() |>
+  mutate(SPCD_CORR = as.factor(SPCD_CORR),
+         TOTAL_CARBON_AG_ADJ = TOTAL_CARBON_AG / PLOTS_IN_SAMPLE)
+```
+
+    `summarise()` has grouped output by 'YEAR', 'SPCD_CORR'. You can override using
+    the `.groups` argument.
+
+``` r
+ggplot(nezperce_carbon, aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") +
+  theme(legend.position = "bottom") +
+  ggtitle("TOTAL_CARBON_AG by species - raw")
+```
+
+![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-8-2.png)
+
+``` r
+ggplot(nezperce_carbon, aes(YEAR, TOTAL_CARBON_AG_ADJ, color = SPCD_CORR, fill = SPCD_CORR)) +
+  geom_col(position = "stack") +
+  theme(legend.position = "bottom") +
+  ggtitle("TOTAL_CARBON_AG by species - adjusted")
+```
+
+![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-8-3.png)
+
+``` r
+nezperce_plot_carbon <- nezperce_nfs |>
+  group_by(YEAR, PLOT_COMPOSITE_ID) |>
+  summarize(TOTAL_CARBON_AG = sum(CARBON_AG_est)) |>
+  ungroup() 
 ```
 
     `summarise()` has grouped output by 'YEAR'. You can override using the
     `.groups` argument.
 
 ``` r
-ggplot(nezperce_carbon |> filter(YEAR >= 2010), aes(YEAR, TOTAL_CARBON_AG, color = SPCD_CORR, fill = SPCD_CORR)) +
-  geom_col(position = "stack") +
-  theme(legend.position = "bottom")
+ggplot(nezperce_plot_carbon, aes(YEAR, TOTAL_CARBON_AG, group = PLOT_COMPOSITE_ID)) +
+  geom_line()
 ```
 
-![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-8-1.png)
+![](national_forests_nezperce_annualized_files/figure-commonmark/unnamed-chunk-9-1.png)
 
 ## Clean up
 
