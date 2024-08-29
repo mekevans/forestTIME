@@ -1,0 +1,183 @@
+---
+title: "Carbon estimation"
+format: gfm
+editor: source
+---
+
+```{r}
+library(ggplot2)
+
+source(here::here("R", "query_tables_db_fxns.R"))
+```
+
+
+# Getting some data
+
+This code pulls 6 trees out of Idaho to start working with.
+
+```{r, eval = F}
+con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
+
+some_trees <- query_tree_surveys(con,
+                                 conditions = create_conditions(STATECD == 16,
+                                                                !is.na(DIA),
+                                                                !is.na(HT),
+                                                                STATUSCD == 1,
+                                                                !is.na(SPCD)),
+                                 variables = c("STANDING_DEAD_CD", "DECAYCD", "DIA", "HT")) |>
+  head()
+
+dbDisconnect(con, shutdown = TRUE)
+
+write.csv(some_trees, here::here("use_cases", "carbon_estimation", "toy_tree_data.csv"), row.names = FALSE)
+
+```
+
+```{r}
+
+some_trees <- read.csv(here::here("use_cases", "carbon_estimation", "toy_tree_data.csv"))
+
+```
+
+# Step 1 Gross total stem wood volume
+
+## Identify the model for gross total stem wood volume
+
+Identify the right model and coefficients to use based on species code and division, using Table S1A from the supplement ([download here](https://www.fs.usda.gov/research/publications/gtr/gtr_wo104/WO-GTR-104-Supp1.zip)).
+
+
+```{r}
+
+table_s1a <- read.csv(here::here("use_cases", 
+                                 "carbon_estimation",
+                                 "Supplemental_tables",
+                                 "Table S1a_volib_coefs_spcd.csv"))
+
+```
+
+First we need to get division. As far as I can tell this is only available from a map - is there a data table for this?
+
+Also note that not all species have different models across divisions. Ideally we would create a table that has SPCD, STATE (or PLOT), and DIVISION. DIVISION should be "" if it doesn't matter. This will be a little work to create. 
+
+And, not all species are represented in Table S1a. From this sample, we lose species 231. From the paper:
+
+"For species not included in the spcd tables, the jenkins suffix tables are used with model 5 and associated coefficients for the Jenkins group that represents the species of interest.
+Species assignments to Jenkins groups are in FIADB REF_SPECIES table as variable name JENKINS_SPGRPCD. 
+Note that Jenkins group coefficients incorporate the predicted random effect into the reported coefficients, i.e., in some cases, the value is a sum of the fixed and random effects."
+
+Here I get DIVISION-SPCD-model information for the 3 species that happen to be in this toy dataset. 
+
+```{r}
+
+table_s1a_models <- table_s1a |>
+  filter(SPCD %in% some_trees$SPCD,
+         DIVISION %in% c("", "M330")) |>
+  # This chunk preferentially pulls the model specific to this division
+  # if division is provided at all for each species.
+  mutate(DIVISION_nchar = nchar(DIVISION)) |>
+  group_by(SPCD) |>
+  mutate(longest_division = max(DIVISION_nchar)) |>
+  ungroup() |>
+  filter(DIVISION_nchar == longest_division) |>
+  select(-DIVISION_nchar, -longest_division)
+
+```
+
+And then re-attach it to the tree data dataset:
+
+```{r}
+
+some_trees_models <- left_join(some_trees, table_s1a_models)
+
+```
+
+### Notes 
+
+Ideally for this step we would have a table of SPCD | PLOT | MODEL | coefficients. 
+
+To create this we would need:
+
+- a data table of which plots (or other locations) are in which divisions - it's not feasible to get this by manually examining the map
+- the Jenkins codes table
+- some code to join these together appropriately
+
+This would be a great thing to see if Grant and Brian already have.
+
+
+## Apply the model for gross total stem volume
+
+This table tells us which of the 6 models described in the paper to use for this species in this location. It makes sense to me to code each model as a function. Here are functions for the models:
+
+```{r}
+
+model1 <- function(DIA, HT, a, b, c) {
+  
+  a * (DIA ^ b) * (HT^c)
+  
+}
+
+model2 <- function(DIA, HT, SPCD, a, b, b1, c) {
+  
+  if(SPCD <300) {
+    k <- 9
+  } else {
+    k <- 11
+  }
+  
+  if(DIA < k) {
+    
+    a * (DIA^b) * (HT^c)
+    
+  } else {
+    
+    a * (k^(b - b1)) * (DIA^b1) * (HT^c)
+    
+  }
+  
+}
+
+model3 <- function(DIA, HT, a, a1, b, c, c1) {
+  
+  a * (DIA ^ (a1 * ((1 - exp(-b*DIA)) ^ c1))) * (HT^c)
+  
+}
+
+model4 <- function(DIA, HT, a, b, b1, c) {
+  
+  a * (DIA ^ b) * (HT^c) * exp(-b1 * DIA)
+  
+}
+
+model5 <- function(DIA, HT, WDSG, a, b, c){
+  
+  a * (DIA^ b) * (HT^c) * WDSG
+  
+}
+
+```
+
+Note also that model5 requires species-level wood specific gravity (WDSG).
+
+```{r}
+
+
+some_trees_gtswv <- some_trees_models |>
+  group_by_all() |>
+  mutate(gtswv = ifelse(model == 1,
+                        model1(DIA = DIA,
+                               HT = HT,
+                               a = a, 
+                               b = b,
+                               c = c),
+                        ifelse(model == 2,
+                           model2(DIA = DIA,
+                                  HT = HT,
+                                  SPCD = SPCD,
+                                  a = a,
+                                  b = b,
+                                  b1 = b1,
+                                  c = c),
+                           NA)))
+
+knitr::kable(some_trees_gtswv)
+```
