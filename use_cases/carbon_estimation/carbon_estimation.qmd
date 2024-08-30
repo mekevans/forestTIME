@@ -13,7 +13,9 @@ source(here::here("R", "query_tables_db_fxns.R"))
 
 # Getting some data
 
-This code pulls 6 trees out of Idaho to start working with.
+This code pulls 6 trees out of Idaho to start working with, and adds a row to match the Douglas fir example worked in the text.
+
+Note that I am pretending Idaho is in DIVISION 240, which is wrong, to match the worked example.
 
 ```{r, eval = F}
 con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
@@ -23,9 +25,18 @@ some_trees <- query_tree_surveys(con,
                                                                 !is.na(DIA),
                                                                 !is.na(HT),
                                                                 STATUSCD == 1,
-                                                                !is.na(SPCD)),
+                                                                !is.na(SPCD),
+                                                                SPCD %in% c(202, 231, 73)),
                                  variables = c("STANDING_DEAD_CD", "DECAYCD", "DIA", "HT")) |>
-  head()
+  group_by(SPCD) |>
+  mutate(rowindex = row_number()) |>
+  ungroup() |>
+  filter(rowindex <= 2) |>
+  select(-rowindex) |>
+  head() |>
+  bind_rows(data.frame(SPCD = 202,
+                       HT = 110,
+                       DIA = 20))
 
 dbDisconnect(con, shutdown = TRUE)
 
@@ -71,7 +82,7 @@ Here I get DIVISION-SPCD-model information for the 3 species that happen to be i
 
 table_s1a_models <- table_s1a |>
   filter(SPCD %in% some_trees$SPCD,
-         DIVISION %in% c("", "M330")) |>
+         DIVISION %in% c("", "240")) |>
   # This chunk preferentially pulls the model specific to this division
   # if division is provided at all for each species.
   mutate(DIVISION_nchar = nchar(DIVISION)) |>
@@ -104,7 +115,7 @@ To create this we would need:
 This would be a great thing to see if Grant and Brian already have.
 
 
-## Apply the model for gross total stem volume
+## Apply the model for gross total stem wood volume
 
 This table tells us which of the 6 models described in the paper to use for this species in this location. It makes sense to me to code each model as a function. Here are functions for the models:
 
@@ -178,6 +189,106 @@ some_trees_gtswv <- some_trees_models |>
                                   b1 = b1,
                                   c = c),
                            NA)))
+```
+
+Run the math, and we get the right result for the Doug fir example:
+
+```{r}
+
+some_trees_gtswv <- some_trees_models |>
+  group_by_all() |>
+  mutate(gtswv = ifelse(model == 1,
+                        model1(DIA = DIA,
+                               HT = HT,
+                               a = a, 
+                               b = b,
+                               c = c),
+                        ifelse(model == 2,
+                           model2(DIA = DIA,
+                                  HT = HT,
+                                  SPCD = SPCD,
+                                  a = a,
+                                  b = b,
+                                  b1 = b1,
+                                  c = c),
+                           NA)))
 
 knitr::kable(some_trees_gtswv)
+```
+
+# Step 2 Gross total stem bark volume
+
+We get the models and coefficients from table S2a in the Supplement:
+
+```{r}
+
+table_s2a <-  read.csv(here::here("use_cases", 
+                                 "carbon_estimation",
+                                 "Supplemental_tables",
+                                 "Table S2a_volbk_coefs_spcd.csv"))
+```
+
+```{r}
+table_s2a_models <- table_s2a |>
+  filter(SPCD %in% some_trees$SPCD,
+         DIVISION %in% c("", "240")) |>
+  mutate(DIVISION_nchar = nchar(DIVISION)) |>
+  group_by(SPCD) |>
+  mutate(longest_division = max(DIVISION_nchar)) |>
+  ungroup() |>
+  filter(DIVISION_nchar == longest_division) |>
+  select(-DIVISION_nchar, -longest_division)
+
+gtsbv_models <- left_join(some_trees, table_s2a_models)
+
+some_trees_gtsbv <- gtsbv_models |>
+  group_by_all() |>
+  mutate(gtsbv = ifelse(model == 1,
+                        model1(DIA = DIA,
+                               HT = HT,
+                               a = a, 
+                               b = b,
+                               c = c),
+                        ifelse(model == 2,
+                           model2(DIA = DIA,
+                                  HT = HT,
+                                  SPCD = SPCD,
+                                  a = a,
+                                  b = b,
+                                  b1 = b1,
+                                  c = c),
+                           NA)))
+
+knitr::kable(some_trees_gtsbv)
+
+```
+
+Note that the estimate for the Doug fir example diverges subtly from the paper (which has 13.191436232306). I think this is because the coefficients in the paper for SPCD 202/DIVISION 240 differ from those in table s2a. Specifically, `a` is 0.000031886237 in the paper and 0.000031900 in the table - truncation?
+
+```{r}
+
+model1(20, 110, a = 0.000031886237, b = gtsbv_models$b[7], c = gtsbv_models$c[7])
+
+```
+
+# Step 3 Gross total stem outside-bark volume
+
+This is just a sum:
+
+```{r}
+
+some_trees_gtsobv <- some_trees |>
+  mutate(gtsobv = some_trees_gtsbv$gtsbv +
+                      some_trees_gtswv$gtswv)
+
+knitr::kable(some_trees_gtsobv)
+
+```
+
+# Step 4 Heights to merchantable top
+
+```{r}
+
+
+
 ```

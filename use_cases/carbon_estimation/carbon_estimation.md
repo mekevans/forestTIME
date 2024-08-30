@@ -22,7 +22,11 @@ source(here::here("R", "query_tables_db_fxns.R"))
 
 # Getting some data
 
-This code pulls 6 trees out of Idaho to start working with.
+This code pulls 6 trees out of Idaho to start working with, and adds a
+row to match the Douglas fir example worked in the text.
+
+Note that I am pretending Idaho is in DIVISION 240, which is wrong, to
+match the worked example.
 
 ``` r
 con <- connect_to_tables(here::here("data", "db", "foresttime-from-state-parquet.duckdb"))
@@ -32,9 +36,18 @@ some_trees <- query_tree_surveys(con,
                                                                 !is.na(DIA),
                                                                 !is.na(HT),
                                                                 STATUSCD == 1,
-                                                                !is.na(SPCD)),
+                                                                !is.na(SPCD),
+                                                                SPCD %in% c(202, 231, 73)),
                                  variables = c("STANDING_DEAD_CD", "DECAYCD", "DIA", "HT")) |>
-  head()
+  group_by(SPCD) |>
+  mutate(rowindex = row_number()) |>
+  ungroup() |>
+  filter(rowindex <= 2) |>
+  select(-rowindex) |>
+  head() |>
+  bind_rows(data.frame(SPCD = 202,
+                       HT = 110,
+                       DIA = 20))
 
 dbDisconnect(con, shutdown = TRUE)
 
@@ -85,7 +98,7 @@ to be in this toy dataset.
 ``` r
 table_s1a_models <- table_s1a |>
   filter(SPCD %in% some_trees$SPCD,
-         DIVISION %in% c("", "M330")) |>
+         DIVISION %in% c("", "240")) |>
   # This chunk preferentially pulls the model specific to this division
   # if division is provided at all for each species.
   mutate(DIVISION_nchar = nchar(DIVISION)) |>
@@ -119,7 +132,7 @@ To create this we would need:
 
 This would be a great thing to see if Grant and Brian already have.
 
-## Apply the model for gross total stem volume
+## Apply the model for gross total stem wood volume
 
 This table tells us which of the 6 models described in the paper to use
 for this species in this location. It makes sense to me to code each
@@ -192,15 +205,133 @@ some_trees_gtswv <- some_trees_models |>
                                   b1 = b1,
                                   c = c),
                            NA)))
+```
+
+Run the math, and we get the right result for the Doug fir example:
+
+``` r
+some_trees_gtswv <- some_trees_models |>
+  group_by_all() |>
+  mutate(gtswv = ifelse(model == 1,
+                        model1(DIA = DIA,
+                               HT = HT,
+                               a = a, 
+                               b = b,
+                               c = c),
+                        ifelse(model == 2,
+                           model2(DIA = DIA,
+                                  HT = HT,
+                                  SPCD = SPCD,
+                                  a = a,
+                                  b = b,
+                                  b1 = b1,
+                                  c = c),
+                           NA)))
 
 knitr::kable(some_trees_gtswv)
 ```
 
 | TREE_COMPOSITE_ID | PLOT_COMPOSITE_ID | SPCD | PLOT | SUBP | COUNTYCD | STATECD | PLT_CN | INVYR | CYCLE | MEASYEAR | TREE_CN | COND_CN | CONDID | STANDING_DEAD_CD | DECAYCD | DIA | HT | DIVISION | STDORGCD | model | a | a1 | b | b1 | c | c1 | gtswv |
 |:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|:---|---:|---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 16_1_17_80110_1_8 | 16_1_17_80110 | 242 | 80110 | 1 | 17 | 16 | 4.038938e+13 | 2013 | 2 | 2013 | 2.735257e+14 | 2.735257e+14 | 1 | NA | NA | 6.3 | 42 | M330 | NA | 2 | 0.0025057 | NA | 1.832658 | 1.641979 | 1.078425 | NA | 4.115228 |
-| 16_1_17_80128_1_11 | 16_1_17_80128 | 73 | 80128 | 1 | 17 | 16 | 4.718063e+12 | 2004 | 2 | 2004 | 4.718083e+12 | 4.718066e+12 | 1 | NA | NA | 17.6 | 126 |  | NA | 1 | 0.0038058 | NA | 1.745228 | NA | 1.004542 | NA | 73.124648 |
-| 16_1_17_80174_1_3 | 16_1_17_80174 | 202 | 80174 | 1 | 17 | 16 | 1.227033e+13 | 2007 | 2 | 2007 | 1.227034e+13 | 1.227033e+13 | 1 | NA | NA | 9.2 | 74 | M330 | NA | 2 | 0.0024107 | NA | 1.867664 | 1.809698 | 1.041719 | NA | 13.453376 |
-| 16_1_17_80174_3_10 | 16_1_17_80174 | 202 | 80174 | 3 | 17 | 16 | 1.227033e+13 | 2007 | 2 | 2007 | 1.227037e+13 | 1.227033e+13 | 1 | NA | NA | 12.2 | 92 | M330 | NA | 2 | 0.0024107 | NA | 1.867664 | 1.809698 | 1.041719 | NA | 28.128759 |
-| 16_1_17_80174_4_2 | 16_1_17_80174 | 202 | 80174 | 4 | 17 | 16 | 1.227033e+13 | 2007 | 2 | 2007 | 1.227037e+13 | 1.227033e+13 | 1 | NA | NA | 12.2 | 98 | M330 | NA | 2 | 0.0024107 | NA | 1.867664 | 1.809698 | 1.041719 | NA | 30.042324 |
-| 16_1_17_80183_4_2 | 16_1_17_80183 | 242 | 80183 | 4 | 17 | 16 | 4.038937e+13 | 2011 | 2 | 2011 | 5.102369e+13 | 5.102367e+13 | 1 | NA | NA | 12.7 | 67 | M330 | NA | 2 | 0.0025057 | NA | 1.832658 | 1.641979 | 1.078425 | NA | 23.045416 |
+| 16_1_49_80298_4_3 | 16_1_49_80298 | 202 | 80298 | 4 | 49 | 16 | 1.227852e+13 | 2007 | 2 | 2007 | 1.227858e+13 | 1.227852e+13 | 1 | NA | NA | 13.3 | 69 | 240 | NA | 2 | 0.0019291 | NA | 2.162413 | 1.6904 | 0.985444 | NA | 28.02924 |
+| 16_1_49_80326_4_4 | 16_1_49_80326 | 202 | 80326 | 4 | 49 | 16 | 3.727587e+13 | 2010 | 2 | 2011 | 4.251260e+13 | 4.251255e+13 | 1 | NA | NA | 11.3 | 60 | 240 | NA | 2 | 0.0019291 | NA | 2.162413 | 1.6904 | 0.985444 | NA | 18.54223 |
+| 16_1_49_84131_2_6 | 16_1_49_84131 | 73 | 84131 | 2 | 49 | 16 | 5.388385e+12 | 2005 | 2 | 2005 | 3.133625e+13 | 5.388388e+12 | 1 | NA | NA | 6.0 | 31 |  | NA | 1 | 0.0038058 | NA | 1.745228 | NA | 1.004542 | NA | 2.73298 |
+| 16_1_49_86700_4_1 | 16_1_49_86700 | 73 | 86700 | 4 | 49 | 16 | 1.180430e+13 | 2006 | 2 | 2006 | 1.180433e+13 | 1.180430e+13 | 1 | NA | NA | 35.4 | 133 |  | NA | 1 | 0.0038058 | NA | 1.745228 | NA | 1.004542 | NA | 261.40379 |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 1.887718e+14 | 2015 | 3 | 2016 | 4.855121e+14 | 4.855121e+14 | 1 | NA | NA | 1.9 | 13 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 5.390710e+12 | 2005 | 2 | 2008 | 3.133657e+13 | 5.390712e+12 | 1 | NA | NA | 1.9 | 14 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| NA | NA | 202 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | 20.0 | 110 | 240 | NA | 2 | 0.0019291 | NA | 2.162413 | 1.6904 | 0.985444 | NA | 88.45229 |
+
+# Step 2 Gross total stem bark volume
+
+We get the models and coefficients from table S2a in the Supplement:
+
+``` r
+table_s2a <-  read.csv(here::here("use_cases", 
+                                 "carbon_estimation",
+                                 "Supplemental_tables",
+                                 "Table S2a_volbk_coefs_spcd.csv"))
+```
+
+``` r
+table_s2a_models <- table_s2a |>
+  filter(SPCD %in% some_trees$SPCD,
+         DIVISION %in% c("", "240")) |>
+  mutate(DIVISION_nchar = nchar(DIVISION)) |>
+  group_by(SPCD) |>
+  mutate(longest_division = max(DIVISION_nchar)) |>
+  ungroup() |>
+  filter(DIVISION_nchar == longest_division) |>
+  select(-DIVISION_nchar, -longest_division)
+
+gtsbv_models <- left_join(some_trees, table_s2a_models)
+```
+
+    Joining with `by = join_by(SPCD)`
+
+``` r
+some_trees_gtsbv <- gtsbv_models |>
+  group_by_all() |>
+  mutate(gtsbv = ifelse(model == 1,
+                        model1(DIA = DIA,
+                               HT = HT,
+                               a = a, 
+                               b = b,
+                               c = c),
+                        ifelse(model == 2,
+                           model2(DIA = DIA,
+                                  HT = HT,
+                                  SPCD = SPCD,
+                                  a = a,
+                                  b = b,
+                                  b1 = b1,
+                                  c = c),
+                           NA)))
+
+knitr::kable(some_trees_gtsbv)
+```
+
+| TREE_COMPOSITE_ID | PLOT_COMPOSITE_ID | SPCD | PLOT | SUBP | COUNTYCD | STATECD | PLT_CN | INVYR | CYCLE | MEASYEAR | TREE_CN | COND_CN | CONDID | STANDING_DEAD_CD | DECAYCD | DIA | HT | DIVISION | STDORGCD | model | a | a1 | b | b1 | c | c1 | gtsbv |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|:---|---:|---:|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 16_1_49_80298_4_3 | 16_1_49_80298 | 202 | 80298 | 4 | 49 | 16 | 1.227852e+13 | 2007 | 2 | 2007 | 1.227858e+13 | 1.227852e+13 | 1 | NA | NA | 13.3 | 69 | 240 | NA | 1 | 0.0000319 | NA | 1.212605 | NA | 1.978577 | NA | 3.1980405 |
+| 16_1_49_80326_4_4 | 16_1_49_80326 | 202 | 80326 | 4 | 49 | 16 | 3.727587e+13 | 2010 | 2 | 2011 | 4.251260e+13 | 4.251255e+13 | 1 | NA | NA | 11.3 | 60 | 240 | NA | 1 | 0.0000319 | NA | 1.212605 | NA | 1.978577 | NA | 1.9905297 |
+| 16_1_49_84131_2_6 | 16_1_49_84131 | 73 | 84131 | 2 | 49 | 16 | 5.388385e+12 | 2005 | 2 | 2005 | 3.133625e+13 | 5.388388e+12 | 1 | NA | NA | 6.0 | 31 |  | NA | 1 | 0.0026974 | NA | 2.073980 | NA | 0.588855 | NA | 0.8375478 |
+| 16_1_49_86700_4_1 | 16_1_49_86700 | 73 | 86700 | 4 | 49 | 16 | 1.180430e+13 | 2006 | 2 | 2006 | 1.180433e+13 | 1.180430e+13 | 1 | NA | NA | 35.4 | 133 |  | NA | 1 | 0.0026974 | NA | 2.073980 | NA | 0.588855 | NA | 78.3765016 |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 1.887718e+14 | 2015 | 3 | 2016 | 4.855121e+14 | 4.855121e+14 | 1 | NA | NA | 1.9 | 13 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 5.390710e+12 | 2005 | 2 | 2008 | 3.133657e+13 | 5.390712e+12 | 1 | NA | NA | 1.9 | 14 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| NA | NA | 202 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | 20.0 | 110 | 240 | NA | 1 | 0.0000319 | NA | 1.212605 | NA | 1.978577 | NA | 13.1971301 |
+
+Note that the estimate for the Doug fir example diverges subtly from the
+paper (which has 13.191436232306). I think this is because the
+coefficients in the paper for SPCD 202/DIVISION 240 differ from those in
+table s2a. Specifically, `a` is 0.000031886237 in the paper and
+0.000031900 in the table - truncation?
+
+``` r
+model1(20, 110, a = 0.000031886237, b = gtsbv_models$b[7], c = gtsbv_models$c[7])
+```
+
+    [1] 13.19144
+
+# Step 3 Gross total stem outside-bark volume
+
+This is just a sum:
+
+``` r
+some_trees_gtsobv <- some_trees |>
+  mutate(gtsobv = some_trees_gtsbv$gtsbv +
+                      some_trees_gtswv$gtswv)
+
+knitr::kable(some_trees_gtsobv)
+```
+
+| TREE_COMPOSITE_ID | PLOT_COMPOSITE_ID | SPCD | PLOT | SUBP | COUNTYCD | STATECD | PLT_CN | INVYR | CYCLE | MEASYEAR | TREE_CN | COND_CN | CONDID | STANDING_DEAD_CD | DECAYCD | DIA | HT | gtsobv |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|:---|---:|---:|---:|
+| 16_1_49_80298_4_3 | 16_1_49_80298 | 202 | 80298 | 4 | 49 | 16 | 1.227852e+13 | 2007 | 2 | 2007 | 1.227858e+13 | 1.227852e+13 | 1 | NA | NA | 13.3 | 69 | 31.227284 |
+| 16_1_49_80326_4_4 | 16_1_49_80326 | 202 | 80326 | 4 | 49 | 16 | 3.727587e+13 | 2010 | 2 | 2011 | 4.251260e+13 | 4.251255e+13 | 1 | NA | NA | 11.3 | 60 | 20.532762 |
+| 16_1_49_84131_2_6 | 16_1_49_84131 | 73 | 84131 | 2 | 49 | 16 | 5.388385e+12 | 2005 | 2 | 2005 | 3.133625e+13 | 5.388388e+12 | 1 | NA | NA | 6.0 | 31 | 3.570528 |
+| 16_1_49_86700_4_1 | 16_1_49_86700 | 73 | 86700 | 4 | 49 | 16 | 1.180430e+13 | 2006 | 2 | 2006 | 1.180433e+13 | 1.180430e+13 | 1 | NA | NA | 35.4 | 133 | 339.780289 |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 1.887718e+14 | 2015 | 3 | 2016 | 4.855121e+14 | 4.855121e+14 | 1 | NA | NA | 1.9 | 13 | NA |
+| 16_1_49_88124_2_11 | 16_1_49_88124 | 231 | 88124 | 2 | 49 | 16 | 5.390710e+12 | 2005 | 2 | 2008 | 3.133657e+13 | 5.390712e+12 | 1 | NA | NA | 1.9 | 14 | NA |
+| NA | NA | 202 | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | NA | 20.0 | 110 | 101.649421 |
+
+# Step 4 Heights to merchantable top
