@@ -195,23 +195,6 @@ Run the math, and we get the right result for the Doug fir example:
 
 ```{r}
 
-some_trees_gtswv <- some_trees_models |>
-  group_by_all() |>
-  mutate(gtswv = ifelse(model == 1,
-                        model1(DIA = DIA,
-                               HT = HT,
-                               a = a, 
-                               b = b,
-                               c = c),
-                        ifelse(model == 2,
-                           model2(DIA = DIA,
-                                  HT = HT,
-                                  SPCD = SPCD,
-                                  a = a,
-                                  b = b,
-                                  b1 = b1,
-                                  c = c),
-                           NA)))
 
 knitr::kable(some_trees_gtswv)
 ```
