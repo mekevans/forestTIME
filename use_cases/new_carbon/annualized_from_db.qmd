@@ -1,0 +1,66 @@
+---
+title: "Extract annualized measurements"
+format: gfm
+editor: source
+---
+
+# Pulling trees
+
+```{r}
+library(duckdb)
+library(dplyr)
+library(ggplot2)
+source(here::here("R", "query_tables_db_fxns.R"))
+
+con <- connect_to_tables(here::here("data", "db", "foresttime-carbon.duckdb"))
+
+mortyr_carbon <- tbl(con, "tree_carbon_annualized_mortyr") |>
+  collect()
+
+midpoint_carbon <- tbl(con, "tree_carbon_annualized_midpoint") |>
+  collect()
+
+mortyr_carbon_total <- mortyr_carbon |> group_by(YEAR, STATECD, STATUSCD) |> summarize(C = sum(CARBON, na.rm = T)) |> ungroup()  |> 
+  mutate(method = "mortyr")
+
+midpoint_carbon_total <- midpoint_carbon |> group_by(YEAR, STATECD, STATUSCD) |> summarize(C = sum(CARBON, na.rm = T)) |> ungroup() |> 
+  mutate(method = "midpoint")
+
+both_carbon_totals <- bind_rows(mortyr_carbon_total,
+                                midpoint_carbon_total)
+
+ggplot(both_carbon_totals |> filter(STATUSCD == 1), aes(YEAR, C, color = method)) + geom_line() + facet_wrap(vars(STATECD), ncol = 1) + theme_bw() + ggtitle("Live C")
+
+
+ggplot(both_carbon_totals |> filter(STATUSCD == 2), aes(YEAR, C, color = method)) + geom_line() + facet_wrap(vars(STATECD), ncol = 1) + theme_bw() + ggtitle("Dead C")
+```
+
+```{r}
+
+included_trees <- unique(c(mortyr_carbon$TREE_COMPOSITE_ID,
+                           midpoint_carbon$TREE_COMPOSITE_ID))
+
+excluded_trees <- tbl(con, "tree_info_composite_id") |>
+  filter(!(TREE_COMPOSITE_ID %in% included_trees)) |> 
+  collect()
+
+excluded_trees |>
+  group_by(STATECD) |>
+  tally()
+
+mortyr_carbon |> select(TREE_COMPOSITE_ID, STATECD) |>
+  distinct() |>
+  group_by(STATECD) |>
+  tally()
+
+```
+
+
+
+```{r}
+
+dbDisconnect(con, shutdown = TRUE)
+
+```
+
+
