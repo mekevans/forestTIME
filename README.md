@@ -19,4 +19,4 @@ Store it in `data/db/`.
 
 ## Generating your own database
 
-To *generate* the database, use the scripts in `diazrenata/automatic-trees`. 
+To *generate* the database, use the scripts in `diazrenata/forestTIME-builder` on the `pre-carbon` branch. 
